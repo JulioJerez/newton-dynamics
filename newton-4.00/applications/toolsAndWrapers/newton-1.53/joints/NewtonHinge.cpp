@@ -39,7 +39,9 @@ class NewtonHinge: public ndJointHinge
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		if (m_callback && (**GetUserData()))
+		m_desc = ndWeakPtr<ndConstraintDescritor>(&desc);
+		//if (m_callback && (**GetUserData()))
+		if (m_callback)
 		{
 			NewtonHingeSliderUpdateDesc userDesc;
 			unsigned state = 0;
@@ -58,6 +60,7 @@ class NewtonHinge: public ndJointHinge
 		ndJointHinge::JacobianDerivative(desc);
 	}
 
+	ndWeakPtr<ndConstraintDescritor> m_desc;
 	NewtonHingeCallBack m_callback;
 };
 
@@ -291,6 +294,20 @@ dFloat NewtonHingeGetJointAngle(const NewtonJoint* const joint)
 	return userJoint->GetAngle();
 }
 
+void NewtonHingeEnableLimits(const NewtonJoint* const joint, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	userJoint->SetLimitState(state ? true : false);
+}
+
+void NewtonHingeSetLimits(const NewtonJoint* const joint, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	userJoint->SetLimits(minTwistAngle, maxTwistAngle);
+}
+
 // Name: NewtonHingeGetJointForce
 // Calculate the angular acceleration needed to stop the hinge at the desired angle.
 //
@@ -307,9 +324,8 @@ dFloat NewtonHingeGetJointAngle(const NewtonJoint* const joint)
 dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat angle)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
-	ndAssert(0);
-	//return userJoint->GetMotorZeroAcceleration(angle, (dgJointCallBackParam*)desc);
-	return 0;
+	//NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	//ndTrace(("deprecated function: %s Use joints limits \n", __FUNCDNAME__));
+	return ndFloat32(0.0f);
 }
 

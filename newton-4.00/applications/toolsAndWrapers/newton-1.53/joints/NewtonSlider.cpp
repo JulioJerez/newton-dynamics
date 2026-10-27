@@ -39,7 +39,9 @@ class NewtonSlider: public ndJointSlider
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		if (m_callback && (**GetUserData()))
+		m_desc = ndWeakPtr<ndConstraintDescritor>(&desc);
+		//if (m_callback && (**GetUserData()))
+		if (m_callback)
 		{
 			NewtonHingeSliderUpdateDesc userDesc;
 			unsigned state = 0;
@@ -51,13 +53,15 @@ class NewtonSlider: public ndJointSlider
 			SetAsMotor(ndFloat32 (0.0f), ndFloat32(0.0f));
 			if (m_callback(joint, &userDesc))
 			{
-				SetAsMotor(GetSpeed() + userDesc.m_accel * desc.m_invTimestep, ndMax (-userDesc.m_minFriction, userDesc.m_maxFriction));
+				ndFloat32 speed = GetSpeed() + userDesc.m_accel * desc.m_timestep;
+				SetAsMotor(speed, ndMax (-userDesc.m_minFriction, userDesc.m_maxFriction));
 			}
 		}
 
 		ndJointSlider::JacobianDerivative(desc);
 	}
 
+	ndWeakPtr<ndConstraintDescritor> m_desc;
 	NewtonSliderCallBack m_callback;
 };
 
@@ -341,6 +345,20 @@ dFloat NewtonSliderGetJointPosit(const NewtonJoint* joint)
 	return userJoint->GetPosit();
 }
 
+void NewtonSliderEnableLimits(const NewtonJoint* const joint, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
+	userJoint->SetLimitState(state ? true : false);
+}
+
+void NewtonSliderSetLimits(const NewtonJoint* const joint, dFloat minPosit, dFloat maxPosit)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
+	userJoint->SetLimits(minPosit, maxPosit);
+}
+
 // Name: NewtonSliderGetJointForce
 // Calculate the angular acceleration needed to stop the slider at the desired angle.
 //
@@ -356,8 +374,8 @@ dFloat NewtonSliderGetJointPosit(const NewtonJoint* joint)
 // See also: NewtonSliderSetUserCallback
 dFloat NewtonSliderCalculateStopAccel(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat distance)
 {
-	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
-	//return contraint->CalculateStopAccel(distance, (dgJointCallBackParam*)desc);
-	ndAssert(0);
-	return 0;
+	TRACE_FUNCTION(__FUNCTION__);
+	//ndTrace(("deprecated function: %s Use joints limits \n", __FUNCDNAME__));
+	//NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
+	return ndFloat32(0.0f);
 }

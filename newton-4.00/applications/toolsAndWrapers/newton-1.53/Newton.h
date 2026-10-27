@@ -9,9 +9,8 @@
 #ifndef NEWTON_H__736495_6495_076__INCLUDED_
 #define NEWTON_H__736495_6495_076__INCLUDED_
 
-//#define DG_CURRENT_VERSION	153
 #define NEWTON_MAJOR_VERSION	1
-#define NEWTON_MINOR_VERSION	53
+#define NEWTON_MINOR_VERSION	54
 
 // force all not visual studio platform to be in library form
 #ifndef _MSC_VER
@@ -545,12 +544,15 @@ extern "C" {
 	NEWTON_API NewtonJoint* NewtonConstraintCreateHinge(const NewtonWorld* newtonWorld,
 		const dFloat* pivotPoint, const dFloat* pinDir,
 		const NewtonBody* childBody, const NewtonBody* parentBody);
-
 	NEWTON_API void NewtonHingeSetUserCallback(const NewtonJoint* hinge, NewtonHingeCallBack callback);
 	NEWTON_API dFloat NewtonHingeGetJointAngle(const NewtonJoint* hinge);
 	NEWTON_API dFloat NewtonHingeGetJointOmega(const NewtonJoint* hinge);
 	NEWTON_API void NewtonHingeGetJointForce(const NewtonJoint* hinge, dFloat* force);
 	NEWTON_API dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* hinge, const NewtonHingeSliderUpdateDesc* desc, dFloat angle);
+
+	// new for 1.54
+	NEWTON_API void NewtonHingeEnableLimits(const NewtonJoint* const hinge, int state);
+	NEWTON_API void NewtonHingeSetLimits(const NewtonJoint* const hinge, dFloat minTwistAngle, dFloat maxTwistAngle);
 
 	// **********************************************************************************************
 //
@@ -565,6 +567,11 @@ extern "C" {
 	NEWTON_API dFloat NewtonSliderGetJointVeloc(const NewtonJoint* slider);
 	NEWTON_API void NewtonSliderGetJointForce(const NewtonJoint* slider, dFloat* force);
 	NEWTON_API dFloat NewtonSliderCalculateStopAccel(const NewtonJoint* slider, const NewtonHingeSliderUpdateDesc* desc, dFloat position);
+
+	// new for 1.54
+	NEWTON_API void NewtonSliderEnableLimits(const NewtonJoint* const slider, int state);
+	NEWTON_API void NewtonSliderSetLimits(const NewtonJoint* const slider, dFloat minPosit, dFloat maxPosit);
+
 
 	// **********************************************************************************************
 	//

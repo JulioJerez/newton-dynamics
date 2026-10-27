@@ -120,19 +120,18 @@ void AddRope (NewtonWorld* nWorld, dSceneNode* root)
 
 static unsigned DoubleDoorUserCallback (const NewtonJoint* hinge, NewtonHingeSliderUpdateDesc* desc)
 {
-	dFloat angle;
-	const dFloat angleLimit = 90.0f;
-
-	angle = NewtonHingeGetJointAngle (hinge);
-	if (angle > ((angleLimit / 180.0f) * 3.1416f)) {
-		// if the joint angle is large than the predefine interval, stop the hinge
-		desc->m_accel = NewtonHingeCalculateStopAlpha (hinge, desc, (angleLimit / 180.0f) * 3.1416f);
-		return 1;
-	} else if (angle < ((-angleLimit / 180.0f) * 3.1416f)) {
-		// if the joint angle is large than the predefine interval, stop the hinge
-		desc->m_accel = NewtonHingeCalculateStopAlpha (hinge, desc, (-angleLimit / 180.0f) * 3.1416f);
-		return 1;
-	}
+	// deprecated in favor of joint limits
+	//const dFloat angleLimit = 90.0f;
+	//dFloat angle = NewtonHingeGetJointAngle (hinge);
+	//if (angle > ((angleLimit / 180.0f) * 3.1416f)) {
+	//	// if the joint angle is large than the predefine interval, stop the hinge
+	//	desc->m_accel = NewtonHingeCalculateStopAlpha (hinge, desc, (angleLimit / 180.0f) * 3.1416f);
+	//	return 1;
+	//} else if (angle < ((-angleLimit / 180.0f) * 3.1416f)) {
+	//	// if the joint angle is large than the predefine interval, stop the hinge
+	//	desc->m_accel = NewtonHingeCalculateStopAlpha (hinge, desc, (-angleLimit / 180.0f) * 3.1416f);
+	//	return 1;
+	//}
 
 	// no action need it if the joint angle is with the limits
 	return 0;
@@ -280,21 +279,19 @@ static void DestroyJointControlStruct(const NewtonJoint* slider)
 
 static unsigned SliderUpdateEvent (const NewtonJoint* slider, NewtonHingeSliderUpdateDesc* desc)
 {
-	dFloat distance;
-	JointControlStruct* limits;
-
-	limits = (JointControlStruct*) NewtonJointGetUserData (slider);
-
-	distance = NewtonSliderGetJointPosit (slider);
-	if (distance < limits->m_min) {
-		// if the distance is smaller than the predefine interval, stop the slider
-		desc->m_accel = NewtonSliderCalculateStopAccel (slider, desc, limits->m_min);
-		return 1;
-	} else if (distance > limits->m_max) {
-		// if the distance is larger than the predefine interval, stop the slider
-		desc->m_accel = NewtonSliderCalculateStopAccel (slider, desc, limits->m_max);
-		return 1;
-	}
+	JointControlStruct* limits = (JointControlStruct*) NewtonJointGetUserData (slider);
+	// NewtonSliderCalculateStopAccel is deprecated, 
+	// it is better to just set limits.
+	// dFloat distance = NewtonSliderGetJointPosit (slider);
+	//if (distance < limits->m_min) {
+	//	// if the distance is smaller than the predefine interval, stop the slider
+	//	desc->m_accel = NewtonSliderCalculateStopAccel (slider, desc, limits->m_min);
+	//	return 1;
+	//} else if (distance > limits->m_max) {
+	//	// if the distance is larger than the predefine interval, stop the slider
+	//	desc->m_accel = NewtonSliderCalculateStopAccel (slider, desc, limits->m_max);
+	//	return 1;
+	//}
 
 	// no action need it if the joint angle is with the limits
 	return 0;
@@ -409,7 +406,7 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 	dMatrix location (GetIdentityMatrix());
 	location.m_posit.m_x =  5.0f; 
 	location.m_posit.m_y = -1.0f; 
-	location.m_posit.m_z = -2.0f; 
+	location.m_posit.m_z = -0.0f; 
 	dVector size (10.0f, 0.25f, 0.25f);
 
 	bar = NULL;
@@ -466,6 +463,9 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		pivot.m_x -= size.m_x * 0.5f;
 		joint = NewtonConstraintCreateHinge (nWorld, &pivot.m_x, &pin.m_x, bar, NULL);
 		NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
+
+		NewtonHingeEnableLimits(joint, 1);
+		NewtonHingeSetLimits(joint, -90.0f * 3.1416f/ 180.0f, 90.0f * 3.1416f / 180.0f);
 	}
 
 
@@ -524,9 +524,6 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		dVector pin (beatLocation.m_front);
 		joint = NewtonConstraintCreateSlider (nWorld, &pivot.m_x, &pin.m_x, beat, bar);
 
-		// assign a control function for this joint
-		NewtonHingeSetUserCallback (joint, SliderUpdateEvent);
-
 		JointControlStruct *limits;
 		limits = new JointControlStruct;
 
@@ -539,9 +536,15 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 
 		// tell this joint to destroy its local private data when destroyed
 		NewtonJointSetDestructor (joint, DestroyJointControlStruct);			
+
+		// assign a control function for this joint
+		NewtonSliderSetUserCallback(joint, SliderUpdateEvent);
+
+		NewtonSliderEnableLimits(joint, 1);
+		NewtonSliderSetLimits(joint, limits->m_min, limits->m_max);
 	}
 
-
+#if 0
 	{
 		// ////////////////////////////////////////////////////////////////////////////////////
 		//
@@ -693,4 +696,5 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		// tell this joint to destroy its local private data when destroyed
 		NewtonJointSetDestructor (joint, DestroyJointControlStruct);			
 	}
+#endif
 }
