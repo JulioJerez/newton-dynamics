@@ -468,7 +468,7 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		NewtonHingeSetLimits(joint, -90.0f * 3.1416f/ 180.0f, 90.0f * 3.1416f / 180.0f);
 	}
 
-
+#if 0
 	{
 		// ////////////////////////////////////////////////////////////////////////////////////
 		//
@@ -543,8 +543,8 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		NewtonSliderEnableLimits(joint, 1);
 		NewtonSliderSetLimits(joint, limits->m_min, limits->m_max);
 	}
+#endif
 
-#if 0
 	{
 		// ////////////////////////////////////////////////////////////////////////////////////
 		//
@@ -620,7 +620,7 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		NewtonJointSetDestructor (joint, DestroyJointControlStruct);			
 	}
 
-
+#if 0
 	{
 		// ////////////////////////////////////////////////////////////////////////////////////
 		//

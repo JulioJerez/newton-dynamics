@@ -33,6 +33,7 @@ class NewtonHinge: public ndJointHinge
 
 	NewtonHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointHinge(pinAndPivotFrame, child, parent)
+		,m_desc(nullptr)
 		,m_callback(nullptr)
 	{
 	}
@@ -40,7 +41,6 @@ class NewtonHinge: public ndJointHinge
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
 		m_desc = ndWeakPtr<ndConstraintDescritor>(&desc);
-		//if (m_callback && (**GetUserData()))
 		if (m_callback)
 		{
 			NewtonHingeSliderUpdateDesc userDesc;
@@ -53,7 +53,8 @@ class NewtonHinge: public ndJointHinge
 			SetAsMotor(ndFloat32 (0.0f), ndFloat32(0.0f));
 			if (m_callback(joint, &userDesc))
 			{
-				SetAsMotor(GetOmega() + userDesc.m_accel * desc.m_invTimestep, ndMax (-userDesc.m_minFriction, userDesc.m_maxFriction));
+				ndFloat32 alpha = GetOmega() + userDesc.m_accel * desc.m_timestep;
+				SetAsMotor(alpha, ndMax (-userDesc.m_minFriction, userDesc.m_maxFriction));
 			}
 		}
 

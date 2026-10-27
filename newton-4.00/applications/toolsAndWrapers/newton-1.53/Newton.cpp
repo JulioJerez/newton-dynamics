@@ -1712,28 +1712,6 @@ NewtonJoint* NewtonConstraintCreateCorkscrew(const NewtonWorld* newtonWorld, con
 	return (NewtonJoint*) world->CreateCorkscrewConstraint (pivot, pin, body0, body1);
 }
 
-
-// Name: NewtonCorkscrewCalculateStopAlpha
-// Calculate the angular acceleration needed to stop the corkscrew at the desired angle.
-//
-// Parameters:
-// *const NewtonJoint* *Corkscrew - pointer to the joint.
-// *NewtonCorkscrewSliderUpdateDesc* *desc - is the pointer to the Corkscrew or slide structure.
-// *dFloat* angle - is the desired corkscrew stop angle 
-//
-// Return: the relative angular acceleration needed to stop the corkscrew.
-//
-// Remarks: this function can only be called from a *NewtonCorkscrewCallBack* and it can be used by the application to implement corkscrew limits.
-// 
-// See also: NewtonCorkscrewSetUserCallback
-dFloat NewtonCorkscrewCalculateStopAlpha (const NewtonJoint* corkscrew, const NewtonHingeSliderUpdateDesc* desc, dFloat angle)
-{
-	dgCorkscrewConstraint* contraint;
-
-	contraint = (dgCorkscrewConstraint*) corkscrew;
-	return contraint->CalculateStopAlpha (angle, (dgJointCallBackParam*) desc);
-}
-
 // Name: NewtonCorkscrewGetJointForce
 // Get the total force asserted over the joint pivot point, to maintain the constraint.
 //

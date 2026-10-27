@@ -33,6 +33,7 @@ class NewtonSlider: public ndJointSlider
 
 	NewtonSlider(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointSlider(pinAndPivotFrame, child, parent)
+		,m_desc(nullptr)
 		,m_callback(nullptr)
 	{
 	}
@@ -40,7 +41,6 @@ class NewtonSlider: public ndJointSlider
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
 		m_desc = ndWeakPtr<ndConstraintDescritor>(&desc);
-		//if (m_callback && (**GetUserData()))
 		if (m_callback)
 		{
 			NewtonHingeSliderUpdateDesc userDesc;

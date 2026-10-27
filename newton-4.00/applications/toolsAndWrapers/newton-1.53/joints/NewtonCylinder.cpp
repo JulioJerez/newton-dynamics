@@ -33,13 +33,15 @@ class NewtonCylinder: public ndJointCylinder
 
 	NewtonCylinder(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointCylinder(pinAndPivotFrame, child, parent)
+		,m_desc(nullptr)
 		,m_callback(nullptr)
 	{
 	}
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		if (m_callback && (**GetUserData()))
+		m_desc = ndWeakPtr<ndConstraintDescritor>(&desc);
+		if (m_callback)
 		{
 			NewtonHingeSliderUpdateDesc userDesc[2];
 			unsigned state = 0;
@@ -58,19 +60,22 @@ class NewtonCylinder: public ndJointCylinder
 			SetAsMotorPosit(ndFloat32(0.0f), ndFloat32(0.0f));
 			if (code & 1)
 			{
-				SetAsMotorPosit(GetSpeed() + userDesc[0].m_accel * desc.m_invTimestep, ndMax (-userDesc[0].m_minFriction, userDesc[0].m_maxFriction));
+				ndFloat32 speed = GetSpeed() + userDesc[0].m_accel * desc.m_timestep;
+				SetAsMotorPosit(speed, ndMax (-userDesc[0].m_minFriction, userDesc[0].m_maxFriction));
 			}
 
 			SetAsMotorAngle(ndFloat32(0.0f), ndFloat32(0.0f));
 			if (code & 2)
 			{
-				SetAsMotorAngle(GetOmega() + userDesc[1].m_accel * desc.m_invTimestep, ndMax (-userDesc[1].m_minFriction, userDesc[1].m_maxFriction));
+				ndFloat32 speed = GetSpeed() + userDesc[1].m_accel * desc.m_timestep;
+				SetAsMotorAngle(speed, ndMax (-userDesc[1].m_minFriction, userDesc[1].m_maxFriction));
 			}
 		}
 
 		ndJointCylinder::JacobianDerivative(desc);
 	}
 
+	ndWeakPtr<ndConstraintDescritor> m_desc;
 	NewtonCorkscrewCallBack m_callback;
 };
 
@@ -197,6 +202,26 @@ dFloat NewtonCorkscrewGetJointOmega(const NewtonJoint* joint)
 	return userJoint->GetOmega();
 }
 
+// Name: NewtonCorkscrewCalculateStopAlpha
+// Calculate the angular acceleration needed to stop the corkscrew at the desired angle.
+//
+// Parameters:
+// *const NewtonJoint* *Corkscrew - pointer to the joint.
+// *NewtonCorkscrewSliderUpdateDesc* *desc - is the pointer to the Corkscrew or slide structure.
+// *dFloat* angle - is the desired corkscrew stop angle 
+//
+// Return: the relative angular acceleration needed to stop the corkscrew.
+//
+// Remarks: this function can only be called from a *NewtonCorkscrewCallBack* and it can be used by the application to implement corkscrew limits.
+// 
+// See also: NewtonCorkscrewSetUserCallback
+dFloat NewtonCorkscrewCalculateStopAlpha(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat angle)
+{
+	NewtonCylinder* const userJoint = PointerCast<NewtonCylinder, NewtonJoint>(joint);
+	ndAssert(0);
+	return 0;
+}
+
 // Name: NewtonCorkscrewGetJointForce
 // Calculate the angular acceleration needed to stop the corkscrew at the desired angle.
 //
@@ -213,7 +238,6 @@ dFloat NewtonCorkscrewGetJointOmega(const NewtonJoint* joint)
 dFloat NewtonCorkscrewCalculateStopAccel(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat distance)
 {
 	NewtonCylinder* const userJoint = PointerCast<NewtonCylinder, NewtonJoint>(joint);
-	ndAssert(0);
-	return 0;
+	return ndFloat32 (-2.0f) * userJoint->GetSpeed() * userJoint->m_desc->m_invTimestep;
 }
 
