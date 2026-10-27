@@ -243,19 +243,17 @@ void InitScene()
 	// create the sky box,
 	nGrapphicWorld = new SkyBoxPrimitive (NULL);
 
-
 	// /////////////////////////////////////////////////////////////////////
 	//
 	// Create a ball controllable by the player
 	AddBallCharacter ();
 
-
 	// /////////////////////////////////////////////////////////////////////
 	//
 	// add some joint configurations
-	AddRope (nWorld, nGrapphicWorld);
-	AddRollingBeats (nWorld, nGrapphicWorld);
-	AddDoubleSwingDoors (nWorld, nGrapphicWorld);
+//	AddRope (nWorld, nGrapphicWorld);
+//	AddRollingBeats (nWorld, nGrapphicWorld);
+//	AddDoubleSwingDoors (nWorld, nGrapphicWorld);
 
 	// add some object to the background
 	PopulateLevel ();

@@ -41,19 +41,31 @@ class NewtonCylinder: public ndJointCylinder
 	{
 		if (m_callback && (**GetUserData()))
 		{
-			ndAssert(0);
-			//NewtonHingeSliderUpdateDesc userDesc;
-			//unsigned state = 0;
-			//userDesc.m_accel = 0.0f;
-			//userDesc.m_timestep = desc.m_timestep;
-			//userDesc.m_minFriction = -1.0e-20f;
-			//userDesc.m_maxFriction = 1.0e-20f;
-			//NewtonJoint* const joint = PointerCast<NewtonJoint, NewtonCylinder>(this);
-			//SetAsMotor(ndFloat32 (0.0f), ndFloat32(0.0f));
-			//if (m_callback(joint, &userDesc))
-			//{
-			//	SetAsMotor(GetSpeed() + userDesc.m_accel * desc.m_invTimestep, ndMax (-userDesc.m_minFriction, userDesc.m_maxFriction));
-			//}
+			NewtonHingeSliderUpdateDesc userDesc[2];
+			unsigned state = 0;
+			userDesc[0].m_accel = 0.0f;
+			userDesc[0].m_timestep = desc.m_timestep;
+			userDesc[0].m_minFriction = -1.0e-20f;
+			userDesc[0].m_maxFriction = 1.0e-20f;
+			userDesc[1].m_accel = 0.0f;
+			userDesc[1].m_timestep = desc.m_timestep;
+			userDesc[1].m_minFriction = -1.0e-20f;
+			userDesc[1].m_maxFriction = 1.0e-20f;
+
+			NewtonJoint* const joint = PointerCast<NewtonJoint, NewtonCylinder>(this);
+			ndInt32 code = m_callback(joint, userDesc);
+
+			SetAsMotorPosit(ndFloat32(0.0f), ndFloat32(0.0f));
+			if (code & 1)
+			{
+				SetAsMotorPosit(GetSpeed() + userDesc[0].m_accel * desc.m_invTimestep, ndMax (-userDesc[0].m_minFriction, userDesc[0].m_maxFriction));
+			}
+
+			SetAsMotorAngle(ndFloat32(0.0f), ndFloat32(0.0f));
+			if (code & 2)
+			{
+				SetAsMotorAngle(GetOmega() + userDesc[1].m_accel * desc.m_invTimestep, ndMax (-userDesc[1].m_minFriction, userDesc[1].m_maxFriction));
+			}
 		}
 
 		ndJointCylinder::JacobianDerivative(desc);

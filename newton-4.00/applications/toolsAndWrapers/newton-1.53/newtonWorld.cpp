@@ -309,11 +309,9 @@ void NewtonWorldFreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* bod
 // Remarks: This function tells Newton to simulate the rigid body *body*.
 //
 // See also: NewtonWorldFreezeBody, NewtonBodySetAutoFreeze, NewtonBodyGetAutoFreeze
-void NewtonWorldUnfreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* body)
+void NewtonWorldUnfreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	//Newton* world;
-	//world = (Newton*)newtonWorld;
-	//world->UnfreezeBody((dgBody*)body);
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	body->SetSleepState(false);
 }

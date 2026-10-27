@@ -34,6 +34,7 @@ class ndJointCylinder: public ndJointBilateralConstraint
 	D_NEWTON_API void SetLimitStateAngle(bool state);
 	D_NEWTON_API void SetLimitsAngle(ndFloat32 minLimit, ndFloat32 maxLimit);
 	D_NEWTON_API void GetLimitsAngle(ndFloat32& minLimit, ndFloat32& maxLimit) const;
+	D_NEWTON_API void SetAsMotorAngle(ndFloat32 omega, ndFloat32 maxTorque);
 	D_NEWTON_API void SetAsSpringDamperAngle(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper);
 	D_NEWTON_API void GetSpringDamperAngle(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const;
 
@@ -45,6 +46,7 @@ class ndJointCylinder: public ndJointBilateralConstraint
 	D_NEWTON_API void SetLimitStatePosit(bool state);
 	D_NEWTON_API void SetLimitsPosit(ndFloat32 minLimit, ndFloat32 maxLimit);
 	D_NEWTON_API void GetLimitsPosit(ndFloat32& minLimit, ndFloat32& maxLimit) const;
+	D_NEWTON_API void SetAsMotorPosit(ndFloat32 omega, ndFloat32 maxTorque);
 	D_NEWTON_API void SetAsSpringDamperPosit(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper);
 	D_NEWTON_API void GetSpringDamperPosit(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const;
 	D_NEWTON_API void DebugJoint(ndConstraintDebugCallback& debugCallback) const override;
@@ -55,9 +57,11 @@ class ndJointCylinder: public ndJointBilateralConstraint
 	D_NEWTON_API void UpdateParameters() override;
 	D_NEWTON_API ndFloat32 PenetrationOmega(ndFloat32 penetartion) const;
 	D_NEWTON_API void SubmitLimitsAngle(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
+	D_NEWTON_API void SubmitMotorAngle(ndConstraintDescritor& desc, const ndMatrix& matrix0);
 	D_NEWTON_API void SubmitSpringDamperAngle(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 
 	D_NEWTON_API ndFloat32 PenetrationSpeed(ndFloat32 penetration) const;
+	D_NEWTON_API void SubmitMotorPosit(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 	D_NEWTON_API void SubmitLimitsPosit(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 	D_NEWTON_API void SubmitSpringDamperPosit(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 

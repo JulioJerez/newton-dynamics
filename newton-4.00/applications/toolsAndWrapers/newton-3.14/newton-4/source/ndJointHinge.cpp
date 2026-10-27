@@ -20,8 +20,6 @@
 ndJointHinge::ndJointHinge()
 	:ndJointBilateralConstraint()
 	,m_axis()
-	,m_maxTorque(0.0f)
-	,m_motorSpeed(0.0f)
 {
 	m_maxDof = 7;
 }
@@ -29,16 +27,12 @@ ndJointHinge::ndJointHinge()
 ndJointHinge::ndJointHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotFrame)
 	,m_axis()
-	,m_maxTorque(0.0f)
-	,m_motorSpeed(0.0f)
 {
 }
 
 ndJointHinge::ndJointHinge(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotInChild, pinAndPivotInParent)
 	,m_axis()
-	,m_maxTorque(0.0f)
-	,m_motorSpeed(0.0f)
 {
 }
 
@@ -119,14 +113,14 @@ void ndJointHinge::SetTargetAngle(ndFloat32 angle)
 
 void ndJointHinge::SetAsMotor(ndFloat32 omega, ndFloat32 maxTorque)
 {
-	m_motorSpeed = omega;
-	m_maxTorque = ndAbs(maxTorque);
+	m_axis.m_motorSpeed = omega;
+	m_axis.m_dryFrictionForce = ndAbs(maxTorque);
 }
 
 void ndJointHinge::SetAsDryFriction(ndFloat32 maxFrictionTorque)
 {
-	m_motorSpeed = ndFloat32 (0.0f);
-	m_maxTorque = ndAbs(maxFrictionTorque);
+	m_axis.m_motorSpeed = ndFloat32 (0.0f);
+	m_axis.m_dryFrictionForce = ndAbs(maxFrictionTorque);
 }
 
 void ndJointHinge::SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
@@ -192,11 +186,11 @@ void ndJointHinge::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 void ndJointHinge::SubmitMotor(ndConstraintDescritor& desc, const ndMatrix& matrix0)
 {
 	AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32 (0.0f));
-	ndFloat32 relativeSpeed = m_motorSpeed - GetOmega();
+	ndFloat32 relativeSpeed = m_axis.m_motorSpeed - GetOmega();
 	ndFloat32 motorAccel = relativeSpeed * desc.m_invTimestep;
 	SetMotorAcceleration(desc, motorAccel);
-	SetLowerFriction(desc, -m_maxTorque);
-	SetHighFriction(desc, m_maxTorque);
+	SetLowerFriction(desc, -m_axis.m_dryFrictionForce);
+	SetHighFriction(desc, m_axis.m_dryFrictionForce);
 	if (m_hitLimits)
 	{
 		SetDiagonalRegularizer(desc, ndFloat32(1.0e-3f));
@@ -311,7 +305,7 @@ void ndJointHinge::JacobianDerivative(ndConstraintDescritor& desc)
 	{
 		SubmitSpringDamper(desc, matrix0, matrix1);
 	}
-	else if (m_maxTorque != ndFloat32(0.0f))
+	else if (m_axis.m_dryFrictionForce != ndFloat32(0.0f))
 	{
 		SubmitMotor(desc, matrix0);
 	}
