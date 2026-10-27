@@ -151,7 +151,7 @@ void PopulateLevel ()
 	Izz = mass * inertia[2];
 
 	// set the center of mass to the lower bottom for a special effect
-	origin.m_x = -size.m_y;
+	origin.m_x = -4.0f * size.m_y;
 		
 	// populate the world with some boxes 
 	dMatrix location (GetIdentityMatrix());
