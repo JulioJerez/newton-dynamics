@@ -24,15 +24,12 @@
 
 #define ND_SIMD8_WORK_GROUP_SIZE	8 
 
-#if defined (D_SCALAR_VECTOR_CLASS) || defined(__clang__)
-	#include "ndVector8Scalar.h"
-#elif (defined (__x86_64) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64))
-	#include "ndVector8Simd.h"
-#elif (defined(__arm__) || defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(__ARM_ARCH_7S__) || defined(__ARM_ARCH_7A__))
+#if defined (D_SCALAR_VECTOR_CLASS) || defined(__clang__)  || defined(__GNUC__)
+	// using scalar version for all none visual studio compilers or none x86/x64 cpus
 	#include "ndVector8Scalar.h"
 #else
-	// unknown cpu assume scaler instruction set until otherwise
-	#include "ndVector8Scalar.h"
+	// using explicit intrinsics only for visual studio compiler
+	#include "ndVector8Simd.h"
 #endif
 
 

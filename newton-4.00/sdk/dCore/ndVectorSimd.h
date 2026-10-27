@@ -560,8 +560,6 @@ class ndBigVector : public ndClassAlloc
 	#define PERMUT_MASK_DOUBLE(y, x) _MM_SHUFFLE2 (y, x)
 
 	public:
-	//D_OPERATOR_NEW_AND_DELETE
-
 	inline ndBigVector()
 	{
 	}

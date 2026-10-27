@@ -215,12 +215,21 @@ class ndVector16
 		ndVector8 m_high;
 	};
 
+	#ifdef D_NEWTON_USE_DOUBLE
+	union
+	{
+		ndFloat64 m_float[ND_SIMD16_WORK_GROUP_SIZE];
+		ndInt64 m_int[ND_SIMD16_WORK_GROUP_SIZE];
+		pair m_pair;
+	};
+	#else
 	union
 	{
 		ndFloat32 m_float[ND_SIMD16_WORK_GROUP_SIZE];
 		ndInt32 m_int[ND_SIMD16_WORK_GROUP_SIZE];
 		pair m_pair;
 	};
+	#endif
 
 
 	D_CORE_API static ndVector16 m_one;
