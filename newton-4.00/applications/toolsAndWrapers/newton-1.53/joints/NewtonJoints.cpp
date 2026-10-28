@@ -273,33 +273,3 @@ void* NewtonJointGetUserData(const NewtonJoint* const joint)
 	return *jointData->m_userData;
 }
 
-/*!
-  Set the strength coefficient to be applied to the joint reaction forces.
-
-  @param *joint pointer to the joint.
-  @param stiffness stiffness coefficient, a value between 0, and 1.0, the default value for most joint is 0.9
-
-  @return nothing.
-
-  Constraint keep bodies together by calculating the exact force necessary to cancel the relative acceleration between one or
-  more common points fixed in the two bodies. The problem is that when the bodies drift apart due to numerical integration inaccuracies,
-  the reaction force work to pull eliminated the error but at the expense of adding extra energy to the system, does violating the rule
-  that constraint forces must be work less. This is a inevitable situation and the only think we can do is to minimize the effect of the
-  extra energy by dampening the force by some amount. In essence the stiffness coefficient tell Newton calculate the precise reaction force
-  by only apply a fraction of it to the joint point. And value of 1.0 will apply the exact force, and a value of zero will apply only
-  10 percent.
-
-  The stiffness is set to a all around value that work well for most situation, however the application can play with these
-  parameter to make finals adjustment. A high value will make the joint stronger but more prompt to vibration of instability; a low
-  value will make the joint more stable but weaker.
-
-  See also: ::NewtonJointGetStiffness
-*/
-void NewtonJointSetStiffness(const NewtonJoint* const jointPtr, dFloat stiffness)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgConstraint* const contraint = (dgConstraint*)joint;
-	//contraint->SetStiffness(dgFloat32(1.0f) - stiffness);
-	//ndJointBilateralConstraint* const joint = PointerCast<ndJointBilateralConstraint, NewtonJoint>(jointPtr);
-	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
-}

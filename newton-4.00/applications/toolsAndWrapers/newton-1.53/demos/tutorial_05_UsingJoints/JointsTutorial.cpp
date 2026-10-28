@@ -116,28 +116,6 @@ void AddRope (NewtonWorld* nWorld, dSceneNode* root)
 }
 
 
-
-
-static unsigned DoubleDoorUserCallback (const NewtonJoint* hinge, NewtonHingeSliderUpdateDesc* desc)
-{
-	// deprecated in favor of joint limits
-	//const dFloat angleLimit = 90.0f;
-	//dFloat angle = NewtonHingeGetJointAngle (hinge);
-	//if (angle > ((angleLimit / 180.0f) * 3.1416f)) {
-	//	// if the joint angle is large than the predefine interval, stop the hinge
-	//	desc->m_accel = NewtonHingeCalculateStopAlpha (hinge, desc, (angleLimit / 180.0f) * 3.1416f);
-	//	return 1;
-	//} else if (angle < ((-angleLimit / 180.0f) * 3.1416f)) {
-	//	// if the joint angle is large than the predefine interval, stop the hinge
-	//	desc->m_accel = NewtonHingeCalculateStopAlpha (hinge, desc, (-angleLimit / 180.0f) * 3.1416f);
-	//	return 1;
-	//}
-
-	// no action need it if the joint angle is with the limits
-	return 0;
-}
-
-
 void AddDoubleSwingDoors (NewtonWorld* nWorld, dSceneNode* root)
 {
 	dFloat mass;
@@ -209,8 +187,9 @@ void AddDoubleSwingDoors (NewtonWorld* nWorld, dSceneNode* root)
 		joint = NewtonConstraintCreateHinge (nWorld, &pivot.m_x, &pin.m_x, link1, NULL);
 
 		// set limit to the door
-		NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
-
+		//NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
+		NewtonHingeEnableLimits(joint, 1);
+		NewtonHingeSetLimits(joint, -45.0f * 3.1416f / 180.0f, 60.0f * 3.1416f / 180.0f);
 	}
 
 
@@ -255,7 +234,9 @@ void AddDoubleSwingDoors (NewtonWorld* nWorld, dSceneNode* root)
 		joint = NewtonConstraintCreateHinge (nWorld, &pivot.m_x, &pin.m_x, link0, link1);
 
 		// set limit to the door
-		NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
+		//NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
+		NewtonHingeEnableLimits(joint, 1);
+		NewtonHingeSetLimits(joint, -60.0f * 3.1416f / 180.0f, 30.0f * 3.1416f / 180.0f);
 	}
 
 	// release the collision geometry when not need it
@@ -299,42 +280,13 @@ static unsigned SliderUpdateEvent (const NewtonJoint* slider, NewtonHingeSliderU
 
 static unsigned CorkScrewUpdateEvent (const NewtonJoint* screw, NewtonHingeSliderUpdateDesc* desc)
 {
-	unsigned retCode; 
-	dFloat distance;
-	dFloat omega;
-	JointControlStruct* limits;
+	const JointControlStruct* const limits = (JointControlStruct*) NewtonJointGetUserData (screw);
+	NewtonCorkscrewEnableLimits(screw, 1);
+	NewtonCorkscrewSetLimits(screw, limits->m_min, limits->m_max);
 
-	// no action need it if the joint angle is with the limits
-	retCode = 0;
-
-	limits = (JointControlStruct*) NewtonJointGetUserData (screw);
-
-	// the first entry in NewtonHingeSliderUpdateDesc control the screw linear acceleration 
-	distance = NewtonCorkscrewGetJointPosit (screw);
-	if (distance < limits->m_min) {
-		// if the distance is smaller than the predefine interval, stop the slider
-		desc[0].m_accel = NewtonCorkscrewCalculateStopAccel (screw, &desc[0], limits->m_min);
-		retCode |= 1;
-	} else if (distance > limits->m_max) {
-		// if the distance is larger than the predefine interval, stop the slider
-		desc[0].m_accel = NewtonCorkscrewCalculateStopAccel (screw, &desc[0], limits->m_max);
-		retCode |= 1;
-	}
-
-	// the second entry in NewtonHingeSliderUpdateDesc control the screw angular acceleration. 
-	// Make s small screw motor by setting the angular acceleration of the screw axis
-	// We are not going to limit the angular rotation of the screw, but is we did we should or return code with 2,
-	omega = NewtonCorkscrewGetJointOmega (screw);
-	desc[1].m_accel = 2.5f - 0.2f * omega;
-
-	// or with 0x10 to tell newton this axis is active
-	retCode |= 2;
-	
-	// return the code
-	return retCode;
-
+	NewtonCorkscrewSetAsMotorAngular(screw, 10.0f, 1000.0f);
+	return 0;
 }
-
 
 static unsigned UniversalUpdateEvent (const NewtonJoint* screw, NewtonHingeSliderUpdateDesc* desc)
 {
@@ -462,8 +414,8 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		dVector pivot (location.m_posit);
 		pivot.m_x -= size.m_x * 0.5f;
 		joint = NewtonConstraintCreateHinge (nWorld, &pivot.m_x, &pin.m_x, bar, NULL);
-		NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
 
+		//NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
 		NewtonHingeEnableLimits(joint, 1);
 		NewtonHingeSetLimits(joint, -90.0f * 3.1416f/ 180.0f, 90.0f * 3.1416f / 180.0f);
 	}

@@ -235,7 +235,6 @@ int NewtonWorldGetVersion(const NewtonWorld*)
 	return NEWTON_MAJOR_VERSION * 100 + NEWTON_MINOR_VERSION;
 }
 
-
 // Name: NewtonUpdate 
 // Advance the simulation by an amount of time.
 //
@@ -257,19 +256,6 @@ void NewtonUpdate(const NewtonWorld* newtonWorld, dFloat timestep)
 	world->Sync();
 }
 
-void NewtonSetWorldSize(const NewtonWorld* newtonWorld, const dFloat* minPoint, const dFloat* maxPoint)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//do nothing;
-	ndTrace(("deprecated: there not world bounds in newton 4\n"));
-}
-
-void NewtonSetMinimumFrameRate(const NewtonWorld* newtonWorld, dFloat frameRate)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//do nothing;
-	//ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
-}
 
 // Name: NewtonWorldFreezeBody 
 // Remove the body from the active simulation list.

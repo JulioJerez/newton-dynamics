@@ -590,6 +590,13 @@ extern "C" {
 	NEWTON_API dFloat NewtonCorkscrewCalculateStopAlpha(const NewtonJoint* corkscrew, const NewtonHingeSliderUpdateDesc* desc, dFloat angle);
 	NEWTON_API dFloat NewtonCorkscrewCalculateStopAccel(const NewtonJoint* corkscrew, const NewtonHingeSliderUpdateDesc* desc, dFloat position);
 
+	// new for 1.54
+	NEWTON_API void NewtonCorkscrewSetAsMotorAngular(const NewtonJoint* const corkscrew, dFloat speed, dFloat MaxTorque);
+
+	NEWTON_API void NewtonCorkscrewEnableLimits(const NewtonJoint* const corkscrew, int state);
+	NEWTON_API void NewtonCorkscrewSetLimits(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit);
+
+
 	// **********************************************************************************************
 	//
 	// Universal joint functions

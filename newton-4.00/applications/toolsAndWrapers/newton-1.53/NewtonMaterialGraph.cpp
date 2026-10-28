@@ -1342,27 +1342,6 @@ int NewtonMaterialGetDefaultGroupID(const NewtonWorld* const)
 	return 0;
 }
 
-/*!
-  Set the default softness coefficients for the material interaction between two physics materials .
-
-  @param *newtonWorld pointer to the Newton world.
-  @param  id0 - group id0
-  @param  id1 - group id1
-  @param softnessCoef softness coefficient
-
-  @return Nothing.
-
-  *softnessCoef* must be a positive value.
-  It is recommended that *softnessCoef* be set to value lower or equal to 1.0
-  A low value for *softnessCoef* will make the material soft. A typical value for *softnessCoef* is 0.15
-*/
-void NewtonMaterialSetDefaultSoftness(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat softnessCoef)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
-}
-
-
 unsigned NewtonMaterialGetBodyCollisionID(const NewtonMaterial* material, const NewtonBody* body)
 {
 	TRACE_FUNCTION(__FUNCTION__);

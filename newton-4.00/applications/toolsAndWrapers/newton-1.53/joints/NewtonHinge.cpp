@@ -309,24 +309,3 @@ void NewtonHingeSetLimits(const NewtonJoint* const joint, dFloat minTwistAngle, 
 	userJoint->SetLimits(minTwistAngle, maxTwistAngle);
 }
 
-// Name: NewtonHingeGetJointForce
-// Calculate the angular acceleration needed to stop the hinge at the desired angle.
-//
-// Parameters:
-// *const NewtonJoint* *Hinge - pointer to the joint.
-// *NewtonHingeSliderUpdateDesc* *desc - is the pointer to and the Hinge or slide structure.
-// *dFloat* angle - is the desired hinge stop angle 
-//
-// Return: the relative angular acceleration needed to stop the hinge.
-//
-// Remarks: this function can only be called from a *NewtonHingeCallBack* and it can be used by the application to implement hinge limits.
-// 
-// See also: NewtonHingeSetUserCallback
-dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat angle)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
-	//ndTrace(("deprecated function: %s Use joints limits \n", __FUNCDNAME__));
-	return ndFloat32(0.0f);
-}
-

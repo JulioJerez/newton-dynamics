@@ -359,23 +359,3 @@ void NewtonSliderSetLimits(const NewtonJoint* const joint, dFloat minPosit, dFlo
 	userJoint->SetLimits(minPosit, maxPosit);
 }
 
-// Name: NewtonSliderGetJointForce
-// Calculate the angular acceleration needed to stop the slider at the desired angle.
-//
-// Parameters:
-// *const NewtonJoint* *slider - pointer to the joint.
-// *NewtonSliderSliderUpdateDesc* *desc - is the pointer to the Slider or slide structure.
-// *dFloat* distance - desired stop distance relative to the pivot point
-//
-// Return: the relative linear acceleration needed to stop the slider.
-//
-// Remarks: this function can only be called from a *NewtonSliderCallBack* and it can be used by the application to implement slider limits.
-// 
-// See also: NewtonSliderSetUserCallback
-dFloat NewtonSliderCalculateStopAccel(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat distance)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//ndTrace(("deprecated function: %s Use joints limits \n", __FUNCDNAME__));
-	//NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
-	return ndFloat32(0.0f);
-}
