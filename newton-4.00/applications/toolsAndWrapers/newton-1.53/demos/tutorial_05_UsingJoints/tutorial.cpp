@@ -251,9 +251,9 @@ void InitScene()
 	// /////////////////////////////////////////////////////////////////////
 	//
 	// add some joint configurations
-//	AddRope (nWorld, nGrapphicWorld);
+	AddRope (nWorld, nGrapphicWorld);
 	AddRollingBeats (nWorld, nGrapphicWorld);
-//	AddDoubleSwingDoors (nWorld, nGrapphicWorld);
+	AddDoubleSwingDoors (nWorld, nGrapphicWorld);
 
 	// add some object to the background
 	PopulateLevel ();

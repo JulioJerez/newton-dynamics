@@ -189,7 +189,7 @@ void AddDoubleSwingDoors (NewtonWorld* nWorld, dSceneNode* root)
 		// set limit to the door
 		//NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
 		NewtonHingeEnableLimits(joint, 1);
-		NewtonHingeSetLimits(joint, -45.0f * 3.1416f / 180.0f, 60.0f * 3.1416f / 180.0f);
+		NewtonHingeSetLimits(joint, -80.0f * 3.1416f / 180.0f, 45.0f * 3.1416f / 180.0f);
 	}
 
 
@@ -236,7 +236,7 @@ void AddDoubleSwingDoors (NewtonWorld* nWorld, dSceneNode* root)
 		// set limit to the door
 		//NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
 		NewtonHingeEnableLimits(joint, 1);
-		NewtonHingeSetLimits(joint, -60.0f * 3.1416f / 180.0f, 30.0f * 3.1416f / 180.0f);
+		NewtonHingeSetLimits(joint, -60.0f * 3.1416f / 180.0f, 120.0f * 3.1416f / 180.0f);
 	}
 
 	// release the collision geometry when not need it
