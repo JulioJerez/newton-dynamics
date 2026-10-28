@@ -117,12 +117,6 @@ void ndJointHinge::SetAsMotor(ndFloat32 omega, ndFloat32 maxTorque)
 	m_axis.m_dryFrictionForce = ndAbs(maxTorque);
 }
 
-void ndJointHinge::SetAsDryFriction(ndFloat32 maxFrictionTorque)
-{
-	m_axis.m_motorSpeed = ndFloat32 (0.0f);
-	m_axis.m_dryFrictionForce = ndAbs(maxFrictionTorque);
-}
-
 void ndJointHinge::SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
 {
 	m_axis.m_springK = ndAbs(spring);

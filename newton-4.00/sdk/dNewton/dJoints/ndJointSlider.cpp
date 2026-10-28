@@ -141,12 +141,6 @@ void ndJointSlider::SetAsMotor(ndFloat32 speed, ndFloat32 maxForce)
 	m_axis.m_dryFrictionForce = ndAbs(maxForce);
 }
 
-void ndJointSlider::SetAsDryFriction(ndFloat32 maxFrictionForce)
-{
-	m_axis.m_motorSpeed = ndFloat32(0.0f);
-	m_axis.m_dryFrictionForce = ndAbs(maxFrictionForce);
-}
-
 void ndJointSlider::SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
 {
 	m_axis.m_springK = ndAbs(spring);

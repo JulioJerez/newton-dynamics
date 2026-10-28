@@ -274,7 +274,7 @@ static void BuildHinge(ndDemoEntityManager* const scene, const ndVector& origin,
 		matrix.m_posit.m_y += 3.6f;
 		ndSharedPtr<ndBody> body(MakePrimitive(scene, matrix, **shape, mesh, mass));
 		ndJointHinge* const joint = new ndJointHinge(matrix, body->GetAsBodyDynamic(), fixBody);
-		joint->SetAsDryFriction(20.0f);
+		joint->SetAsMotor(ndFloat32 (0.0f), ndFloat32(20.0f));
 		ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
 		world->AddJoint(jointPtr);
 	}
