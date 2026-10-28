@@ -138,7 +138,7 @@ void ndJointSlider::GetLimits(ndFloat32& minLimit, ndFloat32& maxLimit) const
 void ndJointSlider::SetAsMotor(ndFloat32 speed, ndFloat32 maxForce)
 {
 	m_axis.m_motorSpeed = speed;
-	m_axis.m_dryFrictionForce = ndAbs(maxForce);
+	m_axis.m_motorForce = ndAbs(maxForce);
 }
 
 void ndJointSlider::SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
@@ -222,10 +222,12 @@ void ndJointSlider::UpdateParameters()
 
 void ndJointSlider::SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
+	m_axis.m_hitLimits = false;
 	if (m_axis.m_limitState)
 	{
 		if ((m_axis.m_minLimit == ndFloat32(0.0f)) && (m_axis.m_maxLimit == ndFloat32(0.0f)))
 		{
+			m_axis.m_hitLimits = true;
 			AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_front);
 		}
 		else
@@ -233,6 +235,7 @@ void ndJointSlider::SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& ma
 			ndFloat32 x = m_axis.m_param + m_axis.m_paramSpeed * desc.m_timestep;
 			if (x < m_axis.m_minLimit)
 			{
+				m_axis.m_hitLimits = true;
 				ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_axis.m_minLimit));
 				AddLinearRowJacobian(desc, matrix0.m_posit, p1, matrix1.m_front);
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
@@ -243,6 +246,7 @@ void ndJointSlider::SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& ma
 			}
 			else if (x > m_axis.m_maxLimit)
 			{
+				m_axis.m_hitLimits = true;
 				AddLinearRowJacobian(desc, matrix0.m_posit, matrix0.m_posit, matrix1.m_front);
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
 				const ndFloat32 penetration = x - m_axis.m_maxLimit;
@@ -269,9 +273,9 @@ void ndJointSlider::SubmitMotor(ndConstraintDescritor& desc, const ndMatrix& mat
 	ndFloat32 relativeSpeed = m_axis.m_motorSpeed - GetSpeed();
 	ndFloat32 motorAccel = relativeSpeed * desc.m_invTimestep;
 	SetMotorAcceleration(desc, motorAccel);
-	SetLowerFriction(desc, -m_axis.m_dryFrictionForce);
-	SetHighFriction(desc, m_axis.m_dryFrictionForce);
-	if (m_hitLimits)
+	SetLowerFriction(desc, -m_axis.m_motorForce);
+	SetHighFriction(desc, m_axis.m_motorForce);
+	if (m_axis.m_hitLimits)
 	{
 		SetDiagonalRegularizer(desc, ndFloat32(1.0e-3f));
 	}
@@ -317,7 +321,7 @@ void ndJointSlider::JacobianDerivative(ndConstraintDescritor& desc)
 	{
 		SubmitSpringDamper(desc, matrix0, matrix1);
 	}
-	else if (m_axis.m_dryFrictionForce != ndFloat32(0.0f))
+	else if (m_axis.m_motorForce != ndFloat32(0.0f))
 	{
 		SubmitMotor(desc, matrix0, matrix1);
 	}

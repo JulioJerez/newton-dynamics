@@ -114,13 +114,7 @@ void ndJointHinge::SetTargetAngle(ndFloat32 angle)
 void ndJointHinge::SetAsMotor(ndFloat32 omega, ndFloat32 maxTorque)
 {
 	m_axis.m_motorSpeed = omega;
-	m_axis.m_dryFrictionForce = ndAbs(maxTorque);
-}
-
-void ndJointHinge::SetAsDryFriction(ndFloat32 maxFrictionTorque)
-{
-	m_axis.m_motorSpeed = ndFloat32 (0.0f);
-	m_axis.m_dryFrictionForce = ndAbs(maxFrictionTorque);
+	m_axis.m_motorForce = ndAbs(maxTorque);
 }
 
 void ndJointHinge::SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
@@ -189,9 +183,9 @@ void ndJointHinge::SubmitMotor(ndConstraintDescritor& desc, const ndMatrix& matr
 	ndFloat32 relativeSpeed = m_axis.m_motorSpeed - GetOmega();
 	ndFloat32 motorAccel = relativeSpeed * desc.m_invTimestep;
 	SetMotorAcceleration(desc, motorAccel);
-	SetLowerFriction(desc, -m_axis.m_dryFrictionForce);
-	SetHighFriction(desc, m_axis.m_dryFrictionForce);
-	if (m_hitLimits)
+	SetLowerFriction(desc, -m_axis.m_motorForce);
+	SetHighFriction(desc, m_axis.m_motorForce);
+	if (m_axis.m_hitLimits)
 	{
 		SetDiagonalRegularizer(desc, ndFloat32(1.0e-3f));
 	}
@@ -258,11 +252,12 @@ ndInt32 ndJointHinge::GetKinematicState(ndKinematicState* const state) const
 
 void ndJointHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
-	m_hitLimits = false;
+	m_axis.m_hitLimits = false;
 	if (m_axis.m_limitState)
 	{
 		if ((m_axis.m_minLimit > (ndFloat32(-1.0f) * ndDegreeToRad)) && (m_axis.m_maxLimit < (ndFloat32(1.0f) * ndDegreeToRad)))
 		{
+			m_axis.m_hitLimits = true;
 			AddAngularRowJacobian(desc, &matrix1.m_front[0], -m_axis.m_param);
 		}
 		else
@@ -270,7 +265,7 @@ void ndJointHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& mat
 			const ndFloat32 angle = m_axis.m_param + m_axis.m_paramSpeed * desc.m_timestep;
 			if (angle < m_axis.m_minLimit)
 			{
-				m_hitLimits = true;
+				m_axis.m_hitLimits = true;
 				AddAngularRowJacobian(desc, &matrix0.m_front[0], ndFloat32(0.0f));
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
 				const ndFloat32 penetration = angle - m_axis.m_minLimit;
@@ -280,7 +275,7 @@ void ndJointHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& mat
 			}
 			else if (angle > m_axis.m_maxLimit)
 			{
-				m_hitLimits = true;
+				m_axis.m_hitLimits = true;
 				AddAngularRowJacobian(desc, &matrix0.m_front[0], ndFloat32(0.0f));
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
 				const ndFloat32 penetration = angle - m_axis.m_maxLimit;
@@ -305,7 +300,7 @@ void ndJointHinge::JacobianDerivative(ndConstraintDescritor& desc)
 	{
 		SubmitSpringDamper(desc, matrix0, matrix1);
 	}
-	else if (m_axis.m_dryFrictionForce != ndFloat32(0.0f))
+	else if (m_axis.m_motorForce != ndFloat32(0.0f))
 	{
 		SubmitMotor(desc, matrix0);
 	}

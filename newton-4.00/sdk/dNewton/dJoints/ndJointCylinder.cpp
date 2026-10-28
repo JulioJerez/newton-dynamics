@@ -128,7 +128,7 @@ void ndJointCylinder::SetOffsetAngle(ndFloat32 angle)
 void ndJointCylinder::SetAsMotorAngle(ndFloat32 omega, ndFloat32 maxTorque)
 {
 	m_rotationAxis.m_motorSpeed = omega;
-	m_rotationAxis.m_dryFrictionForce = ndAbs(maxTorque);
+	m_rotationAxis.m_motorForce = ndAbs(maxTorque);
 }
 
 void ndJointCylinder::SetAsSpringDamperAngle(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
@@ -223,7 +223,7 @@ void ndJointCylinder::SetAsSpringDamperPosit(ndFloat32 regularizer, ndFloat32 sp
 void ndJointCylinder::SetAsMotorPosit(ndFloat32 speed, ndFloat32 maxForce)
 {
 	m_positionAxis.m_motorSpeed = speed;
-	m_positionAxis.m_dryFrictionForce = ndAbs(maxForce);
+	m_positionAxis.m_motorForce = ndAbs(maxForce);
 }
 
 void ndJointCylinder::GetSpringDamperPosit(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const
@@ -286,9 +286,9 @@ void ndJointCylinder::SubmitMotorPosit(ndConstraintDescritor& desc, const ndMatr
 	ndFloat32 relativeSpeed = m_positionAxis.m_motorSpeed - GetSpeed();
 	ndFloat32 motorAccel = relativeSpeed * desc.m_invTimestep;
 	SetMotorAcceleration(desc, motorAccel);
-	SetLowerFriction(desc, -m_positionAxis.m_dryFrictionForce);
-	SetHighFriction(desc, m_positionAxis.m_dryFrictionForce);
-	if (m_hitLimits)
+	SetLowerFriction(desc, -m_positionAxis.m_motorForce);
+	SetHighFriction(desc, m_positionAxis.m_motorForce);
+	if (m_positionAxis.m_hitLimits)
 	{
 		SetDiagonalRegularizer(desc, ndFloat32(1.0e-3f));
 	}
@@ -349,9 +349,9 @@ void ndJointCylinder::SubmitMotorAngle(ndConstraintDescritor& desc, const ndMatr
 	ndFloat32 relativeSpeed = m_rotationAxis.m_motorSpeed - GetOmega();
 	ndFloat32 motorAccel = relativeSpeed * desc.m_invTimestep;
 	SetMotorAcceleration(desc, motorAccel);
-	SetLowerFriction(desc, -m_rotationAxis.m_dryFrictionForce);
-	SetHighFriction(desc, m_rotationAxis.m_dryFrictionForce);
-	if (m_hitLimits)
+	SetLowerFriction(desc, -m_rotationAxis.m_motorForce);
+	SetHighFriction(desc, m_rotationAxis.m_motorForce);
+	if (m_rotationAxis.m_hitLimits)
 	{
 		SetDiagonalRegularizer(desc, ndFloat32(1.0e-3f));
 	}
@@ -359,10 +359,12 @@ void ndJointCylinder::SubmitMotorAngle(ndConstraintDescritor& desc, const ndMatr
 
 void ndJointCylinder::SubmitLimitsAngle(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
+	m_rotationAxis.m_hitLimits = false;
 	if (m_rotationAxis.m_limitState)
 	{
 		if ((m_rotationAxis.m_minLimit > (ndFloat32(-1.0f) * ndDegreeToRad)) && (m_rotationAxis.m_maxLimit < (ndFloat32(1.0f) * ndDegreeToRad)))
 		{
+			m_rotationAxis.m_hitLimits = true;
 			AddAngularRowJacobian(desc, &matrix1.m_front[0], -m_rotationAxis.m_param);
 		}
 		else
@@ -370,6 +372,7 @@ void ndJointCylinder::SubmitLimitsAngle(ndConstraintDescritor& desc, const ndMat
 			const ndFloat32 angle = m_rotationAxis.m_param + m_rotationAxis.m_paramSpeed * desc.m_timestep;
 			if (angle < m_rotationAxis.m_minLimit)
 			{
+				m_rotationAxis.m_hitLimits = true;
 				AddAngularRowJacobian(desc, &matrix0.m_front[0], ndFloat32(0.0f));
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
 				const ndFloat32 penetration = angle - m_rotationAxis.m_minLimit;
@@ -379,6 +382,7 @@ void ndJointCylinder::SubmitLimitsAngle(ndConstraintDescritor& desc, const ndMat
 			}
 			else if (angle > m_rotationAxis.m_maxLimit)
 			{
+				m_rotationAxis.m_hitLimits = true;
 				AddAngularRowJacobian(desc, &matrix0.m_front[0], ndFloat32(0.0f));
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
 				const ndFloat32 penetration = angle - m_rotationAxis.m_maxLimit;
@@ -434,10 +438,12 @@ void ndJointCylinder::UpdateParameters()
 
 void ndJointCylinder::SubmitLimitsPosit(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
+	m_positionAxis.m_hitLimits = false;
 	if (m_positionAxis.m_limitState)
 	{
 		if ((m_positionAxis.m_minLimit == ndFloat32(0.0f)) && (m_positionAxis.m_maxLimit == ndFloat32(0.0f)))
 		{
+			m_positionAxis.m_hitLimits = true;
 			AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_front);
 		}
 		else
@@ -445,6 +451,7 @@ void ndJointCylinder::SubmitLimitsPosit(ndConstraintDescritor& desc, const ndMat
 			ndFloat32 x = m_positionAxis.m_param + m_positionAxis.m_paramSpeed * desc.m_timestep;
 			if (x < m_positionAxis.m_minLimit)
 			{
+				m_positionAxis.m_hitLimits = true;
 				ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_positionAxis.m_minLimit));
 				AddLinearRowJacobian(desc, matrix0.m_posit, p1, matrix1.m_front);
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
@@ -455,6 +462,7 @@ void ndJointCylinder::SubmitLimitsPosit(ndConstraintDescritor& desc, const ndMat
 			}
 			else if (x > m_positionAxis.m_maxLimit)
 			{
+				m_positionAxis.m_hitLimits = true;
 				AddLinearRowJacobian(desc, matrix0.m_posit, matrix0.m_posit, matrix1.m_front);
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
 				const ndFloat32 penetration = x - m_positionAxis.m_maxLimit;
@@ -474,27 +482,12 @@ void ndJointCylinder::JacobianDerivative(ndConstraintDescritor& desc)
 
 	ApplyBaseRows(desc, matrix0, matrix1);
 
-	//if (m_rotationAxis.m_springDamperRegularizer && ((m_rotationAxis.m_springK > ndFloat32(0.0f)) || (m_rotationAxis.m_damperC > ndFloat32(0.0f))))
-	//{
-	//	// spring damper with limits
-	//	SubmitSpringDamperAngle(desc, matrix0, matrix1);
-	//}
-	//
-	//if (m_rotationAxis.m_springDamperRegularizer && ((m_rotationAxis.m_springK > ndFloat32(0.0f)) || (m_rotationAxis.m_damperC > ndFloat32(0.0f))))
-	//{
-	//	// spring damper with limits
-	//	SubmitSpringDamperPosit(desc, matrix0, matrix1);
-	//}
-	//
-	//SubmitLimitsPosit(desc, matrix0, matrix1);
-	//SubmitLimitsAngle(desc, matrix0, matrix1);
-
 	SubmitLimitsAngle(desc, matrix0, matrix1);
 	if (m_rotationAxis.m_springDamperRegularizer && ((m_rotationAxis.m_springK > ndFloat32(0.0f)) || (m_rotationAxis.m_damperC > ndFloat32(0.0f))))
 	{
 		SubmitSpringDamperAngle(desc, matrix0, matrix1);
 	}
-	else if (m_rotationAxis.m_dryFrictionForce != ndFloat32(0.0f))
+	else if (m_rotationAxis.m_motorForce != ndFloat32(0.0f))
 	{
 		SubmitMotorAngle(desc, matrix0);
 	}
@@ -504,7 +497,7 @@ void ndJointCylinder::JacobianDerivative(ndConstraintDescritor& desc)
 	{
 		SubmitSpringDamperPosit(desc, matrix0, matrix1);
 	}
-	else if (m_positionAxis.m_dryFrictionForce != ndFloat32(0.0f))
+	else if (m_positionAxis.m_motorForce != ndFloat32(0.0f))
 	{
 		SubmitMotorPosit(desc, matrix0, matrix1);
 	}

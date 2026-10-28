@@ -50,12 +50,7 @@ class NewtonSlider: public ndJointSlider
 			userDesc.m_minFriction = -1.0e-20f;
 			userDesc.m_maxFriction = 1.0e-20f;
 			NewtonJoint* const joint = PointerCast<NewtonJoint, NewtonSlider>(this);
-			SetAsMotor(ndFloat32 (0.0f), ndFloat32(0.0f));
-			if (m_callback(joint, &userDesc))
-			{
-				ndFloat32 speed = GetSpeed() + userDesc.m_accel * desc.m_timestep;
-				SetAsMotor(speed, ndMax (-userDesc.m_minFriction, userDesc.m_maxFriction));
-			}
+			m_callback(joint, &userDesc);
 		}
 
 		ndJointSlider::JacobianDerivative(desc);

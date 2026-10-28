@@ -42,7 +42,7 @@ ndJointBilateralConstraint::ndJointBilateralConstraint()
 	m_mark0 = 0;
 	m_mark1 = 0;
 	m_maxDof = 0;
-	m_hitLimits = 0;
+	//m_hitLimits = 0;
 	m_rowIsMotor = 0;
 	m_isInSkeleton = 0;
 	m_enableCollision = 0;
@@ -75,7 +75,7 @@ ndJointBilateralConstraint::ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKin
 
 	m_mark0 = 0;
 	m_mark1	= 0;
-	m_hitLimits = 0;
+	//m_hitLimits = 0;
 	m_rowIsMotor = 0;
 	m_isInSkeleton = 0;
 	m_enableCollision = 0;
@@ -115,7 +115,7 @@ ndJointBilateralConstraint::ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKin
 
 	m_mark0 = 0;
 	m_mark1 = 0;
-	m_hitLimits = 0;
+	//m_hitLimits = 0;
 	m_rowIsMotor = 0;
 	m_isInSkeleton = 0;
 	m_enableCollision = 0;
@@ -143,7 +143,7 @@ ndJointBilateralConstraint::ndJointBilateralConstraint(const ndJointBilateralCon
 
 	m_mark0 = 0;
 	m_mark1 = 0;
-	m_hitLimits = 0;
+	//m_hitLimits = 0;
 	m_rowIsMotor = 0;
 	m_isInSkeleton = 0;
 	m_enableCollision = 0;
@@ -343,7 +343,9 @@ bool ndJointBilateralConstraint::IsSkeleton() const
 
 bool ndJointBilateralConstraint::GetJointHitLimits() const
 {
-	return m_hitLimits ? true : false;
+	ndAssert(0);
+	return false;
+	//return m_hitLimits ? true : false;
 }
 
 void ndJointBilateralConstraint::ReplaceSentinel(ndBodyKinematic* const sentinel)

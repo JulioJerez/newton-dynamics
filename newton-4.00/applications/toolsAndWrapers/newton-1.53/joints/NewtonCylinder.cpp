@@ -194,13 +194,13 @@ void NewtonCorkscrewSetAsMotorAngular(const NewtonJoint* const joint, dFloat spe
 	userJoint->SetAsMotorAngle(speed, maxTorque);
 }
 
-void NewtonCorkscrewEnableLimits(const NewtonJoint* const joint, int state)
+void NewtonCorkscrewEnableLimitsPosit(const NewtonJoint* const joint, int state)
 {
 	NewtonCylinder* const userJoint = PointerCast<NewtonCylinder, NewtonJoint>(joint);
 	userJoint->SetLimitStatePosit(state ? true : false);
 }
 
-void NewtonCorkscrewSetLimits(const NewtonJoint* const joint, dFloat minPosit, dFloat maxPosit)
+void NewtonCorkscrewSetLimitsPosit(const NewtonJoint* const joint, dFloat minPosit, dFloat maxPosit)
 {
 	NewtonCylinder* const userJoint = PointerCast<NewtonCylinder, NewtonJoint>(joint);
 	userJoint->SetLimitsPosit(minPosit, maxPosit);

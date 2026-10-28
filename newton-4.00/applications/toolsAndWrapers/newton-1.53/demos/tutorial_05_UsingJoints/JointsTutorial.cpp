@@ -253,27 +253,18 @@ struct JointControlStruct
 
 static void DestroyJointControlStruct(const NewtonJoint* slider)
 {
-	JointControlStruct* limits;
-	limits = (JointControlStruct*) NewtonJointGetUserData (slider);
+	JointControlStruct* limits = (JointControlStruct*) NewtonJointGetUserData (slider);
 	delete limits; 
 }
 
 static unsigned SliderUpdateEvent (const NewtonJoint* slider, NewtonHingeSliderUpdateDesc* desc)
 {
-	JointControlStruct* limits = (JointControlStruct*) NewtonJointGetUserData (slider);
-	// NewtonSliderCalculateStopAccel is deprecated, 
-	// it is better to just set limits.
-	// dFloat distance = NewtonSliderGetJointPosit (slider);
-	//if (distance < limits->m_min) {
-	//	// if the distance is smaller than the predefine interval, stop the slider
-	//	desc->m_accel = NewtonSliderCalculateStopAccel (slider, desc, limits->m_min);
-	//	return 1;
-	//} else if (distance > limits->m_max) {
-	//	// if the distance is larger than the predefine interval, stop the slider
-	//	desc->m_accel = NewtonSliderCalculateStopAccel (slider, desc, limits->m_max);
-	//	return 1;
-	//}
+	const JointControlStruct* const limits = (JointControlStruct*) NewtonJointGetUserData (slider);
+	// or se limits at update time 
+	NewtonSliderEnableLimits(slider, 1);
+	NewtonSliderSetLimits(slider, limits->m_min, limits->m_max);
 
+	// you can also set motors or proportional derivative controller
 	// no action need it if the joint angle is with the limits
 	return 0;
 }
@@ -281,8 +272,8 @@ static unsigned SliderUpdateEvent (const NewtonJoint* slider, NewtonHingeSliderU
 static unsigned CorkScrewUpdateEvent (const NewtonJoint* screw, NewtonHingeSliderUpdateDesc* desc)
 {
 	const JointControlStruct* const limits = (JointControlStruct*) NewtonJointGetUserData (screw);
-	NewtonCorkscrewEnableLimits(screw, 1);
-	NewtonCorkscrewSetLimits(screw, limits->m_min, limits->m_max);
+	NewtonCorkscrewEnableLimitsPosit(screw, 1);
+	NewtonCorkscrewSetLimitsPosit(screw, limits->m_min, limits->m_max);
 
 	NewtonCorkscrewSetAsMotorAngular(screw, 10.0f, 1000.0f);
 	return 0;
@@ -290,57 +281,12 @@ static unsigned CorkScrewUpdateEvent (const NewtonJoint* screw, NewtonHingeSlide
 
 static unsigned UniversalUpdateEvent (const NewtonJoint* screw, NewtonHingeSliderUpdateDesc* desc)
 {
-	unsigned retCode; 
-	dFloat angle;
-	dFloat omega;
-	JointControlStruct* limits;
+	JointControlStruct* const limits = (JointControlStruct*)NewtonJointGetUserData(screw);
 
-	// no action need it if the joint angle is with the limits
-	retCode = 0;
-
-// change this to #if 0 put a double limit on the universal joint
-#if 1
-	// the first entry in is the axis fixes of the spinning beat
-	// apply a simple motor to this object
-	omega = NewtonUniversalGetJointOmega0 (screw);
-	desc[0].m_accel = -4.5f - 0.2f * omega;
-	// or with 0x10 to tell newton this axis is active
-	retCode |= 1;
-
-#else
-	// put a top limit on the joint
-	limits = (JointControlStruct*) NewtonJointGetUserData (screw);
-	angle = NewtonUniversalGetJointAngle0 (screw);
-	if (angle < limits->m_min) {
-		// if the distance is smaller than the predefine interval, stop the slider
-		desc[0].m_accel = NewtonUniversalCalculateStopAlpha0 (screw, &desc[0], limits->m_min);
-		retCode |= 1;
-	} else if (angle > limits->m_max) {
-		// if the distance is larger than the predefine interval, stop the slider
-		desc[0].m_accel = NewtonUniversalCalculateStopAlpha0 (screw, &desc[0], limits->m_max);
-		retCode |= 1;
-	}
-#endif
-
-
-
-	limits = (JointControlStruct*) NewtonJointGetUserData (screw);
-
-	// the first entry in NewtonHingeSliderUpdateDesc control the screw linear acceleration 
-	angle = NewtonUniversalGetJointAngle1 (screw);
-	if (angle < limits->m_min) {
-		// if the distance is smaller than the predefine interval, stop the slider
-		desc[1].m_accel = NewtonUniversalCalculateStopAlpha1 (screw, &desc[0], limits->m_min);
-		retCode |= 2;
-	} else if (angle > limits->m_max) {
-		// if the distance is larger than the predefine interval, stop the slider
-		desc[1].m_accel = NewtonUniversalCalculateStopAlpha1 (screw, &desc[0], limits->m_max);
-		retCode |= 2;
-	}
-	
-	// return the code
-	return retCode;
-
+	NewtonUniversalEnableLimits1(screw, 1);
+	NewtonUniversalSetLimits1(screw, limits->m_min, limits->m_max);
+	NewtonUniversalSetAsMotor0(screw, -5.0f, 2000.0f);
+	return 0;
 }
 
 
@@ -420,7 +366,6 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		NewtonHingeSetLimits(joint, -90.0f * 3.1416f/ 180.0f, 90.0f * 3.1416f / 180.0f);
 	}
 
-#if 0
 	{
 		// ////////////////////////////////////////////////////////////////////////////////////
 		//
@@ -495,7 +440,6 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		NewtonSliderEnableLimits(joint, 1);
 		NewtonSliderSetLimits(joint, limits->m_min, limits->m_max);
 	}
-#endif
 
 	{
 		// ////////////////////////////////////////////////////////////////////////////////////
@@ -572,7 +516,6 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		NewtonJointSetDestructor (joint, DestroyJointControlStruct);			
 	}
 
-#if 0
 	{
 		// ////////////////////////////////////////////////////////////////////////////////////
 		//
@@ -584,7 +527,7 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		dMatrix beatLocation (location);
 		dVector beatSize (0.5f, 1.25f, 1.25f);
 
-		beatLocation.m_posit.m_x -= size.m_x * 0.5f;
+		beatLocation.m_posit.m_x += size.m_x * 0.5f;
 
 		// create the a graphic character (use a visualObject as our body
 		//visualObject = new BoxPrimitive (beatLocation, beatSize);
@@ -633,7 +576,7 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		joint = NewtonConstraintCreateUniversal (nWorld, &pivot.m_x, &pin0.m_x, &pin1.m_x, beat, bar);
 		
 		// assign a control function for this joint
-		NewtonCorkscrewSetUserCallback (joint, UniversalUpdateEvent);
+		NewtonUniversalSetUserCallback(joint, UniversalUpdateEvent);
 
 		JointControlStruct *limits;
 		limits = new JointControlStruct;
@@ -648,5 +591,4 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		// tell this joint to destroy its local private data when destroyed
 		NewtonJointSetDestructor (joint, DestroyJointControlStruct);			
 	}
-#endif
 }

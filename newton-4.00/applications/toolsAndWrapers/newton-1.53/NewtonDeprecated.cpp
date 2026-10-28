@@ -173,3 +173,44 @@ dFloat NewtonCorkscrewCalculateStopAccel(const NewtonJoint* joint, const NewtonH
 	return ndFloat32(0.0f);
 }
 
+// Name: NewtonUniversalCalculateStopAlpha0
+// Calculate the angular acceleration needed to stop the universal at the desired angle.
+//
+// Parameters:
+// *const NewtonJoint* *Universal - pointer to the joint.
+// *NewtonUniversalSliderUpdateDesc* *desc - is the pointer to the Universal or slide structure.
+// *dFloat* angle - is the desired universal stop angle rotation around pin0
+//
+// Return: the relative angular acceleration needed to stop the universal.
+//
+// Remarks: this function can only be called from a *NewtonUniversalCallBack* and it can be used by the application to implement universal limits.
+// 
+// See also: NewtonUniversalSetUserCallback
+dFloat NewtonUniversalCalculateStopAlpha0(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat angle)
+{
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+	ndTrace(("please use the joint limits or motor\n"));
+	ndAssert(0);
+	return ndFloat32(0.0f);
+}
+
+// Name: NewtonUniversalCalculateStopAlpha1
+// Calculate the angular acceleration needed to stop the universal at the desired angle.
+//
+// Parameters:
+// *const NewtonJoint* *Universal - pointer to the joint.
+// *NewtonUniversalSliderUpdateDesc* *desc - is the pointer to and the Universal or slide structure.
+// *dFloat* angle - is the desired universal stop angle rotation around pin1
+//
+// Return: the relative angular acceleration needed to stop the universal.
+//
+// Remarks: this function can only be called from a *NewtonUniversalCallBack* and it can be used by the application to implement universal limits.
+// 
+// See also: NewtonUniversalSetUserCallback
+dFloat NewtonUniversalCalculateStopAlpha1(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat angle)
+{
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+	ndTrace(("please use the joint limits or motor\n"));
+	ndAssert(0);
+	return ndFloat32(0.0f);
+}

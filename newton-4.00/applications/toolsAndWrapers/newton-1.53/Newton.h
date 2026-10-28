@@ -593,9 +593,8 @@ extern "C" {
 	// new for 1.54
 	NEWTON_API void NewtonCorkscrewSetAsMotorAngular(const NewtonJoint* const corkscrew, dFloat speed, dFloat MaxTorque);
 
-	NEWTON_API void NewtonCorkscrewEnableLimits(const NewtonJoint* const corkscrew, int state);
-	NEWTON_API void NewtonCorkscrewSetLimits(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit);
-
+	NEWTON_API void NewtonCorkscrewEnableLimitsPosit(const NewtonJoint* const corkscrew, int state);
+	NEWTON_API void NewtonCorkscrewSetLimitsPosit(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit);
 
 	// **********************************************************************************************
 	//
@@ -613,6 +612,15 @@ extern "C" {
 	NEWTON_API void NewtonUniversalGetJointForce(const NewtonJoint* universal, dFloat* force);
 	NEWTON_API dFloat NewtonUniversalCalculateStopAlpha0(const NewtonJoint* universal, const NewtonHingeSliderUpdateDesc* desc, dFloat angle);
 	NEWTON_API dFloat NewtonUniversalCalculateStopAlpha1(const NewtonJoint* universal, const NewtonHingeSliderUpdateDesc* desc, dFloat angle);
+
+	// new for 1.54
+	NEWTON_API void NewtonUniversalSetAsMotor0(const NewtonJoint* const corkscrew, dFloat speed, dFloat MaxTorque);
+	NEWTON_API void NewtonUniversalEnableLimits0(const NewtonJoint* const corkscrew, int state);
+	NEWTON_API void NewtonUniversalSetLimits0(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit);
+
+	NEWTON_API void NewtonUniversalSetAsMotor1(const NewtonJoint* const corkscrew, dFloat speed, dFloat MaxTorque);
+	NEWTON_API void NewtonUniversalEnableLimits1(const NewtonJoint* const corkscrew, int state);
+	NEWTON_API void NewtonUniversalSetLimits1(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit);
 
 #ifdef __cplusplus 
 }

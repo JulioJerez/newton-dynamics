@@ -108,7 +108,7 @@ class ndJointBilateralConstraint : public ndConstraint
 			,m_targetParam(ndFloat32(0.0f))
 			,m_maxForce(D_LCP_MAX_VALUE)
 			,m_motorSpeed(ndFloat32(0.0f))
-			,m_dryFrictionForce(ndFloat32(0.0f))
+			,m_motorForce(ndFloat32(0.0f))
 			,m_springDamperRegularizer(ndFloat32(1.0e-3f))
 			,m_limitState(false)
 			,m_hitLimits(false)
@@ -124,7 +124,7 @@ class ndJointBilateralConstraint : public ndConstraint
 		ndFloat32 m_targetParam;
 		ndFloat32 m_maxForce;
 		ndFloat32 m_motorSpeed;
-		ndFloat32 m_dryFrictionForce;
+		ndFloat32 m_motorForce;
 		ndFloat32 m_springDamperRegularizer;
 		bool m_limitState;
 		bool m_hitLimits;
@@ -173,7 +173,7 @@ class ndJointBilateralConstraint : public ndConstraint
 	D_COLLISION_API void SetCollidable(bool state);
 	D_COLLISION_API void SetSkeletonFlag(bool flag);
 
-	D_COLLISION_API bool GetJointHitLimits() const;
+	D_COLLISION_API bool virtual GetJointHitLimits() const;
 
 	D_COLLISION_API void SetHighFriction(ndConstraintDescritor& desc, ndFloat32 friction);
 	D_COLLISION_API void SetLowerFriction(ndConstraintDescritor& desc, ndFloat32 friction);
@@ -218,7 +218,7 @@ class ndJointBilateralConstraint : public ndConstraint
 	ndUnsigned32 m_isInSkeleton		: 1;
 	ndUnsigned32 m_enableCollision	: 1;
 	ndInt8 m_rowIsMotor;
-	ndInt8 m_hitLimits;
+	//ndInt8 m_hitLimits;
 	ndJointBilateralSolverModel m_solverModel;
 
 	static ndVector m_arrowDebugColor;
