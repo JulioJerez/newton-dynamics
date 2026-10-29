@@ -52,9 +52,8 @@ int hightMap_debugCount;
 dVector hightMap_debugLines[1024][2];
 
 
-// set this to 0 for more realistic game (the stack will never go to sleep mode)
-//#define AUTO_SLEEP_MODE 1
-#define AUTO_SLEEP_MODE 0
+// set this to 0 and objects stack will never go to sleep mode
+#define AUTO_SLEEP_MODE 1
 static bool sleepMode = AUTO_SLEEP_MODE;
 
 
@@ -530,7 +529,7 @@ void InitScene()
 	CreateBuildingStruture_1 (posit);
 	CreateBuildingStruture_2 ();
 	CreateBuildingStruture_3 ();
-//	CompoundCollisionStruture ();
+	CompoundCollisionStruture ();
 }
 
 
@@ -1530,42 +1529,25 @@ void CreateBuildingStruture_3 ()
   NewtonBodySetJointRecursiveCollision(tenthBody,0);
 }
 
-
-
-
-
-
-
 void CompoundCollisionStruture ()
 {
-	_ASSERT(0);
-#if 0
-	int i;
-	int j;
-	int count;
-	int segments;
-	int hullCount;
-	dFloat A;
-	dFloat C;
-	dFloat alpha;
-	dFloat beta0;
-	dFloat beta1;
 	dVector array[200];
 	NewtonCollision* collision;
 	NewtonCollision* conhexHullArray[100];
   
-	A = 0.8f;
-	C = 3.0f;
+	dFloat A = 0.8f;
+	dFloat C = 3.0f;
 
-	segments = 16;
-	hullCount = 0;
+	int hullCount = 0;
+	int segments = 16;
+
 	// create the upper half of a change
-	for (i = 0; i < segments; i ++) {
-		beta0 = 2.0f * dFloat (i) * 3.1416 / segments; 
-		beta1 = 2.0f * dFloat (i + 1) * 3.1416 / segments; 
-		count = 0;
-		for (j = 0; j < segments; j ++) {
-			alpha = 2.0f * dFloat (j) * 3.1416 / segments; 
+	for (int i = 0; i < segments; i ++) {
+		dFloat beta0 = 2.0f * dFloat (i) * 3.1416 / segments;
+		dFloat beta1 = 2.0f * dFloat (i + 1) * 3.1416 / segments;
+		int count = 0;
+		for (int j = 0; j < segments; j ++) {
+			dFloat alpha = 2.0f * dFloat (j) * 3.1416 / segments;
 			array[count].m_x = A * dSin (alpha);
 			array[count].m_y = (C + A * dCos(alpha)) * dCos (beta0);
 			array[count].m_z = (C + A * dCos(alpha)) * dSin (beta0);
@@ -1580,69 +1562,25 @@ void CompoundCollisionStruture ()
 		hullCount ++;
 	}
 
-
-	// test collision between two compound objects
-#if 0
-	NewtonCollision* collisionA;
-	NewtonCollision* collisionB;
-//	collisionB = NewtonCreateBox (nWorld, 3.5f, 3.5f, 3.5f, NULL);
-	collisionB = NewtonCreateCompoundCollision (nWorld, hullCount, conhexHullArray); 
-	collisionA = NewtonCreateCompoundCollision (nWorld, hullCount, conhexHullArray);
-
-	dMatrix matrixA (GetIdentityMatrix());
-	dMatrix matrixB (GetIdentityMatrix());
-	matrixA.m_posit.m_y += 10.0f;
-	matrixB.m_posit.m_z += 0.0f;
-
-	dVector contacts[20];
-	dVector normals[20];
-	dFloat depths[20];
-//	count = NewtonCollisionCollide (nWorld, 10, 
-//									collisionA, &matrixA[0][0], 
-//									collisionB, &matrixB[0][0],
-//									&contacts[0][0], &normals[0][0], &depths[0]);
-
-
-	dVector velocA(0, -1000, 0);
-	dVector omegaA(0, 0, 0);
-	dVector velocB(0, 0, 0);
-	dVector omegaB(0, 0, 0);
-	dFloat timeOfImpact;
-
-	count = NewtonCollisionCollideContinue (nWorld, 1, 0.01f, 
-										  collisionA, &matrixA[0][0], &velocA[0], &omegaA[0], 
-										  collisionB, &matrixB[0][0], &velocB[0], &omegaB[0],  
-										  &timeOfImpact, &contacts[0][0], &normals[0][0], depths);
-
-	NewtonReleaseCollision (nWorld, collisionA);
-	NewtonReleaseCollision (nWorld, collisionB);
-#endif
-
-
 	dMatrix baseMatrix (GetIdentityMatrix());
 	baseMatrix.m_posit.m_x = cameraEyepoint.m_x + 20.0f;
-	baseMatrix.m_posit.m_z = cameraEyepoint.m_z + 4.0f;
+	baseMatrix.m_posit.m_z = cameraEyepoint.m_z + 10.0f;
 	baseMatrix.m_posit.m_y = FindFloor (baseMatrix.m_posit.m_x, baseMatrix.m_posit.m_z); 
 	baseMatrix.m_posit.m_y += 5.0f;
 
-	dFloat mass;
-	dVector origin;
-	dVector inertia;
 
-	mass = 10;
-	for (i = 0; i < 1; i ++) {
-		NewtonBody* blockBoxBody;
-		RenderPrimitive* blockBox;
+	dFloat mass = 10.0f;
+	for (int i = 0; i < 1; i ++) {
 		baseMatrix = dgYawMatrix (0.5f * 3.1416) * baseMatrix;
 
 		dMatrix matrix (baseMatrix);
-		blockBox = new TorusPrimitive (nGrapphicWorld, matrix, A, C);
+		RenderPrimitive* blockBox = new TorusPrimitive (nGrapphicWorld, matrix, A, C);
 
 		// create the compound collision
 		collision = NewtonCreateCompoundCollision (nWorld, hullCount, conhexHullArray);
 
  		//create the rigid body
-		blockBoxBody = NewtonCreateBody (nWorld, collision);
+		NewtonBody* blockBoxBody = NewtonCreateBody (nWorld, collision);
   
 		// save the pointer to the graphic object with the body.
 		NewtonBodySetUserData (blockBoxBody, blockBox);
@@ -1654,7 +1592,7 @@ void CompoundCollisionStruture ()
 		NewtonBodySetAutoFreeze (blockBoxBody, sleepMode);
 
 		// set a call back to catch the auto active state of this body
-		NewtonBodySetAutoactiveCallback (blockBoxBody, TrackActivesBodies);
+		//NewtonBodySetAutoactiveCallback (blockBoxBody, TrackActivesBodies);
 
 		// set a destructor for this rigid body
 		NewtonBodySetDestructorCallback (blockBoxBody, PhysicsBodyDestructor);
@@ -1666,12 +1604,13 @@ void CompoundCollisionStruture ()
 		NewtonBodySetForceAndTorqueCallback (blockBoxBody, PhysicsApplyGravityForce);
 
 		// set the mass matrix
+		dVector origin;
+		dVector inertia;
 		NewtonConvexCollisionCalculateInertialMatrix (collision, &inertia[0], &origin[0]);	
 		NewtonBodySetMassMatrix (blockBoxBody, mass, inertia[0] * mass, inertia[1] * mass, inertia[2] * mass);
 
 		// set the center of mass 
-		_ASSERT(0);
-		//NewtonBodyGetCentreOfMass (blockBoxBody, &origin[0]);
+		NewtonBodyGetCentreOfMass (blockBoxBody, &origin[0]);
 
 		// set the matrix for both the rigid body and the graphic body
 		NewtonBodySetMatrix (blockBoxBody, &matrix[0][0]);
@@ -1684,8 +1623,7 @@ void CompoundCollisionStruture ()
 	}
 
 	// release all collision parts
-	for (i = 0; i < hullCount; i ++) {
+	for (int i = 0; i < hullCount; i ++) {
 		NewtonReleaseCollision (nWorld, conhexHullArray[i]);
 	}
-#endif
  }

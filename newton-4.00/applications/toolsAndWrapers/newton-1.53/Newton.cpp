@@ -487,35 +487,6 @@ void NewtonConvexHullModifierSetMatrix(const NewtonCollision* convexHullModifier
 	collision->ModifierSetMatrix(matrix);
 }
 
-
-
-
-// Name: NewtonCreateCompoundCollision 
-// Create a container to hold an array of convex collision primitives. 
-//
-// Parameters:
-// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
-// *int* count - number of primitives in the array.
-// *const NewtonCollision* **collisionPrimitiveArray - pointer to an array of convex collision primitives. This array must be filled with convex collision primitives before this function is called.
-//
-// Return: Pointer to the compound collision.
-//
-// Remarks: Compound collision primitives can only be made of convex collision primitives and they can not contain compound collision. Therefore they are treated as convex primitives.
-//
-// Remarks: Compound collision primitives are treated as instance collision objects that can not shared by multiples rigid bodies.
-//
-// Remarks: Collision primitives are reference counted objects. The application should call *NewtonReleaseCollision* in order to release references to the object.
-// Neglecting to release references to collision primitives is a common cause of memory leaks.
-//
-// See also: NewtonReleaseCollision
-NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* newtonWorld, int count, NewtonCollision* const collisionPrimitiveArray[])
-{
-	Newton *world;
-
-	world = (Newton *)newtonWorld;
-	return (NewtonCollision*) world->CreateCompoundCollision (count, (dgCollision**) collisionPrimitiveArray);
-}
-
 // Name: NewtonCollisionApplyScale
 // Apply a global uniform scale to the collision geometry.
 //

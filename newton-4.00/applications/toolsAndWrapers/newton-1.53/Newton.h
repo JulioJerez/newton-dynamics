@@ -149,19 +149,6 @@ extern "C" {
 		
 	// **********************************************************************************************
 	//
-	// complex collision primitives creation functions
-	// note: can only be used with static bodies (bodies with infinite mass)
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonCollision* NewtonCreateCompoundCollision (const NewtonWorld* newtonWorld, int count, 
-		NewtonCollision* const collisionPrimitiveArray[]);
-
-	NEWTON_API NewtonCollision* NewtonCreateUserMeshCollision (const NewtonWorld* newtonWorld, const dFloat *minBox, 
-		const dFloat *maxBox, void *userData, NewtonUserMeshCollisionCollideCallback collideCallback, 
-		NewtonUserMeshCollisionRayHitCallback rayHitCallback, NewtonUserMeshCollisionDestroyCallback destroyCallback);
-
-	// **********************************************************************************************
-	//
 	// General purpose collision library functions
 	//
 	// **********************************************************************************************
@@ -464,6 +451,19 @@ extern "C" {
 	NEWTON_API int NewtonTreeCollisionGetVertexListIndexListInAABB(const NewtonCollision* treeCollision, const dFloat* p0, const dFloat* p1,
 		const dFloat** vertexArray, int* vertexCount, int* vertexStrideInBytes,
 		const int* indexList, int maxIndexCount);
+
+	// **********************************************************************************************
+	//
+	// complex collision primitives creation functions
+	// note: can only be used with static bodies (bodies with infinite mass)
+	//
+	// **********************************************************************************************
+	NEWTON_API NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* newtonWorld, int count,
+		NewtonCollision* const collisionPrimitiveArray[]);
+
+	NEWTON_API NewtonCollision* NewtonCreateUserMeshCollision(const NewtonWorld* newtonWorld, const dFloat* minBox,
+		const dFloat* maxBox, void* userData, NewtonUserMeshCollisionCollideCallback collideCallback,
+		NewtonUserMeshCollisionRayHitCallback rayHitCallback, NewtonUserMeshCollisionDestroyCallback destroyCallback);
 
 	// **********************************************************************************************
 	//
