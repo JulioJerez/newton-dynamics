@@ -28,6 +28,7 @@ class ndNewtonBodyNotify : public ndModelBodyNotify
 
 	typedef void (*NewtonBodyDestructor) (const NewtonBody* const body);
 	typedef void (*NewtonApplyForceAndTorque) (const NewtonBody* const body);
+	typedef void (*NewtonBodyActivationState) (const NewtonBody* body, unsigned state);
 	typedef void (*NewtonSetTransform) (const NewtonBody* const body, const ndFloat32* const matrix);
 
 	ndNewtonBodyNotify(ndNewtonWorld* const world, NewtonBody* const owner);
@@ -49,10 +50,11 @@ class ndNewtonBodyNotify : public ndModelBodyNotify
 	ndFloat32 m_capOmega;
 
 	bool m_bodyIsInWorld;
+	bool m_collideWithConnectedBodies;
 
 	NewtonBodyDestructor m_onDestroy;
 	NewtonSetTransform m_applyTransform;
-	NewtonApplyForceAndTorque m_forceAndTorque;
+	NewtonApplyForceAndTorque m_onForceAndTorque;
 };
 
 #endif

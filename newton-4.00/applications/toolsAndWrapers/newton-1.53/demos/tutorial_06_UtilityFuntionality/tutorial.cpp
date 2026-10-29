@@ -87,7 +87,6 @@ enum PrimitiveType
 void CreateBuildingStruture_1 (dVector& location);
 void CreateBuildingStruture_2 ();
 void CreateBuildingStruture_3 ();
-void CreateBuildingStruture_4 ();
 void CompoundCollisionStruture ();
 NewtonBody* AddBlockObject (dFloat mass, const dMatrix& matrix, const dVector& size, PrimitiveType type);
 NewtonBody* AddBlockObject2 (dFloat mass, const dMatrix& matrix, const dVector& size, PrimitiveType type);
@@ -210,12 +209,6 @@ void PhysicsSetTransform (const NewtonBody* body, const dFloat* matrix)
 	primitive->SetMatrix (mat);
 }
 
-// count the number of blocks actives in the scene
-static void TrackActivesBodies (const NewtonBody* body, unsigned state)
-{
-	g_activeBodies += (state == 1) ? 1 : -1;
-}
-
 // change auto sleep mode for this body and activate the body
 static void  ToggleAutoSleep (const NewtonBody* body)
 {
@@ -275,10 +268,9 @@ void DrawScene ()
 {
 	dFloat timeStep;
 
-
-	// get the time step
+	// get the time stepf
 	timeStep = timer.GetElapsedSeconds();
-  //printf("timeStep = %.3f \n",timeStep);
+	//printf("timeStep = %f\n", timeStep);
 
 	// update the Newton physics world
 	NewtonUpdate (nWorld, timeStep);
@@ -310,8 +302,6 @@ void DrawScene ()
 	Print (color, 4, 34, "f1 - auto sleep %s      f2 - show collision boxes", sleepMode ? "ON" : "OFF");
 } 
 
-
-
 dFloat  RayCastPlacement (const NewtonBody* body, const dFloat* normal, int collisionID, void* userData, dFloat intersetParam)
 {
 	dFloat* paramPtr;
@@ -341,8 +331,7 @@ dFloat FindFloor (dFloat x, dFloat z)
 	dVector p1 (x, -1000.0f, z); 
 
 	parameter = 1.2f;
-	_ASSERT(0);
-	//NewtonWorldRayCast (nWorld, &p0[0], &p1[0], RayCastPlacement, &parameter, NULL);
+	NewtonWorldRayCast (nWorld, &p0[0], &p1[0], RayCastPlacement, &parameter, NULL);
 	//_ASSERTE (parameter < 1.0f);
 
 	// the intersection is the interpolated value
@@ -365,8 +354,7 @@ void Keyboard()
 	if (prevF1Key & f1Key) {
 		// toggle auto sleep mode when press F1
 		sleepMode = ! sleepMode;
-		_ASSERT(0);
-		//NewtonWorldForEachBodyDo (nWorld, ToggleAutoSleep);
+		NewtonWorldForEachBodyDo (nWorld, ToggleAutoSleep);
 	}
 	prevF1Key = ~f1Key;
 
@@ -393,65 +381,78 @@ void Keyboard()
 	// this section control the camera object picking
 	mouseLeftKey = dGetKeyState (VK_LBUTTON) & 0x8000;
 
-	_ASSERT(0);
-	//if (!MousePick (nWorld, mouse1, mouseLeftKey, 0.125f, 1.0f)) {
-	//	// we are not in mouse pick mode, then we are in camera tracking mode
-	//	if (mouseLeftKey) {
-	//		// when click left mouse button the first time, we reset the camera
-	//		// convert the mouse x position to delta yaw angle
-	//		if (mouse1.x > (mouse0.x + 1)) {
-	//			yawAngle += 1.0f * 3.1416 / 180.0f;
-	//			if (yawAngle > (360.0f * 3.1416 / 180.0f)) {
-	//				yawAngle -= (360.0f * 3.1416 / 180.0f);
-	//			}
-	//		} else if (mouse1.x < (mouse0.x - 1)) {
-	//			yawAngle -= 1.0f * 3.1416 / 180.0f;
-	//			if (yawAngle < 0.0f) {
-	//				yawAngle += (360.0f * 3.1416 / 180.0f);
-	//			}
-	//		}
-	//
-	//		if (mouse1.y > (mouse0.y + 1)) {
-	//			rollAngle += 1.0f * 3.1416 / 180.0f;
-	//			if (rollAngle > (80.0f * 3.1416 / 180.0f)) {
-	//				rollAngle = 80.0f * 3.1416 / 180.0f;
-	//			}
-	//		} else if (mouse1.y < (mouse0.y - 1)) {
-	//			rollAngle -= 1.0f * 3.1416 / 180.0f;
-	//			if (rollAngle < -(80.0f * 3.1416 / 180.0f)) {
-	//				rollAngle = -80.0f * 3.1416 / 180.0f;
-	//			}
-	//		}
-	//		dMatrix cameraDirMat (dgRollMatrix(rollAngle) * dgYawMatrix(yawAngle));
-	//		cameraDir = cameraDirMat.m_front;
-	//	}
-	//}
-	//
-	//// save mouse position and left mouse key state for next frame
-	//mouse0 = mouse1;
-	//
-	//
-	//
-	//// camera control
-	//if (dGetKeyState ('W') & 0x8000) {
-	//	cameraEyepoint += cameraDir.Scale (CAMERA_SPEED / 60.0f);
-	//} else if (dGetKeyState ('S') & 0x8000) {
-	//	cameraEyepoint -= cameraDir.Scale (CAMERA_SPEED / 60.0f);
-	//}
-	//
-	//if (dGetKeyState ('D') & 0x8000) {
-	//	dVector up (0.0f, 1.0f, 0.0f);
-	//	dVector right (cameraDir * up);
-	//	cameraEyepoint += right.Scale (CAMERA_SPEED / 60.0f);
-	//} else if (dGetKeyState ('A') & 0x8000) {
-	//	dVector up (0.0f, 1.0f, 0.0f);
-	//	dVector right (cameraDir * up);
-	//	cameraEyepoint -= right.Scale (CAMERA_SPEED / 60.0f);
-	//}
+	if (!MousePick (nWorld, mouse1, mouseLeftKey, 0.125f, 1.0f)) {
+		// we are not in mouse pick mode, then we are in camera tracking mode
+		if (mouseLeftKey) {
+			// when click left mouse button the first time, we reset the camera
+			// convert the mouse x position to delta yaw angle
+			if (mouse1.x > (mouse0.x + 1)) {
+				yawAngle += 1.0f * 3.1416 / 180.0f;
+				if (yawAngle > (360.0f * 3.1416 / 180.0f)) {
+					yawAngle -= (360.0f * 3.1416 / 180.0f);
+				}
+			} else if (mouse1.x < (mouse0.x - 1)) {
+				yawAngle -= 1.0f * 3.1416 / 180.0f;
+				if (yawAngle < 0.0f) {
+					yawAngle += (360.0f * 3.1416 / 180.0f);
+				}
+			}
+	
+			if (mouse1.y > (mouse0.y + 1)) {
+				rollAngle += 1.0f * 3.1416 / 180.0f;
+				if (rollAngle > (80.0f * 3.1416 / 180.0f)) {
+					rollAngle = 80.0f * 3.1416 / 180.0f;
+				}
+			} else if (mouse1.y < (mouse0.y - 1)) {
+				rollAngle -= 1.0f * 3.1416 / 180.0f;
+				if (rollAngle < -(80.0f * 3.1416 / 180.0f)) {
+					rollAngle = -80.0f * 3.1416 / 180.0f;
+				}
+			}
+			dMatrix cameraDirMat (dgRollMatrix(rollAngle) * dgYawMatrix(yawAngle));
+			cameraDir = cameraDirMat.m_front;
+		}
+	}
+	
+	// save mouse position and left mouse key state for next frame
+	mouse0 = mouse1;
+	
+	
+	
+	// camera control
+	if (dGetKeyState ('W') & 0x8000) {
+		cameraEyepoint += cameraDir.Scale (CAMERA_SPEED / 60.0f);
+	} else if (dGetKeyState ('S') & 0x8000) {
+		cameraEyepoint -= cameraDir.Scale (CAMERA_SPEED / 60.0f);
+	}
+	
+	if (dGetKeyState ('D') & 0x8000) {
+		dVector up (0.0f, 1.0f, 0.0f);
+		dVector right (cameraDir * up);
+		cameraEyepoint += right.Scale (CAMERA_SPEED / 60.0f);
+	} else if (dGetKeyState ('A') & 0x8000) {
+		dVector up (0.0f, 1.0f, 0.0f);
+		dVector right (cameraDir * up);
+		cameraEyepoint -= right.Scale (CAMERA_SPEED / 60.0f);
+	}
 } 
 
 
 static NewtonCollision* floorBoxCollisiom;
+
+
+// count the number of blocks actives in the scene
+static void TrackActivesBodies(const NewtonBody* body)
+{
+	int state = NewtonBodyGetSleepingState(body) ? 0 : 1;
+	g_activeBodies += state;
+}
+
+static void CountActiveBodies(const NewtonWorld* const world, dFloat timestep)
+{
+	g_activeBodies = 0;
+	NewtonWorldForEachBodyDo(nWorld, TrackActivesBodies);
+}
 
 // create physics scene
 void InitScene()
@@ -464,12 +465,7 @@ void InitScene()
 	//
 	// create the newton world
 	nWorld = NewtonCreate (PhysicsAlloc, PhysicsFree);
-
-	// Set the adaptive solve for compromise trade off speed/stability combination
-  // NewtonSetSolverModel (nWorld, 20);
-
-	// used the adaptive friction model
-//	NewtonSetFrictionModel (nWorld, 1);
+	NewtonSetPostUpdateCallback(nWorld, CountActiveBodies);
 
 	// Set the termination function
 	atexit(CleanUp); 
@@ -523,30 +519,17 @@ void InitScene()
 	NewtonBodySetDestructorCallback (blockFloorBody, PhysicsBodyDestructor);
 
 	// position the camera relative to the building struct
-	cameraEyepoint.m_y = FindFloor (cameraEyepoint.m_x, cameraEyepoint.m_z) + 10.0f;
+	cameraEyepoint.m_y = FindFloor (cameraEyepoint.m_x, cameraEyepoint.m_z) + 5.0f;
 
 	// /////////////////////////////////////////////////////////////////////
 	//
 	// build a standard block stack of 20 * 3 boxes for a total of 60
 	dVector posit (cameraEyepoint.m_x + 15.0f, 0.0f, cameraEyepoint.m_z + 4.0f);
-	CreateBuildingStruture_4();//CreateBuildingStruture_4 () ; // CreateBuildingStruture_3
+	posit.m_x += 10.0f;
 
-	posit.m_x += 20.0f;
-//	CreateBuildingStruture_1 (posit);
-
-	posit.m_z -= 20.0f;
-//	CreateBuildingStruture_1 (posit);
-
-	posit.m_x -= 20.0f;
-//	CreateBuildingStruture_1 (posit);
-
-	posit.m_z += 40.0f;
-//	CreateBuildingStruture_1 (posit);
-
-	posit.m_x += 20.0f;
-//	CreateBuildingStruture_1 (posit);
-  
-//	CreateBuildingStruture_2 ();
+	CreateBuildingStruture_1 (posit);
+	CreateBuildingStruture_2 ();
+	CreateBuildingStruture_3 ();
 //	CompoundCollisionStruture ();
 }
 
@@ -713,7 +696,6 @@ NewtonBody* AddBlockObject (dFloat mass, const dMatrix& srcMatrix, const dVector
 	NewtonBodySetAutoFreeze (blockBoxBody, sleepMode);
 
 	// set a call back to catch the auto active state of this body
-	_ASSERT(0);
 	//NewtonBodySetAutoactiveCallback (blockBoxBody, TrackActivesBodies);
 
 	// set a destructor for this rigid body
@@ -935,7 +917,6 @@ NewtonBody* AddBlockObject2 (dFloat mass, const dMatrix& srcMatrix, const dVecto
 	NewtonBodySetAutoFreeze (blockBoxBody, 0); //sleepMode
 
 	// set a call back to catch the auto active state of this body
-	_ASSERT(0);
 	//NewtonBodySetAutoactiveCallback (blockBoxBody, TrackActivesBodies);
 
 	// set a destructor for this rigid body
@@ -1149,7 +1130,6 @@ NewtonBody* AddBlockObject (dFloat mass, const dMatrix& srcMatrix, const dVector
 	NewtonBodySetAutoFreeze (blockBoxBody, sleepMode);
 
 	// set a call back to catch the auto active state of this body
-	_ASSERT(0);
 	//NewtonBodySetAutoactiveCallback (blockBoxBody, TrackActivesBodies);
 
 	// set a destructor for this rigid body
@@ -1238,15 +1218,12 @@ void CreateBuildingStruture_1 (dVector& location)
 	// Build a parking lot type structure
 	 
 	dVector columnBoxSize (3.0f, 1.0f, 1.0f);
-//	dVector columnBoxSize (3.0f, 3.0f, 1.0f);
 	dVector plankBoxSize (6.0f, 1.0f, 6.0f);
 
 	// create the stack
 	dMatrix baseMatrix (GetIdentityMatrix());
 
 	// get the floor position in from o the camera
-//	baseMatrix.m_posit.m_x = cameraEyepoint.m_x + 20.0f;
-//	baseMatrix.m_posit.m_z = cameraEyepoint.m_z + 4.0f;
 	baseMatrix.m_posit = location;
 	baseMatrix.m_posit.m_y = FindFloor (baseMatrix.m_posit.m_x, baseMatrix.m_posit.m_z); 
 	baseMatrix.m_posit.m_y += columnBoxSize.m_x / 2.0f;
@@ -1256,23 +1233,16 @@ void CreateBuildingStruture_1 (dVector& location)
 	// note how the newton engine handle different masses ratios without compromising stability, 
 	// we recommend the application keep this ration under 100 for contacts and 50 for joints 
 	columnMass = 1.0f;
-	//plankMass = 200.0f;
 	plankMass = 50.0f;
 
 	dMatrix columAlignment (dgRollMatrix(3.1416f * 0.5f));
-//dMatrix columAlignment (dgRollMatrix(3.1416f * 0.0f));
-//	for (i = 0; i < 10; i ++) { 
 	for (i = 0; i < 10; i ++) { 
 		dMatrix matrix(columAlignment * baseMatrix);
 		// add the 4 column
 		matrix.m_posit.m_x -=  (columnBoxSize.m_z - plankBoxSize.m_x) * 0.5f;
 		matrix.m_posit.m_z -=  (columnBoxSize.m_z - plankBoxSize.m_z) * 0.5f;
 
-//matrix.m_posit.m_y += 0.2;
 		body = AddBlockObject (columnMass, matrix, columnBoxSize, GetRandType());
-//NewtonBodySetContinuousCollisionMode (body, 1);
-//dVector veloc (100, -200, 0);
-//NewtonBodySetVelocity (body, &veloc[0]);
  
   		matrix.m_posit.m_x += columnBoxSize.m_z - plankBoxSize.m_x;
 		body = AddBlockObject (columnMass, matrix, columnBoxSize, GetRandType());
@@ -1313,10 +1283,11 @@ void CreateBuildingStruture_2 ()
 	dMatrix baseMatrix (GetIdentityMatrix());
 
 	// for the elevation of the floor at the stack position
-	baseMatrix.m_posit.m_x = cameraEyepoint.m_x + 12.0f;
+	baseMatrix.m_posit.m_x = cameraEyepoint.m_x + 20.0f;
+	baseMatrix.m_posit.m_z = cameraEyepoint.m_z - 10.0f;
 
 	baseMatrix.m_posit.m_y = FindFloor (baseMatrix.m_posit.m_x, baseMatrix.m_posit.m_z); 
-	baseMatrix.m_posit.m_y += blockBoxSize.m_y / 2.0f;
+	//baseMatrix.m_posit.m_y += blockBoxSize.m_y / 2.0f;
 
 
 	// set realistic mass and inertia matrix for each block
@@ -1345,8 +1316,6 @@ void CreateBuildingStruture_2 ()
 
 void CreateBuildingStruture_3 ()
 {
-//	int i;
-//	int j;
 	dFloat gap;
 	dFloat mass;
 
@@ -1364,8 +1333,7 @@ void CreateBuildingStruture_3 ()
 	baseMatrix.m_posit.m_x = cameraEyepoint.m_x + 12.0f;
 
 	baseMatrix.m_posit.m_y = FindFloor (baseMatrix.m_posit.m_x, baseMatrix.m_posit.m_z); 
-	baseMatrix.m_posit.m_y += blockBoxSize.m_y / 2.0f;
-
+	//baseMatrix.m_posit.m_y += blockBoxSize.m_y / 2.0f;
 
 	// set realistic mass and inertia matrix for each block
 	mass = 50.0f;
@@ -1474,29 +1442,6 @@ void CreateBuildingStruture_3 ()
   pin8[2] = 0.0f;
   NewtonJoint* joint8 = NewtonConstraintCreateHinge (nWorld, pivot8, pin8, sixthBody, fourthBody);
 
-
-
-  //NewtonUserJointSetRowStiffness(joint,1.0);
-  //NewtonUserJointSetRowStiffness(joint2,1.0);
-  //NewtonUserJointSetRowStiffness(joint3,1.0);
-  //NewtonUserJointSetRowStiffness(joint5,1.0);
-  //NewtonUserJointSetRowStiffness(joint4,1.0);
-  //NewtonUserJointSetRowStiffness(joint6,1.0);
-  //NewtonUserJointSetRowStiffness(joint7,1.0);
-  //NewtonUserJointSetRowStiffness(joint8,1.0);
-
-
-  NewtonJointSetStiffness(joint,1.0);
-  NewtonJointSetStiffness(joint2,1.0);
-  NewtonJointSetStiffness(joint3,1.0);
-  NewtonJointSetStiffness(joint4,1.0);
-  NewtonJointSetStiffness(joint5,1.0);
-  NewtonJointSetStiffness(joint6,1.0);
-  NewtonJointSetStiffness(joint7,1.0);
-  NewtonJointSetStiffness(joint8,1.0);
-
-
-
   matrix.m_posit.m_x += 2.0f;
   matrix.m_posit.m_y -= 1.0f;
   matrix.m_posit.m_z -= 3.6f;
@@ -1510,8 +1455,6 @@ void CreateBuildingStruture_3 ()
   pin9[1] = 0.0f;
   pin9[2] = 0.0f;
   NewtonJoint* joint9 = NewtonConstraintCreateHinge (nWorld, pivot9, pin9, seventhBody, NULL); // NewtonConstraintCreateHinge  , pin9
-
-
 
   matrix.m_posit.m_z += 3.6f;
   NewtonBody * eigthBody = AddBlockObject (mass, matrix, blockBoxSize, _BOX_PRIMITIVE);
@@ -1535,11 +1478,6 @@ void CreateBuildingStruture_3 ()
   pin11[1] = 0.0f;
   pin11[2] = 0.0f;
   NewtonJoint* joint11 = NewtonConstraintCreateHinge (nWorld, pivot11, pin11, eigthBody, secondBody); //, pin11
-
-  NewtonJointSetStiffness(joint9,1);
-  NewtonJointSetStiffness(joint10,1);
-  NewtonJointSetStiffness(joint11,1);
-
 
   matrix.m_posit.m_x += 2.0f;
   //matrix.m_posit.m_y -= 1.0f;
@@ -1580,23 +1518,16 @@ void CreateBuildingStruture_3 ()
   pin14[2] = 0.0f;
   NewtonJoint* joint14 = NewtonConstraintCreateHinge (nWorld, pivot14, pin14, tenthBody, eigthBody); //, pin11
 
-  NewtonJointSetStiffness(joint12,1);
-  NewtonJointSetStiffness(joint13,1);
-  NewtonJointSetStiffness(joint14,1);
-
-
-
-  _ASSERT(0);
-  //NewtonBodySetJointRecursiveCollision(firstBody,0);
-  //NewtonBodySetJointRecursiveCollision(secondBody,0);
-  //NewtonBodySetJointRecursiveCollision(thirdBody,0);
-  //NewtonBodySetJointRecursiveCollision(fourthBody,0);
-  //NewtonBodySetJointRecursiveCollision(fifthBody,0);
-  //NewtonBodySetJointRecursiveCollision(sixthBody,0);
-  //NewtonBodySetJointRecursiveCollision(seventhBody,0);
-  //NewtonBodySetJointRecursiveCollision(eigthBody,0);
-  //NewtonBodySetJointRecursiveCollision(ninethBody,0);
-  //NewtonBodySetJointRecursiveCollision(tenthBody,0);
+  NewtonBodySetJointRecursiveCollision(firstBody,0);
+  NewtonBodySetJointRecursiveCollision(secondBody,0);
+  NewtonBodySetJointRecursiveCollision(thirdBody,0);
+  NewtonBodySetJointRecursiveCollision(fourthBody,0);
+  NewtonBodySetJointRecursiveCollision(fifthBody,0);
+  NewtonBodySetJointRecursiveCollision(sixthBody,0);
+  NewtonBodySetJointRecursiveCollision(seventhBody,0);
+  NewtonBodySetJointRecursiveCollision(eigthBody,0);
+  NewtonBodySetJointRecursiveCollision(ninethBody,0);
+  NewtonBodySetJointRecursiveCollision(tenthBody,0);
 }
 
 
@@ -1607,6 +1538,8 @@ void CreateBuildingStruture_3 ()
 
 void CompoundCollisionStruture ()
 {
+	_ASSERT(0);
+#if 0
 	int i;
 	int j;
 	int count;
@@ -1689,7 +1622,6 @@ void CompoundCollisionStruture ()
 	dMatrix baseMatrix (GetIdentityMatrix());
 	baseMatrix.m_posit.m_x = cameraEyepoint.m_x + 20.0f;
 	baseMatrix.m_posit.m_z = cameraEyepoint.m_z + 4.0f;
-//	baseMatrix.m_posit = location;
 	baseMatrix.m_posit.m_y = FindFloor (baseMatrix.m_posit.m_x, baseMatrix.m_posit.m_z); 
 	baseMatrix.m_posit.m_y += 5.0f;
 
@@ -1707,15 +1639,10 @@ void CompoundCollisionStruture ()
 		blockBox = new TorusPrimitive (nGrapphicWorld, matrix, A, C);
 
 		// create the compound collision
-		_ASSERT(0);
-		//collision = NewtonCreateCompoundCollision (nWorld, hullCount, conhexHullArray);
-		//
- 		////create the rigid body
-		//blockBoxBody = NewtonCreateBody (nWorld, collision);
+		collision = NewtonCreateCompoundCollision (nWorld, hullCount, conhexHullArray);
 
-//NewtonBodySetContinuousCollisionMode (blockBoxBody, 1);
-//dVector veloc (0, -500, 0);
-//NewtonBodySetVelocity (blockBoxBody, &veloc[0]);
+ 		//create the rigid body
+		blockBoxBody = NewtonCreateBody (nWorld, collision);
   
 		// save the pointer to the graphic object with the body.
 		NewtonBodySetUserData (blockBoxBody, blockBox);
@@ -1727,8 +1654,7 @@ void CompoundCollisionStruture ()
 		NewtonBodySetAutoFreeze (blockBoxBody, sleepMode);
 
 		// set a call back to catch the auto active state of this body
-		_ASSERT(0);
-		//NewtonBodySetAutoactiveCallback (blockBoxBody, TrackActivesBodies);
+		NewtonBodySetAutoactiveCallback (blockBoxBody, TrackActivesBodies);
 
 		// set a destructor for this rigid body
 		NewtonBodySetDestructorCallback (blockBoxBody, PhysicsBodyDestructor);
@@ -1761,155 +1687,5 @@ void CompoundCollisionStruture ()
 	for (i = 0; i < hullCount; i ++) {
 		NewtonReleaseCollision (nWorld, conhexHullArray[i]);
 	}
- }
-
-
-
- void CreateBuildingStruture_4 ()
- {
-	 //int i;
-	 //int j;
-	 dFloat gap;
-	 dFloat mass;
-
-	 // /////////////////////////////////////////////////////////////////////
-	 //
-	 // build a standard block stack of 20 * 3 boxes for a total of 60
-
-	 // set the Jenga rectangle using the golden ratio for base (1 * 0.5f, 1.62 * 0.5f, 2.0f)
-	 dVector blockBoxSize8 (0.03850f, 0.133580f, 0.1350f);
-	 dVector blockBoxSize7 (0.204302f, 0.172838f, 0.160245f);
-	 dVector blockBoxSize6 (0.473000f, 0.250530f, 0.1900f);
-	 dVector blockBoxSize5 (0.632000f, 0.369000f, 0.469151f);
-
-	 //dVector blockBoxSize8 (100.0f, 100.0f, 100.0f);
-	 //dVector blockBoxSize7 (100.0f, 100.0f, 100.0f);
-	 //dVector blockBoxSize6 (100.0f, 100.0f, 100.0f);
-	 //dVector blockBoxSize5 (100.0f, 100.0f, 100.0f);
-
-	 // create the stack
-	 dMatrix baseMatrix (GetIdentityMatrix());
-	 dMatrix matAssy5 = baseMatrix;
-	 matAssy5.m_posit = dVector(2.892221f, 0.008445f, 2.101425f);
-	 dMatrix matAssy6 = baseMatrix;
-	 matAssy6.m_posit = dVector(3.444721f, -0.014763f, 2.2360f);
-	 dMatrix matAssy7 = baseMatrix;
-	 matAssy7.m_posit = dVector(3.64757f, -0.008636f, 2.236059f);
-	 dMatrix matAssy8 = baseMatrix;
-	 matAssy8.m_posit = dVector(3.768971f, -0.019055f, 2.2360f);
-
-	 //dMatrix baseMatrix (GetIdentityMatrix());
-	 // dMatrix matAssy5 = baseMatrix;
-	 // matAssy5.m_posit = dVector(392.221f, 0.0f, 101.425f);
-	 // dMatrix matAssy6 = baseMatrix;
-	 // matAssy6.m_posit = dVector(944.721f, 0.0f, 236.0f);
-	 // dMatrix matAssy7 = baseMatrix;
-	 // matAssy7.m_posit = dVector(1147.57f, 0.0f, 236.059f);
-	 // dMatrix matAssy8 = baseMatrix;
-	 // matAssy8.m_posit = dVector(1268.971f, -0.0f, 236.0f);
-
-
-	 // for the elevation of the floor at the stack position
-	 baseMatrix.m_posit.m_x = cameraEyepoint.m_x + 12.0f;
-
-	 baseMatrix.m_posit.m_y = FindFloor (baseMatrix.m_posit.m_x, baseMatrix.m_posit.m_z); 
-	 //baseMatrix.m_posit.m_y += blockBoxSize.m_y / 2.0f;
-
-
-	 // set realistic mass and inertia matrix for each block
-	 mass = 1.0f;
-
-	 // create a 90 degree rotation matrix
-	 dMatrix rotMatrix (dgYawMatrix (3.1416f * 0.5f));
-
-	 // separate a bit the block alone the horizontal direction
-	 gap = 0.01f;
-
-	 dMatrix matrix(baseMatrix);
-	 NewtonBody * Assy5 = AddBlockObject (mass, matAssy5, blockBoxSize5, _BOX_PRIMITIVE);
-	 dFloat * pivot = new dFloat[3]; 
-	 pivot[0] = 2.798221f;
-	 pivot[1] = -0.079555f;
-	 pivot[2] = 2.0910f;
-	 dFloat * pin = new dFloat[3]; 
-	 pin[0] = 0.0f;
-	 pin[1] = 1.0f;
-	 pin[2] = 0.0f;
-	 _ASSERT(0);
-	 //jointAssy5 = new CustomHinge (pivot, pin, Assy5, NULL); //NewtonJoint* 
-	 
-
-	 NewtonBody * Assy6 = AddBlockObject (mass, matAssy6, blockBoxSize6, _BOX_PRIMITIVE);
-	 dFloat * pivot2 = new dFloat[3]; 
-	 pivot2[0] = 3.249219f;
-	 pivot2[1] = -0.019026f;
-	 pivot2[2] = 2.235000f;
-	 dFloat * pin2 = new dFloat[3]; 
-	 pin2[0] = 1.0f;
-	 pin2[1] = 0.0f;
-	 pin2[2] = 0.0f;
-	 //jointAssy6 = NewtonConstraintCreateHinge (nWorld, pivot2, pin2, Assy6,Assy5); //NewtonJoint* 
-	 _ASSERT(0);
-	 //jointAssyRigid2 = new CustomRigid(pivot2,Assy6,Assy5);
-
-/*
-	 NewtonBody * Assy7 = AddBlockObject (mass, matAssy7, blockBoxSize7, _BOX_PRIMITIVE);
-	 dFloat * pivot3 = new dFloat[3]; 
-	 pivot3[0] = 3.618219f;
-	 pivot3[1] = 0.110498f;
-	 pivot3[2] = 2.236000f;
-	 dFloat * pin3 = new dFloat[3]; 
-	 pin3[0] = 0.0f;
-	 pin3[1] = 1.0f;
-	 pin3[2] = 0.0f;
-	 //jointAssy7 = NewtonConstraintCreateHinge (nWorld, pivot3, pin3, Assy7, Assy6); //NewtonJoint* 
-	 jointAssyRigid = new CustomRigid(pivot3,Assy7, Assy6);
-
-
-	 NewtonBody * Assy8 = AddBlockObject (mass, matAssy8, blockBoxSize8, _BOX_PRIMITIVE);
-	 dFloat * pivot4 = new dFloat[3]; 
-	 pivot4[0] = 3.768955f;
-	 pivot4[1] = -0.019055f;
-	 pivot4[2] = 2.236000f;
-	 dFloat * pin4 = new dFloat[3]; 
-	 pin4[0] = 1.0f;
-	 pin4[1] = 0.0f;
-	 pin4[2] = 0.0f;
-//	 jointAssy8 = NewtonConstraintCreateHinge (nWorld, pivot4, pin4, Assy8, Assy7); //NewtonJoint* 
-	 jointAssy8 = new CustomHinge (pivot4, pin4, Assy8, Assy7); //NewtonJoint* 
-
-
-
-	 //NewtonUserJointSetRowStiffness(joint,1.0);
-	 //NewtonUserJointSetRowStiffness(joint2,1.0);
-	 //NewtonUserJointSetRowStiffness(joint3,1.0);
-	 //NewtonUserJointSetRowStiffness(joint5,1.0);
-	 //NewtonUserJointSetRowStiffness(joint4,1.0);
-	 //NewtonUserJointSetRowStiffness(joint6,1.0);
-	 //NewtonUserJointSetRowStiffness(joint7,1.0);
-	 //NewtonUserJointSetRowStiffness(joint8,1.0);
-	 //NewtonJointSetStiffness(jointAssy5,1.0f);
-	 //NewtonJointSetStiffness(jointAssy6,1.0f);
-	 //NewtonJointSetStiffness(jointAssy7,1.0f);
-	 //NewtonJointSetStiffness(jointAssy8,1.0f);
-
-	 NewtonBodySetJointRecursiveCollision(Assy8,0);
-	 NewtonBodySetJointRecursiveCollision(Assy7,0);
-	 NewtonBodySetJointRecursiveCollision(Assy6,0);
-	 NewtonBodySetJointRecursiveCollision(Assy5,0);
-
-	 dFloat tempMass;
-	 dFloat tempIxx;
-	 dFloat tempIyy;
-	 dFloat tempIzz;
-
-	 NewtonBodyGetMassMatrix (Assy5, &tempMass, &tempIxx, &tempIyy, &tempIzz);
-	 printf("Mass = %.3f       Inertia = %.3f %.3f %.3f \n",tempMass,tempIxx,tempIyy,tempIzz);
-	 NewtonBodyGetMassMatrix (Assy6, &tempMass, &tempIxx, &tempIyy, &tempIzz);
-	 printf("Mass = %.3f       Inertia = %.3f %.3f %.3f \n",tempMass,tempIxx,tempIyy,tempIzz);
-	 NewtonBodyGetMassMatrix (Assy7, &tempMass, &tempIxx, &tempIyy, &tempIzz);
-	 printf("Mass = %.3f       Inertia = %.3f %.3f %.3f \n",tempMass,tempIxx,tempIyy,tempIzz);
-	 NewtonBodyGetMassMatrix (Assy8, &tempMass, &tempIxx, &tempIyy, &tempIzz);
-	 printf("Mass = %.3f       Inertia = %.3f %.3f %.3f \n",tempMass,tempIxx,tempIyy,tempIzz);
-*/
+#endif
  }

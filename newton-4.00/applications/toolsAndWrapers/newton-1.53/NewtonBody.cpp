@@ -24,8 +24,6 @@
 #include "NewtonBody.h"
 #include "NewtonUtils.h"
 #include "newtonWorld.h"
-//#include "newtonMaterial.h"
-//#include "newtonBodyNotify.h"
 
 ndNewtonBodyNotify::ndNewtonBodyNotify(ndNewtonWorld* const world, NewtonBody* const owner)
 	:ndModelBodyNotify()
@@ -36,9 +34,10 @@ ndNewtonBodyNotify::ndNewtonBodyNotify(ndNewtonWorld* const world, NewtonBody* c
 	,m_capSpeed(ndFloat32(60.0f))
 	,m_capOmega(ndFloat32(75.0f))
 	,m_bodyIsInWorld(false)
+	,m_collideWithConnectedBodies(false)
 	,m_onDestroy(nullptr)
 	,m_applyTransform(nullptr)
-	,m_forceAndTorque(nullptr)
+	,m_onForceAndTorque(nullptr)
 {
 }
 
@@ -51,9 +50,10 @@ ndNewtonBodyNotify::ndNewtonBodyNotify(const ndNewtonBodyNotify& notify)
 	,m_capSpeed(notify.m_capSpeed)
 	,m_capOmega(notify.m_capOmega)
 	,m_bodyIsInWorld(false)
+	,m_collideWithConnectedBodies(notify.m_collideWithConnectedBodies)
 	,m_onDestroy(notify.m_onDestroy)
 	,m_applyTransform(notify.m_applyTransform)
-	,m_forceAndTorque(notify.m_forceAndTorque)
+	,m_onForceAndTorque(notify.m_onForceAndTorque)
 {
 }
 
@@ -113,9 +113,9 @@ void ndNewtonBodyNotify::OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 tim
 		}
 	}
 
-	if (m_forceAndTorque)
+	if (m_onForceAndTorque)
 	{
-		m_forceAndTorque(*m_owner);
+		m_onForceAndTorque(*m_owner);
 	}
 }
 
@@ -140,54 +140,6 @@ NewtonWorld* NewtonBodyGetWorld(const NewtonBody* bodyPtr)
 	body = (dgBody*)bodyPtr;
 	return (NewtonWorld*)body->GetWorld();
 }
-
-
-
-
-// Name: NewtonBodySetAutoactiveCallback 
-// Assign an activation/deativation callback function.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - pointer to the body.
-// *NewtonBodyActivationStatem callback - pointer to a function callback is used to be called when the body is about to be activated or deactivated.
-//
-// Return: Nothing.
-//
-// Remarks: this function sets an activation and deactivation callback with the body. The application can use this method to implement advanced scene management control.
-void NewtonBodySetAutoactiveCallback(const NewtonBody* bodyPtr, NewtonBodyActivationState callback)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	body->SetAutoactiveNotify((OnActivation)callback);
-}
-
-// Name: NewtonBodyGetForceAndTorqueCallback 
-// Return the pointer to the current force and torque call back function.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - pointer to the body.
-//
-// Return: pointer to the force call back.
-//
-// Remarks: This function can be used to concatenate different force calculation components making more modular the 
-// design of function components dedicated to apply special effect. For example a body may have a basic force a force that
-// only apply the effect of gravity, but that application can place a region in where there can be a fluid volume, or another gravity field.
-// we this function the application can read the correct function and save into a local variable, and set a new one.
-// this new function will firs call the save function pointer and upon return apply the correct effect.
-// this similar to the concept of virtual methods on objected oriented languages.
-//
-// Remarks: The function *NewtonApplyForceAndTorque callback* is called by the Newton Engine every time an active body is going to be simulated. 
-// The Newton Engine does not call the *NewtonApplyForceAndTorque callback* function for bodies that are inactive or have reached a state of stable equilibrium.
-// 
-// See also: NewtonBodyGetUserData, NewtonBodyGetUserData, NewtonBodySetForceAndTorqueCallback
-NewtonApplyForceAndTorque NewtonBodyGetForceAndTorqueCallback(const NewtonBody* bodyPtr)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	return (NewtonApplyForceAndTorque)body->GetExtForceAndTorqueCallback();
-}
-
-
 
 // Name: NewtonBodyGetInvMass 
 // Get the inverse mass matrix of a rigid body.
@@ -254,36 +206,6 @@ void NewtonBodySetMatrixRecursive(const NewtonBody* bodyPtr, const dFloat* matri
 	dgMatrix matrix(*((dgMatrix*)matrixPtr));
 
 	world->BodySetMatrix(body, matrix);
-}
-
-
-
-
-// Name: NewtonBodyGetCentreOfMass 
-// Get the relative position of the center of mass of a rigid body.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - pointer to the body.
-// *dFloat* *comPtr - pointer to an array of 3 floats to hold the relative offset of the center of mass of the body.
-//
-// Return: Nothing.
-//
-// Remarks: This function can be used to set the relative offset of the center of mass of a rigid body.
-// when a rigid body is crated the center of mass is set the the point c(0, 0, 0), and normally this is 
-// the best setting for a rigid body. However the are situations in which and object does not have symmetry or
-// simple some kind of special effect is desired, and this origin need to be changed.
-//
-// Remarks: This function can be used in conjunction with *NewtonConvexCollisionCalculateInertialMatrix* 
-//
-// See also: NewtonConvexCollisionCalculateInertialMatrix, NewtonBodySetCentreOfMass 
-void NewtonBodyGetCentreOfMass(const NewtonBody* bodyPtr, dFloat* comPtr)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	dgVector vector(body->GetCentreOfMass());
-	comPtr[0] = vector.m_x;
-	comPtr[1] = vector.m_y;
-	comPtr[2] = vector.m_z;
 }
 
 // Name: NewtonBodyAddBuoyancyForce 
@@ -492,81 +414,6 @@ int NewtonBodyGetContinuousCollisionMode(const NewtonBody* bodyPtr)
 }
 
 
-
-// Name: NewtonBodySetJointRecursiveCollision 
-// Set the collision state flag of this body when the body is connected to another body by a hierarchy of joints.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - pointer to the body.
-// *int* state - collision state. 1 indicates this body will collide with any linked body. 0 disable collision with body connected to this one by joints.
-//
-// Return: Nothing.
-//
-// Remarks: sometimes when making complicated arrangements of linked bodies it is possible the collision geometry of these bodies is in the way of the 
-// joints work space. This could be a problem for the normal operation of the joints. When this situation happens the application can determine which bodies
-// are the problem and disable collision for those bodies while they are linked by joints. For the collision to be disable for a pair of body, 
-// both bodies must have the collision disabled. If the joints connecting the bodies are destroyed these bodies become collidable automatically.
-// This feature can also be achieved by making special material for the whole configuration of jointed bodies, however it is a lot easier just to set collision disable
-// for jointed bodies.
-//
-// See also: NewtonBodySetMaterialGroupID
-void NewtonBodySetJointRecursiveCollision(const NewtonBody* bodyPtr, unsigned state)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	body->SetCollisionWithLinkedBodies(state ? true : false);
-}
-
-// Name: NewtonBodyGetJointRecursiveCollision 
-// Get the collision state flag when the body is joint.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - pointer to the body.
-//
-// Return: return the collision state flag for this body.
-//
-// See also: NewtonBodySetMaterialGroupID
-int NewtonBodyGetJointRecursiveCollision(const NewtonBody* bodyPtr)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	return body->GetCollisionWithLinkedBodies() ? 1 : 0;
-}
-
-
-// Name: NewtonBodyGetAutoFreeze 
-// Get the auto-activation state of the body.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - is the pointer to the body.
-// 
-// Return: Auto activation state: 1 = auto-activation on. 0 = auto-activation off.
-//
-// See also: NewtonBodySetAutoFreeze, NewtonBodyGetSleepingState
-int NewtonBodyGetAutoFreeze(const NewtonBody* bodyPtr)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	return body->GetAutoFreeze() ? 1 : 0;
-}
-
-
-// Name: NewtonBodyGetSleepingState
-// Return the sleep mode of a rigid body.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - is the pointer to the body.
-// 
-// Return: Sleep state: 1 = active. 0 = sleeping. 
-//
-// See also: NewtonBodySetAutoFreeze
-int NewtonBodyGetSleepingState(const NewtonBody* bodyPtr)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	return body->GetActive() ? 1 : 0;
-}
-
 // Name: NewtonBodySetFreezeTreshold 
 // Set the minimum values for velocity of a body that will be considered at rest.
 //
@@ -744,8 +591,6 @@ NewtonBody* NewtonCreateBody(const NewtonWorld* newtonWorld, const NewtonCollisi
 void NewtonDestroyBody(const NewtonWorld* newtonWorld, const NewtonBody* body)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-
-	ndAssert(0);
 	ndBodyKinematic* const kinBody = PointerCast<ndBodyKinematic, NewtonBody>(body);
 	ndBodyListView::ndNode* node = kinBody->GetSceneNode();
 	if (node)
@@ -772,7 +617,7 @@ void  NewtonBodySetUserData(const NewtonBody* bodyPtr, void* userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	bodyNotify->m_userData = ndWeakPtr<void>(userData);
 }
@@ -781,7 +626,7 @@ void NewtonBodySetMaterialGroupID(const NewtonBody* bodyPtr, int id)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	bodyNotify->m_materialGoupId = id;
 }
@@ -799,7 +644,7 @@ int NewtonBodyGetMaterialGroupID(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	return bodyNotify->m_materialGoupId;
 }
@@ -820,51 +665,10 @@ void* NewtonBodyGetUserData(const NewtonBody* bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
 	return *bodyNotify->m_userData;
 }
 
-// Name: NewtonBodyForEachPolygonDo 
-// Iterate thought polygon of the collision geometry of a body calling the function callback. 
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - is the pointer to the body.
-// *NewtonCollisionIterator* callback - application define callback 
-//
-// Return: nothing
-// 
-// Remarks: This function can be called by the application in order to show the collision geometry. The application should provide a pointer to the function *NewtonCollisionIterator*, 
-// Newton will convert the collision geometry into a polygonal mesh, and will call *callback* for every polygon of the mesh
-//
-// Remarks: this function affect severely the performance of Newton. The application should call this function only for debugging purpose
-//
-// Remarks: This function will ignore user define collision mesh
-// See also: NewtonWorldForEachBodyDo, NewtonWorldForEachBodyInAABBDo
-void NewtonBodyForEachPolygonDo(const NewtonBody* bodyPtr, NewtonCollisionIterator callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-
-	//dgBody* body;
-	//void* saveCallBack;
-	//dgCollision* collision;
-	//dgCollisionPolygonalSoup* treeCollision;
-	//
-	//body = (dgBody*)bodyPtr;
-	//collision = body->GetCollision();
-	//if (collision->IsType(dgCollisionPolygonalSoup::GetRttiType())) {
-	//	treeCollision = (dgCollisionPolygonalSoup*)collision;
-	//	saveCallBack = treeCollision->GetCallBack();
-	//	if (saveCallBack == NewtonCollisionTree::GetIntersectingPolygons) {
-	//		treeCollision->SetCallBack((void*)NewtonCollisionTree::IteratePolygonMesh);
-	//		collision->DebugCollision(*body, (DebugCollisionMeshCallback)callback);
-	//		treeCollision->SetCallBack(saveCallBack);
-	//	}
-	//}
-	//else {
-	//	collision->DebugCollision(*body, (DebugCollisionMeshCallback)callback);
-	//}
-}
 
 // Name: NewtonBodySetMatrix
 // Set the transformation matrix of a rigid body.
@@ -974,7 +778,7 @@ void  NewtonBodySetTransformCallback(const NewtonBody* bodyPtr, NewtonSetTransfo
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
-	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	bodyNotify->m_applyTransform = callback;
 }
@@ -1005,30 +809,6 @@ void NewtonBodySetDestructorCallback(const NewtonBody* const bodyPtr, NewtonBody
 	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	bodyNotify->m_onDestroy = callback;
-}
-
-/*!
-  Assign an event function for applying external force and torque to a rigid body.
-
-  @param *bodyPtr pointer to the body.
-  @param callback pointer to a function callback used to apply force and torque to a rigid body.
-
-  @return Nothing.
-
-  Before the *NewtonApplyForceAndTorque callback* is called for a body, Newton first clears the net force and net torque for the body.
-
-  The function *NewtonApplyForceAndTorque callback* is called by the Newton Engine every time an active body is going to be simulated.
-  The Newton Engine does not call the *NewtonApplyForceAndTorque callback* function for bodies that are inactive or have reached a state of stable equilibrium.
-
-  See also: ::NewtonBodyGetUserData, ::NewtonBodyGetUserData, ::NewtonBodyGetForceAndTorqueCallback
-*/
-void  NewtonBodySetForceAndTorqueCallback(const NewtonBody* const bodyPtr, NewtonApplyForceAndTorque callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
-	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
-	bodyNotify->m_forceAndTorque = callback;
 }
 
 
@@ -1271,12 +1051,41 @@ void NewtonBodyGetOmega(const NewtonBody* bodyPtr, dFloat* omega)
 // See also: NewtonWorldFreezeBody, NewtonWorldUnfreezeBody, NewtonBodyGetAutoFreeze, NewtonBodySetFreezeTreshold
 void NewtonBodySetAutoFreeze(const NewtonBody* bodyPtr, int state)
 {
-	//dgBody* body;
-	//body = (dgBody*)bodyPtr;
-	//body->SetAutoFreeze(state ? true : false);
 	TRACE_FUNCTION(__FUNCTION__);
 	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	body->SetAutoSleep(state ? true : false);
+}
+
+// Name: NewtonBodyGetSleepingState
+// Return the sleep mode of a rigid body.
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - is the pointer to the body.
+// 
+// Return: Sleep state: 1 = active. 0 = sleeping. 
+//
+// See also: NewtonBodySetAutoFreeze
+int NewtonBodyGetSleepingState(const NewtonBody* bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	return body->GetSleepState() ? 1 : 0;
+}
+
+// Name: NewtonBodyGetAutoFreeze 
+// Get the auto-activation state of the body.
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - is the pointer to the body.
+// 
+// Return: Auto activation state: 1 = auto-activation on. 0 = auto-activation off.
+//
+// See also: NewtonBodySetAutoFreeze, NewtonBodyGetSleepingState
+int NewtonBodyGetAutoFreeze(const NewtonBody* bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	return body->GetAutoSleep() ? 1 : 0;
 }
 
 // Name: NewtonBodySetLinearDamping 
@@ -1412,4 +1221,179 @@ void NewtonBodySetCentreOfMass(const NewtonBody* bodyPtr, const dFloat* comPtr)
 	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndVector vector(comPtr[0], comPtr[1], comPtr[2], ndFloat32(1.0f));
 	body->SetCentreOfMass(vector);
+}
+
+// Name: NewtonBodyGetCentreOfMass 
+// Get the relative position of the center of mass of a rigid body.
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - pointer to the body.
+// *dFloat* *comPtr - pointer to an array of 3 floats to hold the relative offset of the center of mass of the body.
+//
+// Return: Nothing.
+//
+// Remarks: This function can be used to set the relative offset of the center of mass of a rigid body.
+// when a rigid body is crated the center of mass is set the the point c(0, 0, 0), and normally this is 
+// the best setting for a rigid body. However the are situations in which and object does not have symmetry or
+// simple some kind of special effect is desired, and this origin need to be changed.
+//
+// Remarks: This function can be used in conjunction with *NewtonConvexCollisionCalculateInertialMatrix* 
+//
+// See also: NewtonConvexCollisionCalculateInertialMatrix, NewtonBodySetCentreOfMass 
+void NewtonBodyGetCentreOfMass(const NewtonBody* bodyPtr, dFloat* comPtr)
+{
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndVector vector(body->GetCentreOfMass());
+	comPtr[0] = vector.m_x;
+	comPtr[1] = vector.m_y;
+	comPtr[2] = vector.m_z;
+}
+
+/*!
+  Assign an event function for applying external force and torque to a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param callback pointer to a function callback used to apply force and torque to a rigid body.
+
+  @return Nothing.
+
+  Before the *NewtonApplyForceAndTorque callback* is called for a body, Newton first clears the net force and net torque for the body.
+
+  The function *NewtonApplyForceAndTorque callback* is called by the Newton Engine every time an active body is going to be simulated.
+  The Newton Engine does not call the *NewtonApplyForceAndTorque callback* function for bodies that are inactive or have reached a state of stable equilibrium.
+
+  See also: ::NewtonBodyGetUserData, ::NewtonBodyGetUserData, ::NewtonBodyGetForceAndTorqueCallback
+*/
+void  NewtonBodySetForceAndTorqueCallback(const NewtonBody* const bodyPtr, NewtonApplyForceAndTorque callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
+	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
+	bodyNotify->m_onForceAndTorque = callback;
+}
+
+// Name: NewtonBodyGetForceAndTorqueCallback 
+// Return the pointer to the current force and torque call back function.
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - pointer to the body.
+//
+// Return: pointer to the force call back.
+//
+// Remarks: This function can be used to concatenate different force calculation components making more modular the 
+// design of function components dedicated to apply special effect. For example a body may have a basic force a force that
+// only apply the effect of gravity, but that application can place a region in where there can be a fluid volume, or another gravity field.
+// we this function the application can read the correct function and save into a local variable, and set a new one.
+// this new function will firs call the save function pointer and upon return apply the correct effect.
+// this similar to the concept of virtual methods on objected oriented languages.
+//
+// Remarks: The function *NewtonApplyForceAndTorque callback* is called by the Newton Engine every time an active body is going to be simulated. 
+// The Newton Engine does not call the *NewtonApplyForceAndTorque callback* function for bodies that are inactive or have reached a state of stable equilibrium.
+// 
+// See also: NewtonBodyGetUserData, NewtonBodyGetUserData, NewtonBodySetForceAndTorqueCallback
+NewtonApplyForceAndTorque NewtonBodyGetForceAndTorqueCallback(const NewtonBody* bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
+	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
+	return bodyNotify->m_onForceAndTorque;
+}
+
+// Name: NewtonBodyForEachPolygonDo 
+// Iterate thought polygon of the collision geometry of a body calling the function callback. 
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - is the pointer to the body.
+// *NewtonCollisionIterator* callback - application define callback 
+//
+// Return: nothing
+// 
+// Remarks: This function can be called by the application in order to show the collision geometry. The application should provide a pointer to the function *NewtonCollisionIterator*, 
+// Newton will convert the collision geometry into a polygonal mesh, and will call *callback* for every polygon of the mesh
+//
+// Remarks: this function affect severely the performance of Newton. The application should call this function only for debugging purpose
+//
+// Remarks: This function will ignore user define collision mesh
+// See also: NewtonWorldForEachBodyDo, NewtonWorldForEachBodyInAABBDo
+void NewtonBodyForEachPolygonDo(const NewtonBody* bodyPtr, NewtonCollisionIterator callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	class ndForEachPolygonDo : public ndShapeDebugNotify
+	{
+		public:
+		ndForEachPolygonDo(const NewtonBody* body, NewtonCollisionIterator callback)
+			:ndShapeDebugNotify()
+			,m_body(body)
+			//,m_userData(userData)
+			,m_callback(callback)
+		{
+		}
+
+		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const) override
+		{
+			ndFixSizeArray<ndFloat32, 256> face;
+			for (ndInt32 i = 0; i < vertexCount; ++i)
+			{
+				face.PushBack(faceVertex[i].m_x);
+				face.PushBack(faceVertex[i].m_y);
+				face.PushBack(faceVertex[i].m_z);
+			}
+			//typedef void (*NewtonCollisionIterator) (const NewtonBody* body, int vertexCount, const dFloat* FaceArray, int faceId);
+			m_callback(m_body, vertexCount, &face[0], 0);
+		}
+
+		const NewtonBody* m_body;
+		NewtonCollisionIterator m_callback;
+	};
+	ndBodyKinematic* const body = PointerCast<ndBodyKinematic, NewtonBody>(bodyPtr);
+	const ndShapeInstance& instance = body->GetCollisionShape();
+	const ndMatrix matrix(instance.GetLocalMatrix() * body->GetMatrix());
+
+	ndForEachPolygonDo debugShape(bodyPtr, callback);
+	instance.DebugShape(matrix, debugShape);
+}
+
+
+// Name: NewtonBodySetJointRecursiveCollision 
+// Set the collision state flag of this body when the body is connected to another body by a hierarchy of joints.
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - pointer to the body.
+// *int* state - collision state. 1 indicates this body will collide with any linked body. 0 disable collision with body connected to this one by joints.
+//
+// Return: Nothing.
+//
+// Remarks: sometimes when making complicated arrangements of linked bodies it is possible the collision geometry of these bodies is in the way of the 
+// joints work space. This could be a problem for the normal operation of the joints. When this situation happens the application can determine which bodies
+// are the problem and disable collision for those bodies while they are linked by joints. For the collision to be disable for a pair of body, 
+// both bodies must have the collision disabled. If the joints connecting the bodies are destroyed these bodies become collidable automatically.
+// This feature can also be achieved by making special material for the whole configuration of jointed bodies, however it is a lot easier just to set collision disable
+// for jointed bodies.
+//
+// See also: NewtonBodySetMaterialGroupID
+void NewtonBodySetJointRecursiveCollision(const NewtonBody* bodyPtr, unsigned state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
+	bodyNotify->m_collideWithConnectedBodies = state ? true : false;
+}
+
+// Name: NewtonBodyGetJointRecursiveCollision 
+// Get the collision state flag when the body is joint.
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - pointer to the body.
+//
+// Return: return the collision state flag for this body.
+//
+// See also: NewtonBodySetMaterialGroupID
+int NewtonBodyGetJointRecursiveCollision(const NewtonBody* bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
+	return bodyNotify->m_collideWithConnectedBodies? 1 : 0;
 }

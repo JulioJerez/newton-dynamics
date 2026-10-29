@@ -300,37 +300,6 @@ void NewtonSetBodyLeaveWorldEvent(const NewtonWorld* newtonWorld, NewtonBodyLeav
 	world->SetLeavingWorldCallback ((OnLeavingWorldAction) callback);		
 }
 
-// Name: NewtonWorldForEachBodyDo 
-// Iterate thought every body in the world calling the function callback.
-//
-// Parameters:
-// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
-// *NewtonBodyIterator* callback - application define callback 
-//
-// Return: nothing
-// 
-// Remarks: The application can call this function to iterate thought every body in the world. 
-// the application should provide the function *NewtonBodyIterator callback* to be called by Newton for every body in the world 
-//
-// Remarks: this function affect severally the performance of Newton. The application should call this function only for debugging purpose
-// See also: NewtonBodyForEachPolygonDo, NewtonWorldForEachBodyInAABBDo
-void NewtonWorldForEachBodyDo(const NewtonWorld* newtonWorld, NewtonBodyIterator callback)
-{
-	Newton *world;
-	dgBody *body;
-
-	world = (Newton *) newtonWorld;
-
-	dgBodyMasterList &masterList = *world;
-	dgBodyMasterList::Iterator iter0 (masterList);
-	for (iter0.Begin(); iter0; iter0 ++) {
-		body = *iter0;
-		callback ((NewtonBody*) body);
-	}
-}
-
-
-
 // Name: NewtonWorldForEachBodyInAABBDo 
 // Iterate thought every body in the world that intersect the AABB calling the function callback.
 //
@@ -418,51 +387,6 @@ void* NewtonWorldGetUserData(const NewtonWorld* newtonWorld)
 	return world->GetUserData();
 }
 
-
-// Name: NewtonWorldRayCast 
-// Shoot a ray from p0 to p1 and call the application callback with each ray intersection.
-//
-// Parameters:
-// *const NewtonWorld* *newtonWorld - is the pointer to the world.
-// *const dFloat* *p0 - pointer to an array of at least three floats containing the beginning of the ray in global space.
-// *const dFloat* *p1 - pointer to an array of at least three floats containing the end of the ray in global space.
-// *NewtonWorldRayFilterCallback* filter - user define function to be called for each body hit during the ray scan.
-// *void* *userData - user data to be passed to the filter callback.
-// *NewtonWorldRayPrefilterCallback* prefilter - user define function to be called for each body before intesection.
-//
-// Return: nothing
-// 
-// Remarks: The ray cast function will call the application with each body intersecting the line segment. 
-// By writing the callback filter function in different ways the application can implement different flavors of ray casting. 
-// For example an all body ray cast can be easily implemented by having the filter function always returning 1.0, and copying each 
-// rigid body into an array of pointers; a closest hit ray cast can be implemented by saving the body with the smaller intersection 
-// parameter and returning the parameter t; and a report the first body hit can be implemented by having the filter function returning 
-// zero after the first call and saving the pointer to the rigid body.
-//
-// Remarks: The most common use for the ray cast function is the closest body hit, In this case it is important, for performance reasons, 
-// that the filter function returns the intersection parameter. If the filter function returns a value of zero the ray cast will terminate 
-// immediately.
-//
-// Remarks: if prefilter is not NULL, Newton will call the application right before executing the intersections between the ray and the primitive.
-// if the function returns zero the Newton will not raycast the primitive. passing a NULL pointer will raycast the. 
-// The application can use this implement faster or smarter filters when implementing complex logic, otherwise for normal all ray cast
-// this parameter could be NULL.
-//
-// Remarks: The ray cast function is provided as an utility function, this means that even thought the function is very high performance 
-// by function standards, it can not by batched and therefore it can not be an incremental function. For example the cost of calling 1000 
-// ray cast is 1000 times the cost of calling one ray cast. This is much different than the collision system where the cost of calculating 
-// collision for 1000 pairs in much, much less that the 1000 times the cost of one pair. Therefore this function must be used with care, 
-// as excessive use of it can degrade performance.
-void NewtonWorldRayCast(const NewtonWorld* newtonWorld, const dFloat* p0, const dFloat* p1, NewtonWorldRayFilterCallback filter, void* userData, NewtonWorldRayPrefilterCallback prefilter)
-{
-	Newton *world;
-	if (filter) {
-		dgVector pp0 (p0[0], p0[1], p0[2]);
-		dgVector pp1 (p1[0], p1[1], p1[2]);
-		world = (Newton *) newtonWorld;
-		world->RayCast (pp0, pp1, (OnRayCastAction) filter, (OnRayPrecastAction) prefilter, userData);
-	}
-}
 
 
 

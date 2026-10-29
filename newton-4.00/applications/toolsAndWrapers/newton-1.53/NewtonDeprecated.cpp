@@ -214,3 +214,19 @@ dFloat NewtonUniversalCalculateStopAlpha1(const NewtonJoint* joint, const Newton
 	ndAssert(0);
 	return ndFloat32(0.0f);
 }
+
+// Name: NewtonBodySetAutoactiveCallback 
+// Assign an activation/deativation callback function.
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - pointer to the body.
+// *NewtonBodyActivationStatem callback - pointer to a function callback is used to be called when the body is about to be activated or deactivated.
+//
+// Return: Nothing.
+//
+// Remarks: this function sets an activation and deactivation callback with the body. The application can use this method to implement advanced scene management control.
+void NewtonBodySetAutoactiveCallback(const NewtonBody* bodyPtr, NewtonBodyActivationState callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+}

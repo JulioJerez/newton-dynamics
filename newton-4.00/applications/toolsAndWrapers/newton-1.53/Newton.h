@@ -106,6 +106,8 @@ extern "C" {
 		const dFloat* vertex, int vertexstrideInBytes, 
 		int indexCount, const int* indexArray); 
 
+	typedef void (*NewtonPostUpdateCallback) (const NewtonWorld* const world, dFloat timestep);
+
 	typedef void (*NewtonBodyDestructor) (const NewtonBody* body);
 	typedef void (*NewtonApplyForceAndTorque) (const NewtonBody* body);
 	typedef void (*NewtonBodyActivationState) (const NewtonBody* body, unsigned state);
@@ -123,10 +125,8 @@ extern "C" {
 	typedef int  (*NewtonContactProcess) (const NewtonMaterial* material, const NewtonContact* contact);
 	typedef void (*NewtonContactEnd) (const NewtonMaterial* material);
 
-
 	typedef void (*NewtonBodyIterator) (const NewtonBody* body);
 	typedef void (*NewtonCollisionIterator) (const NewtonBody* body, int vertexCount, const dFloat* FaceArray, int faceId);
-
 
 	typedef void (*NewtonBallCallBack) (const NewtonJoint* ball);
 	typedef unsigned (*NewtonHingeCallBack) (const NewtonJoint* hinge, NewtonHingeSliderUpdateDesc* desc);
@@ -321,28 +321,27 @@ extern "C" {
 	NEWTON_API void NewtonWorldFreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* body);
 	NEWTON_API void NewtonWorldUnfreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* body);
 
+	NEWTON_API void NewtonWorldForEachBodyDo(const NewtonWorld* newtonWorld, NewtonBodyIterator callback);
+	NEWTON_API void NewtonWorldRayCast(const NewtonWorld* newtonWorld, const dFloat* p0, const dFloat* p1, NewtonWorldRayFilterCallback filter, void* userData, NewtonWorldRayPrefilterCallback prefilter);
+
+	NEWTON_API void NewtonWorldSetUserData(const NewtonWorld* newtonWorld, void* userData);
+	NEWTON_API void* NewtonWorldGetUserData(const NewtonWorld* newtonWorld);
+	NEWTON_API NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonSetPostUpdateCallback(const NewtonWorld* const newtonWorld, NewtonPostUpdateCallback callback);
+
 	//NEWTON_API void NewtonDestroyAllBodies(const NewtonWorld* newtonWorld);
 	//NEWTON_API void NewtonSetPlatformArchitecture(const NewtonWorld* newtonWorld, int mode);
 	//NEWTON_API void NewtonSetSolverModel(const NewtonWorld* newtonWorld, int model);
 	//NEWTON_API void NewtonSetFrictionModel(const NewtonWorld* newtonWorld, int model);
 	//NEWTON_API dFloat NewtonGetTimeStep(const NewtonWorld* newtonWorld);
 	//NEWTON_API void NewtonSetBodyLeaveWorldEvent(const NewtonWorld* newtonWorld, NewtonBodyLeaveWorld callback);
-
-	
-	//NEWTON_API void NewtonWorldForEachBodyDo(const NewtonWorld* newtonWorld, NewtonBodyIterator callback);
 	//NEWTON_API void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* newtonWorld, const dFloat* p0, const dFloat* p1, NewtonBodyIterator callback);
-	//
-	//NEWTON_API void NewtonWorldSetUserData(const NewtonWorld* newtonWorld, void* userData);
-	//NEWTON_API void* NewtonWorldGetUserData(const NewtonWorld* newtonWorld);
 	
-	//
-	//NEWTON_API void NewtonWorldRayCast(const NewtonWorld* newtonWorld, const dFloat* p0, const dFloat* p1, NewtonWorldRayFilterCallback filter, void* userData, NewtonWorldRayPrefilterCallback prefilter);
-	//
-	//// world utility functions
-	//// NEWTON_API int NewtonGetBodiesCount();
-	//// NEWTON_API int NewtonGetActiveBodiesCount();
-	//// NEWTON_API int NewtonGetActiveConstraintsCount();
-	//// NEWTON_API dFloat NewtonGetGlobalScale (const NewtonWorld* newtonWorld);
+	// world utility functions
+	// NEWTON_API int NewtonGetBodiesCount();
+	// NEWTON_API int NewtonGetActiveBodiesCount();
+	// NEWTON_API int NewtonGetActiveConstraintsCount();
+	// NEWTON_API dFloat NewtonGetGlobalScale (const NewtonWorld* newtonWorld);
 
 
 	// **********************************************************************************************
@@ -404,7 +403,6 @@ extern "C" {
 	NEWTON_API void  NewtonBodyGetAngularDamping(const NewtonBody* body, dFloat* vector);
 	NEWTON_API void  NewtonBodyGetAABB(const NewtonBody* body, dFloat* p0, dFloat* p1);
 	NEWTON_API void  NewtonBodyGetFreezeTreshold(const NewtonBody* body, dFloat* freezeSpeed2, dFloat* freezeOmega2);
-
 
 	NEWTON_API void  NewtonBodyAddBuoyancyForce(const NewtonBody* body, dFloat fluidDensity,
 		dFloat fluidLinearViscosity, dFloat fluidAngularViscosity,

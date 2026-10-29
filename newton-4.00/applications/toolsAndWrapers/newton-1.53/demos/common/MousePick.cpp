@@ -68,10 +68,11 @@ static void PhysicsApplyPickForce (const NewtonBody* body)
 	dVector omega;
 	dMatrix matrix;
 
-	_ASSERTE (chainForceCallBack);
-
 	// apply the thew body forces
-	chainForceCallBack (body);
+	if (chainForceCallBack)
+	{
+		chainForceCallBack(body);
+	}
 
 
 	// add the mouse pick penalty force and torque

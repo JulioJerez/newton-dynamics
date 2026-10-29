@@ -42,8 +42,15 @@ public:
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		//ndBodyKinematic* const kinBody0 = GetBody0();
-		//ndBodyKinematic* const kinBody1 = GetBody1();
+		ndBodyKinematic* const kinBody0 = GetBody0();
+		ndBodyKinematic* const kinBody1 = GetBody1();
+		ndNewtonBodyNotify* const bodyNotify0 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody0->GetNotifyCallback());
+		ndNewtonBodyNotify* const bodyNotify1 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody1->GetNotifyCallback());
+		if (bodyNotify0->m_collideWithConnectedBodies || bodyNotify1->m_collideWithConnectedBodies)
+		{
+			ndAssert(0);
+		}
+
 		//const ndNewtonBodyNotify* const notify0 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody0->GetNotifyCallback());
 		//const ndNewtonBodyNotify* const notify1 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody1->GetNotifyCallback());
 		//const ndNewtonMaterial* const material = PointerCast<ndNewtonMaterial, ndMaterial>(m_world->GetMaterial(notify0->m_materialGoupId, notify1->m_materialGoupId));
@@ -102,7 +109,7 @@ ndNewtonWorld::ndNewtonWorld()
 	,m_onCreateContact(nullptr)
 	,m_onDestroyContact(nullptr)
 {
-	SetSubSteps(2);
+	SetSubSteps(3);
 	//SetThreadCount(2);
 	SelectSolver(ndSimd8Solver);
 	SetContactCallback();
@@ -300,4 +307,142 @@ void NewtonWorldUnfreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* b
 	TRACE_FUNCTION(__FUNCTION__);
 	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	body->SetSleepState(false);
+}
+
+// Name: NewtonWorldRayCast 
+// Shoot a ray from p0 to p1 and call the application callback with each ray intersection.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the world.
+// *const dFloat* *p0 - pointer to an array of at least three floats containing the beginning of the ray in global space.
+// *const dFloat* *p1 - pointer to an array of at least three floats containing the end of the ray in global space.
+// *NewtonWorldRayFilterCallback* filter - user define function to be called for each body hit during the ray scan.
+// *void* *userData - user data to be passed to the filter callback.
+// *NewtonWorldRayPrefilterCallback* prefilter - user define function to be called for each body before intesection.
+//
+// Return: nothing
+// 
+// Remarks: The ray cast function will call the application with each body intersecting the line segment. 
+// By writing the callback filter function in different ways the application can implement different flavors of ray casting. 
+// For example an all body ray cast can be easily implemented by having the filter function always returning 1.0, and copying each 
+// rigid body into an array of pointers; a closest hit ray cast can be implemented by saving the body with the smaller intersection 
+// parameter and returning the parameter t; and a report the first body hit can be implemented by having the filter function returning 
+// zero after the first call and saving the pointer to the rigid body.
+//
+// Remarks: The most common use for the ray cast function is the closest body hit, In this case it is important, for performance reasons, 
+// that the filter function returns the intersection parameter. If the filter function returns a value of zero the ray cast will terminate 
+// immediately.
+//
+// Remarks: if prefilter is not NULL, Newton will call the application right before executing the intersections between the ray and the primitive.
+// if the function returns zero the Newton will not raycast the primitive. passing a NULL pointer will raycast the. 
+// The application can use this implement faster or smarter filters when implementing complex logic, otherwise for normal all ray cast
+// this parameter could be NULL.
+//
+// Remarks: The ray cast function is provided as an utility function, this means that even thought the function is very high performance 
+// by function standards, it can not by batched and therefore it can not be an incremental function. For example the cost of calling 1000 
+// ray cast is 1000 times the cost of calling one ray cast. This is much different than the collision system where the cost of calculating 
+// collision for 1000 pairs in much, much less that the 1000 times the cost of one pair. Therefore this function must be used with care, 
+// as excessive use of it can degrade performance.
+void NewtonWorldRayCast(const NewtonWorld* newtonWorld, const dFloat* p0, const dFloat* p1, NewtonWorldRayFilterCallback filter, void* userData, NewtonWorldRayPrefilterCallback prefilter)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	if (filter)
+	{
+		class WorldRayCast : public ndRayCastClosestHitCallback
+		{
+			public:
+			WorldRayCast(ndNewtonWorld* const world, void* const userData, NewtonWorldRayFilterCallback filter, NewtonWorldRayPrefilterCallback prefilter)
+				:ndRayCastClosestHitCallback()
+				,m_userData(userData)
+				,m_world(world)
+				,m_filter(filter)
+				,m_prefilter(prefilter)
+			{
+			}
+
+			ndUnsigned32 OnRayPrecastAction(const ndBody* const body, const ndShapeInstance* const instance) override
+			{
+				if (m_prefilter)
+				{
+					return m_prefilter(PointerCast<NewtonBody, ndBody>(body), PointerCast<NewtonCollision, ndShapeInstance>(instance), m_userData);
+				}
+				return true;
+			}
+
+			ndFloat32 OnRayCastAction(const ndContactPoint& contact, ndFloat32 intersetParam) override
+			{
+				if (m_filter)
+				{
+					intersetParam = m_filter(PointerCast<NewtonBody, ndBody>(contact.m_body0), &contact.m_normal[0], int (contact.m_shapeId0), m_userData, intersetParam);
+				}
+				return intersetParam;
+			}
+
+			void* m_userData;
+			ndNewtonWorld* m_world;
+			NewtonWorldRayFilterCallback m_filter;
+			NewtonWorldRayPrefilterCallback m_prefilter;
+		};
+
+		ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+		WorldRayCast rayCaster(world, userData, filter, prefilter);
+		const ndVector pp0(p0[0], p0[1], p0[2], ndFloat32(0.0f));
+		const ndVector pp1(p1[0], p1[1], p1[2], ndFloat32(0.0f));
+		world->RayCast(rayCaster, pp0, pp1);
+	}
+}
+
+// Name: NewtonWorldForEachBodyDo 
+// Iterate thought every body in the world calling the function callback.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
+// *NewtonBodyIterator* callback - application define callback 
+//
+// Return: nothing
+// 
+// Remarks: The application can call this function to iterate thought every body in the world. 
+// the application should provide the function *NewtonBodyIterator callback* to be called by Newton for every body in the world 
+//
+// Remarks: this function affect severally the performance of Newton. The application should call this function only for debugging purpose
+// See also: NewtonBodyForEachPolygonDo, NewtonWorldForEachBodyInAABBDo
+void NewtonWorldForEachBodyDo(const NewtonWorld* newtonWorld, NewtonBodyIterator callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	const ndBodyListView& bodyList = world->GetBodyList();
+
+	for (ndBodyListView::ndNode* node = bodyList.GetFirst()->GetNext(); node; node = node->GetNext())
+	{
+		ndSharedPtr<ndBody>& body = node->GetInfo();
+		callback(PointerCast<NewtonBody, ndBody>(*body));
+	}
+}
+
+void NewtonWorldSetUserData(const NewtonWorld* newtonWorld, void* userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	world->m_userData = userData;
+}
+
+void* NewtonWorldGetUserData(const NewtonWorld* newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	return *world->m_userData;
+}
+
+NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	return world->m_onPostUpdate;
+}
+
+void NewtonSetPostUpdateCallback(const NewtonWorld* const newtonWorld, NewtonPostUpdateCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	world->m_onPostUpdate = callback;
 }
