@@ -311,7 +311,6 @@ class NewtonProceduralCollition : public ndShapeStaticProceduralMesh
 		return ndFloat32 (1.2f);
 	}
 
-
 	ndWeakPtr<void> m_userData;
 	NewtonUserMeshCollisionRayHitCallback m_onRaycast;
 	NewtonUserMeshCollisionDestroyCallback m_onDestroy;

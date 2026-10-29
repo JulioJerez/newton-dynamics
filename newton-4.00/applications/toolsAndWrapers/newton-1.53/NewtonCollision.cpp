@@ -21,6 +21,201 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonBody.h"
+#include "NewtonUtils.h"
+#include "newtonWorld.h"
+
+class NewtonProceduralCollition : public ndShapeStaticProceduralMesh
+{
+	public:
+	D_CLASS_REFLECTION(NewtonProceduralCollitiuon, ndShapeStaticProceduralMesh)
+
+	typedef void (*NewtonUserMeshCollisionDestroyCallback) (void* const userData);
+	typedef dFloat(*NewtonUserMeshCollisionRayHitCallback) (NewtonUserMeshCollisionRayHitDesc* lineDescData);
+	typedef int (*NewtonUserMeshCollisionAABBTest) (void* const userData, const dFloat* const boxP0, const dFloat* const boxP1);
+	typedef void (*NewtonUserMeshCollisionCollideCallback) (NewtonUserMeshCollisionCollideDesc* collideDescData);
+	typedef int (*NewtonUserMeshCollisionGetFacesInAABB) (
+		void* const userData, const dFloat* const p0, const dFloat* const p1,
+		const dFloat** const vertexArray, int* const vertexCount, int* const vertexStrideInBytes,
+		const int* const indexList, int maxIndexCount, const int* const userDataList);
+
+	NewtonProceduralCollition(void* const userData, const ndVector& box0, const ndVector& box1)
+		:ndShapeStaticProceduralMesh()
+		,m_userData(userData)
+		,m_onRaycast(nullptr)
+		,m_onDestroy(nullptr)
+		,m_onGetFacePatch(nullptr)
+		,m_box0(box0)
+		,m_box1(box1)
+	{
+		m_boxSize = (m_box1 - m_box0) * ndVector::m_half;
+		m_boxOrigin = (m_box1 + m_box0) * ndVector::m_half;
+	}
+
+	virtual ~NewtonProceduralCollition() override
+	{
+		if (m_onDestroy)
+		{
+			m_onDestroy(PointerCast<void, void>(*m_userData));
+		}
+	}
+
+	virtual void CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const override
+	{
+		ndAssert(0);
+	}
+
+	virtual void GetFacesPatch(ndPatchMesh& patch) const override
+	{
+		ndAssert(0);
+#if 0
+		ndVector minBox;
+		ndVector maxBox;
+		if (m_onGetFacePatch && ndBoxBoxIntersection(minBox, maxBox, m_box0, m_box1, patch.m_boxP0, patch.m_boxP1))
+		{
+			NewtonUserMeshCollisionCollideDesc collideDescData;
+			//typedef struct NewtonUserMeshCollisionCollideDesc
+			//{
+			//	int	m_faceCount;                        	// the application should set here how many polygons intersect the query box
+			//	int m_vertexStrideInBytes;              	// the application should set here the size of each vertex
+			//	dFloat m_skinThickness;                     // this is the minimum skin separation specified by the material between these two colliding shapes
+			//	void* m_userData;                       	// user data passed to the collision geometry at creation time
+			//
+			//	NewtonBody* m_objBody;                  	// pointer to the colliding body
+			//	NewtonBody* m_polySoupBody;             	// pointer to the rigid body owner of this collision tree 
+			//	NewtonCollision* m_objCollision;			// collision shape of the colliding body, (no necessarily the collision of m_objBody)
+			//	NewtonCollision* m_polySoupCollision;		// collision shape of the collision tree, (no necessarily the collision of m_polySoupBody)
+			//
+			//	dFloat* m_vertex;                       	// the application should set here the pointer to the global vertex of the mesh. 
+			//	int* m_faceIndexCount;                  	// the application should set here the pointer to the vertex count of each face.
+			//	int* m_faceVertexIndex;                 	// the application should set here the pointer index array for each vertex on a face.
+			//	// the format of a face is I0, I1, I2, I3, ..., M, N, E0, E1, E2, ..., A
+			//	// I0, I1, I2, .. are the indices to the vertex, relative to m_vertex pointer
+			//	// M is the index to the material sub shape id
+			//	// N in the index to the vertex normal relative to m_vertex pointer
+			//	// E0, E1, E2, ... are the indices of the the face normal that is shared to that face edge, when the edge does not share a face normal then the edge index is set to index N, which the index to the face normal    
+			//	// A is and estimate of the largest diagonal of the face, this used internally as a hint to improve floating point accuracy and algorithm performance. 
+			//} NewtonUserMeshCollisionCollideDesc;
+
+			ndMemSet(PointerCast<char, NewtonUserMeshCollisionCollideDesc>(&collideDescData), char(0), sizeof(NewtonUserMeshCollisionCollideDesc));
+			for (ndInt32 i = 0; i < 4; ++i)
+			{
+				collideDescData.m_boxP0[i] = minBox[i];
+				collideDescData.m_boxP1[i] = maxBox[i];
+				collideDescData.m_boxDistanceTravel[i] = ndFloat32(0.0f);
+			}
+			collideDescData.m_threadNumber = 0;
+			collideDescData.m_userData = PointerCast<void, void>(*m_userData);
+			collideDescData.m_skinThickness = ndFloat32(0.0f);
+
+			collideDescData.m_objBody = nullptr;                  	// pointer to the colliding body
+			collideDescData.m_polySoupBody = nullptr;             	// pointer to the rigid body owner of this collision tree 
+			collideDescData.m_polySoupCollision = nullptr;		// collision shape of the collision tree, (no necessarily the collision of m_polySoupBody)
+			collideDescData.m_objCollision = PointerCast<NewtonCollision, ndShapeInstance>(patch.m_convexShapeInstance);
+			m_onGetFacePatch(&collideDescData, nullptr);
+			if (collideDescData.m_faceCount)
+			{
+				if (patch.m_queryType == patch.m_vertexListOnly)
+				{
+					patch.m_pointArray.PushBack(ndVector::m_zero);
+				}
+				else
+				{
+					// the application should set here the pointer index array for each vertex on a face.
+					//int* m_faceVertexIndex;                 	
+					//the format of a face is I0, I1, I2, I3, ..., M, N, E0, E1, E2, ..., A
+					//I0, I1, I2, .. are the indices to the vertex, relative to m_vertex pointer
+					//M is the index to the material sub shape id
+					//N in the index to the vertex normal relative to m_vertex pointer
+					//E0, E1, E2, ... are the indices of the the face normal that is shared to that face edge, when the edge does not share a face normal then the edge index is set to index N, which the index to the face normal    
+					//A is and estimate of the largest diagonal of the face, this used internally as a hint to improve floating point accuracy and algorithm performance. 
+
+					ndInt32 faceIndex = 0;
+					patch.m_vertexArrayHasDuplicated = true;
+					const ndFloat32* const vertex = collideDescData.m_vertex;
+					const ndInt32* const indexArray = collideDescData.m_faceVertexIndex;
+					const ndInt32* const facesIndexArray = collideDescData.m_faceIndexCount;
+					const ndInt32 stride = collideDescData.m_vertexStrideInBytes / sizeof(ndFloat32);
+					for (ndInt32 i = 0; i < collideDescData.m_faceCount; ++i)
+					{
+						const ndInt32 indexCount = facesIndexArray[i];
+						patch.m_faceArray.PushBack(indexCount);
+						patch.m_faceMaterialArray.PushBack(indexArray[faceIndex + indexCount]);
+
+						ndInt32 n = stride * indexArray[faceIndex + indexCount + 1];
+						const ndVector normal(vertex[n + 0], vertex[n + 1], vertex[n + 2], ndFloat32(0.0f));
+						patch.m_normalArray.PushBack(normal);
+						for (ndInt32 j = 0; j < indexCount; ++j)
+						{
+							ndInt32 k = stride * indexArray[faceIndex + j];
+							const ndVector point(vertex[k + 0], vertex[k + 1], vertex[k + 2], ndFloat32(1.0f));
+							patch.m_indexArray.PushBack(patch.m_pointArray.GetCount());
+							patch.m_pointArray.PushBack(point);
+						}
+						faceIndex += 2 * (indexCount + 1);
+					}
+				}
+			}
+		}
+#endif
+	}
+
+	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const
+	{
+		ndAssert(0);
+		return 0;
+#if 0
+		if (m_onRaycast)
+		{
+			//typedef struct NewtonUserMeshCollisionRayHitDesc
+			//{
+			//	dFloat m_p0[4];							// ray origin in collision local space
+			//	dFloat m_p1[4];                         // ray destination in collision local space   
+			//	dFloat m_normalOut[4];					// copy here the normal at the ray intersection
+			//	dLong m_userIdOut;						// copy here a user defined id for further feedback  
+			//	void* m_userData;                       // user data passed to the collision geometry at creation time
+			//} NewtonUserMeshCollisionRayHitDesc;
+
+			NewtonUserMeshCollisionRayHitDesc desc;
+			desc.m_userData = PointerCast<void, void>(*m_userData);
+			for (ndInt32 i = 0; i < 4; ++i)
+			{
+				desc.m_p0[i] = localP0[i];
+				desc.m_p1[i] = localP1[i];
+			}
+
+			ndFloat32 param = m_onRaycast(&desc);
+			if (param < ndFloat32(1.0f))
+			{
+				contactOut.m_shapeId0 = desc.m_userIdOut;
+				contactOut.m_normal.m_x = desc.m_normalOut[0];
+				contactOut.m_normal.m_y = desc.m_normalOut[1];
+				contactOut.m_normal.m_z = desc.m_normalOut[2];
+				contactOut.m_normal.m_w = ndFloat32(0.0f);
+			}
+			return param;
+		}
+		return ndFloat32(1.2f);
+#endif
+	}
+
+	ndWeakPtr<void> m_userData;
+	NewtonUserMeshCollisionRayHitCallback m_onRaycast;
+	NewtonUserMeshCollisionDestroyCallback m_onDestroy;
+	NewtonUserMeshCollisionCollideCallback m_onGetFacePatch;
+
+	//typedef void (*NewtonUserMeshCollisionGetCollisionInfo) (void* const userData, NewtonCollisionInfoRecord* const infoRecord);
+	//typedef int (*NewtonUserMeshCollisionAABBTest) (void* const userData, const dFloat* const boxP0, const dFloat* const boxP1);
+	//typedef void (*NewtonUserMeshCollisionCollideCallback) (NewtonUserMeshCollisionCollideDesc* const collideDescData, const void* const continueCollisionHandle);
+	//typedef void (*NewtonOnUserCollisionSerializationCallback) (void* const userData, NewtonSerializeCallback function, void* const serializeHandle);
+
+	ndVector m_box0;
+	ndVector m_box1;
+};
+
+
+#include "newtonStdafx.h"
+#include "Newton.h"
 #include "NewtonUtils.h"
 #include "newtonWorld.h"
 
@@ -437,3 +632,62 @@ void NewtonConvexHullModifierSetMatrix(const NewtonCollision* convexHullModifier
 	matrix.m_posit.m_w = ndFloat32(1.0f);
 	instance->SetLocalMatrix(matrix);
 }
+
+// Name: NewtonCreateUserMeshCollision 
+// Create a complex collision geometry to be controlled by the application.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
+// *const dFloat* *minBox - pointer to an array of at least three floats to hold minimum value for the box relative to the collision.
+// *const dFloat* *maxBox - pointer to an array of at least three floats to hold maximum value for the box relative to the collision.
+// *void* *userData - pointer to user data to be used as context for event callback.
+// *NewtonUserMeshCollisionCollideCallback* collideCallback - pointer to an event function for providing Newton with the polygon inside a given box region.
+// *NewtonUserMeshCollisionRayHitCallback* rayHitCallBack   - pointer to an event function for providing Newton with ray intersection information.
+// *NewtonUserMeshCollisionDestroyCallback* destroyCallback	- pointer to an event function for destroying any data allocated for use by the application.
+//
+// Return: Pointer to the user collision.
+//
+// Remarks: *UserMeshCollision* provides the application with a method of overloading the built-in collision system for background objects.
+// UserMeshCollision can be used for implementing collisions with height maps, collisions with BSP, and any other collision structure the application
+// supports and wishes to preserve.
+// However, *UserMeshCollision* can not take advantage of the efficient and sophisticated algorithms and data structures of the 
+// built-in *TreeCollision*. We suggest you experiment with both methods and use the method best suited to your situation.
+//
+// Remarks: When a *UserMeshCollision* is assigned to a body, the mass of the body is ignored in all dynamics calculations. 
+// This make the body behave as a static body.
+//
+// Remarks: The most significant bit of a triangle index list is use to indite to Newton that edge between
+// that index and next index is not part of collision calculation. 
+// The application can use this feature to mark concave and coplanar shared edges as non collidables.
+// for example is two triangles has indices 1, 2, 3  and 3, 2, 4 respective, if the two triangle are coplanar, then the application can mark edge 2, 3 as:
+// 1, 2 | 0x80000000, 3 | 0x80000000 for triangle 1 and 3 | 0x80000000, 2 | 0x80000000, 4 for the second triangle.
+// these feature greatly enhances the quality of contact generation meshes with flat and concave faces. 
+//
+// Remarks: Collision primitives are reference counted objects. The application should call *NewtonReleaseCollision* in order to release references to the object.
+// Neglecting to release references to collision primitives is a common cause of memory leaks.
+// Collision primitives can be reused with more than one body. This will reduce the amount of memory used be the engine, as well
+// as speed up some calculations.
+//
+// See also: NewtonReleaseCollision
+NewtonCollision* NewtonCreateUserMeshCollision(
+	const NewtonWorld* newtonWorld,
+	const dFloat* minBox,
+	const dFloat* maxBox,
+	void* userData,
+	NewtonUserMeshCollisionCollideCallback collideCallback,
+	NewtonUserMeshCollisionRayHitCallback rayHitCallBack,
+	NewtonUserMeshCollisionDestroyCallback destroyCallback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndVector p0(minBox[0], minBox[1], minBox[2], ndFloat32(1.0f));
+	const ndVector p1(maxBox[0], maxBox[1], maxBox[2], ndFloat32(1.0f));
+	NewtonProceduralCollition* const shape = new NewtonProceduralCollition(userData, p0, p1);
+
+	shape->m_onRaycast = rayHitCallBack;
+	shape->m_onDestroy = destroyCallback;
+	shape->m_onGetFacePatch = collideCallback;
+
+	ndShapeInstance* const instance = new ndShapeInstance(shape);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
+

@@ -208,46 +208,6 @@ void NewtonBodySetMatrixRecursive(const NewtonBody* bodyPtr, const dFloat* matri
 	world->BodySetMatrix(body, matrix);
 }
 
-// Name: NewtonBodyAddBuoyancyForce 
-// Add buoyancy force and torque for bodies immersed in a fluid.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - pointer to the body.
-// *dFloat* fluidDensity - fluid density.
-// *dFloat* fluidLinearViscosity - fluid linear viscosity (resistance to linear translation).
-// *dFloat* fluidAngularViscosity - fluid angular viscosity (resistance to rotation).
-// *const dFloat* *gravityVector - pointer to an array of floats containing the gravity vector.
-// *NewtonGetBuoyancyPlane* *buoyancyPlane - pointer to an array of at least 4 floats containing the plane equation of the surface of the fluid. This parameter can be NULL
-//
-// Return: Nothing.
-//
-// Remarks: This function is only effective when called from *NewtonApplyForceAndTorque callback*
-//
-// Remarks: This function adds buoyancy force and torque to a body when it is immersed in a fluid.
-// The force is calculated according to Archimedes’ Buoyancy Principle. When the parameter *buoyancyPlane* is set to NULL, the body is considered
-// to completely immersed in the fluid. This can be used to simulate boats and lighter than air vehicles etc..
-//
-// Remarks: If *buoyancyPlane* return 0 buoyancy calculation for this collision primitive is ignored, this could be used to filter bouyancy calculation 
-// of compound collision geometry with different IDs. 
-//
-// See also: NewtonConvexCollisionCalculateVolume
-void  NewtonBodyAddBuoyancyForce(
-	const NewtonBody* bodyPtr,
-	dFloat fluidDensity,
-	dFloat fluidLinearViscosity,
-	dFloat fluidAngularViscosity,
-	const dFloat* gravityVector,
-	NewtonGetBuoyancyPlane buoyancyPlane,
-	void* context)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-
-	dgVector gravity(gravityVector[0], gravityVector[1], gravityVector[2]);
-	body->AddBuoyancyForce(fluidDensity, fluidLinearViscosity, fluidAngularViscosity, gravity, (GetBuoyancyPlane)buoyancyPlane, context);
-}
-
-
 // Name: NewtonBodySetCollision 
 // Assign a collision primitive to the body.
 //
@@ -1336,4 +1296,83 @@ void NewtonAddBodyImpulse(const NewtonBody* bodyPtr, const dFloat* pointDeltaVel
 	//dgVector v(pointDeltaVeloc);
 	//
 	//world->AddBodyImpulse(body, v, p);
+}
+
+// Name: NewtonBodyAddBuoyancyForce 
+// Add buoyancy force and torque for bodies immersed in a fluid.
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - pointer to the body.
+// *dFloat* fluidDensity - fluid density.
+// *dFloat* fluidLinearViscosity - fluid linear viscosity (resistance to linear translation).
+// *dFloat* fluidAngularViscosity - fluid angular viscosity (resistance to rotation).
+// *const dFloat* *gravityVector - pointer to an array of floats containing the gravity vector.
+// *NewtonGetBuoyancyPlane* *buoyancyPlane - pointer to an array of at least 4 floats containing the plane equation of the surface of the fluid. This parameter can be NULL
+//
+// Return: Nothing.
+//
+// Remarks: This function is only effective when called from *NewtonApplyForceAndTorque callback*
+//
+// Remarks: This function adds buoyancy force and torque to a body when it is immersed in a fluid.
+// The force is calculated according to Archimedes’ Buoyancy Principle. When the parameter *buoyancyPlane* is set to NULL, the body is considered
+// to completely immersed in the fluid. This can be used to simulate boats and lighter than air vehicles etc..
+//
+// Remarks: If *buoyancyPlane* return 0 buoyancy calculation for this collision primitive is ignored, this could be used to filter bouyancy calculation 
+// of compound collision geometry with different IDs. 
+//
+// See also: NewtonConvexCollisionCalculateVolume
+void  NewtonBodyAddBuoyancyForce(
+	const NewtonBody* bodyPtr,
+	dFloat fluidDensity,
+	dFloat fluidLinearViscosity,
+	dFloat fluidAngularViscosity,
+	const dFloat* gravityVector,
+	NewtonGetBuoyancyPlane buoyancyPlane,
+	void* context)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = PointerCast<ndBodyKinematic, NewtonBody>(bodyPtr);
+
+	ndPlane plane;
+	const ndMatrix matrix(body->GetMatrix());
+	ndInt32 hasPlane = buoyancyPlane (0, context, &matrix[0][0], &plane.m_x);
+//hasPlane = 0;
+	if (hasPlane)
+	{
+		ndVector centerOfPreasure(ndVector::m_zero);
+		const ndShapeInstance& instance = body->GetCollisionShape();
+		ndFloat32 volume = instance.CalculateBuoyancyCenterOfPresure(centerOfPreasure, matrix, plane);
+		if (volume > 0.0f)
+		{
+			//ndFloat32 FLUID_VISCOSITY = ndFloat32 (0.995f);
+			//const ndFloat32 viscousDrag = FLUID_VISCOSITY;
+
+			//const ndShapeMaterial material(collision.GetMaterial());
+			//ndFloat32 density = material.m_userParam[ndDemoContactCallback::m_density].m_floatData;
+			ndFloat32 density = fluidDensity;
+			ndFloat32 desplacedVolume = density * instance.GetVolume();
+
+			ndVector mass(body->GetMassMatrix());
+			ndVector bouyancyForce(gravityVector[0], gravityVector[1], gravityVector[2], ndFloat32(0.0f));
+			ndVector cog(body->GetCentreOfMass());
+			centerOfPreasure -= matrix.TransformVector(cog);
+
+			ndFloat32 displacedMass = mass.m_w * volume / desplacedVolume;
+			bouyancyForce = bouyancyForce.Scale(-displacedMass);
+
+			// now with the mass and center of mass of the volume under water, calculate buoyancy force and torque
+			ndVector bouyancyTorque (centerOfPreasure.CrossProduct(bouyancyForce));
+
+			body->SetForce(body->GetForce() + bouyancyForce);
+			body->SetTorque(body->GetTorque() + bouyancyTorque);
+
+			// apply a fake viscous drag to damp the under water motion 
+			ndVector omega(body->GetOmega());
+			ndVector veloc(body->GetVelocity());
+			omega = omega.Scale(fluidAngularViscosity);
+			veloc = veloc.Scale(fluidLinearViscosity);
+			body->SetOmega(omega);
+			body->SetVelocity(veloc);
+		}
+	}
 }

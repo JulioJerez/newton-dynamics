@@ -29,7 +29,7 @@ static dSceneNode* nGrapphicWorld;
 //#define OBJEST_COUNT	1
 
 
-#define GRAVITY		   -50.0f
+#define GRAVITY		   -10.0f
 #define CAMERA_SPEED	24.0f
 
 #define SPACING			60.0f
