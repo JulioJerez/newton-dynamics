@@ -354,3 +354,9 @@ void NewtonSliderSetLimits(const NewtonJoint* const joint, dFloat minPosit, dFlo
 	userJoint->SetLimits(minPosit, maxPosit);
 }
 
+void NewtonSliderSetAsMotor(const NewtonJoint* const joint, dFloat speed, dFloat maxForce)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
+	userJoint->SetAsMotor(speed, maxForce);
+}

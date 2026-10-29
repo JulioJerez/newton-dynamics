@@ -26,9 +26,6 @@ CharacterController::CharacterController (dSceneNode* parent, NewtonWorld* nWorl
 	:SpherePrimitive (parent, GetIdentityMatrix(), size.m_x * 0.5f, size.m_y * 0.5f, size.m_z * 0.5f), 
 	m_size (size.Scale (0.5f)),	m_forceVector (0.0f, 0.0f, 0.0f)
 {							    
-	NewtonCollision* sphere;
-
-
 	// catch the world
 	m_myWorld = nWorld;
 
@@ -58,7 +55,7 @@ CharacterController::CharacterController (dSceneNode* parent, NewtonWorld* nWorl
 	location.m_posit.m_y = FindFloor (nWorld, position, 100) + radius.m_y;
 
 	// place a sphere at the center
-	sphere = NewtonCreateSphere (nWorld, radius.m_x, radius.m_y, radius.m_z, NULL); 
+	NewtonCollision* sphere = NewtonCreateSphere (nWorld, radius.m_x, radius.m_y, radius.m_z, NULL);
 
 	// wrap the character collision under a transform, modifier for tunneling trught walls avoidance
 	m_myCollision = NewtonCreateConvexHullModifier (nWorld, sphere);
@@ -312,8 +309,8 @@ void CharacterController::OnApplyForceAndTorque ()
 	// rotate the force direction to align with the camera
 	heading = m_matrix.RotateVector (m_forceVector);
 	heading = heading.Scale (1.0f / dSqrt ((heading % heading) + 1.0e-6f));
-
 	force += (heading.Scale (mass * 30.0f) - heading.Scale (2.0f * (velocity % heading))); 
+
 	NewtonBodySetForce (m_myBody, &force.m_x);
 
 	// estimate the final horizontal translation for to next force and velocity
@@ -353,10 +350,10 @@ void CharacterController::OnApplyForceAndTorque ()
 	steerAngle = dAsin (steerAngle); 
 	NewtonBodyGetOmega(m_myBody, &omega.m_x);
 
-	dVector torque (0.0f, 0.5f * Iyy * (steerAngle * timestepInv - omega.m_y) * timestepInv, 0.0f);
-//	torque = dVector (0.0f, Iyy * (20.0f * steerAngle - 5.0f * omega.m_y), 0.0f);  
+	dFloat w = steerAngle * timestepInv - omega.m_y;
+	dFloat t = 0.5f * Iyy * w * timestepInv;
+	dVector torque (0.0f, t, 0.0f);
 	NewtonBodySetTorque (m_myBody, &torque.m_x);
-
 
 	// assume the character is on the air. this variable will be set to false if the contact detect 
 	//the character is landed 

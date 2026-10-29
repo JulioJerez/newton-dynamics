@@ -540,6 +540,7 @@ extern "C" {
 	NEWTON_API dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* hinge, const NewtonHingeSliderUpdateDesc* desc, dFloat angle);
 
 	// new for 1.54
+	NEWTON_API void NewtonHingeSetAsMotor(const NewtonJoint* const hinge, dFloat speed, dFloat maxTorque);
 	NEWTON_API void NewtonHingeEnableLimits(const NewtonJoint* const hinge, int state);
 	NEWTON_API void NewtonHingeSetLimits(const NewtonJoint* const hinge, dFloat minTwistAngle, dFloat maxTwistAngle);
 
@@ -558,6 +559,7 @@ extern "C" {
 	NEWTON_API dFloat NewtonSliderCalculateStopAccel(const NewtonJoint* slider, const NewtonHingeSliderUpdateDesc* desc, dFloat position);
 
 	// new for 1.54
+	NEWTON_API void NewtonSliderSetAsMotor(const NewtonJoint* const slider, dFloat speed, dFloat maxForce);
 	NEWTON_API void NewtonSliderEnableLimits(const NewtonJoint* const slider, int state);
 	NEWTON_API void NewtonSliderSetLimits(const NewtonJoint* const slider, dFloat minPosit, dFloat maxPosit);
 

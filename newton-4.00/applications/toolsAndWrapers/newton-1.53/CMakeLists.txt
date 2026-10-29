@@ -88,6 +88,6 @@ if (NEWTON_BUILD_DEMOS)
 	add_subdirectory(demos/tutorial_04_IntroductionToMaterials)
 	add_subdirectory(demos/tutorial_05_UsingJoints)
 	add_subdirectory(demos/tutorial_06_UtilityFuntionality)
-	#add_subdirectory(demos/tutorial_07_CharaterController)
-	
+	add_subdirectory(demos/tutorial_07_CharaterController)
+	#add_subdirectory(demos/tutorial_08_HeightFieldCollision)
 endif()

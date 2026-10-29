@@ -353,67 +353,6 @@ int NewtonBodyGetMaterialGroupID(const NewtonBody* bodyPtr)
 	return body->GetGroupID();
 }
 
-// Name: NewtonBodySetContinuousCollisionMode 
-// Set the continuous collision state mode for this rigid body.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - pointer to the body.
-// *int* state - collision state. 1 indicates this body may tunnel through other objects while moving at high speed. 0 ignore high speed collision checks.
-//
-// Return: Nothing.
-//
-// Remarks: continue collision mode enable allow the engine to predict colliding contact on rigid bodies
-// Moving at high speed of subject to strong forces.
-//
-// Remarks: continue collision mode does not prevent rigid bodies from inter penetration instead it prevent bodies from 
-// passing trough each others by extrapolating contact points when the bodies normal contact calculation determine the bodies are not colliding. 
-//
-// Remarks: for performance reason the bodies angular velocities is only use on the broad face of the collision, 
-// but not on the contact calculation. 
-// 
-// Remarks: continue collision does not perform back tracking to determine time of contact, instead it extrapolate contact by incrementally 
-// extruding the collision geometries of the two colliding bodies along the linear velocity of the bodies during the time step, 
-// if during the extrusion colliding contact are found, a collision is declared and the normal contact resolution is called. 
-//
-// Remarks: for continue collision to be active the continue collision mode must on the material pair of the colliding bodies as well as on at least one of the two colliding bodies.
-//
-// Remarks: Because there is penalty of about 40% to 80% depending of the shape complexity of the collision geometry, this feature is set 
-// off by default. It is the job of the application to determine what bodies need this feature on. Good guidelines are: very small objects, 
-// and bodies that move a height speed.  
-// 
-// See also: NewtonBodyGetContinuousCollisionMode, NewtonBodySetContinuousCollisionMode
-void NewtonBodySetContinuousCollisionMode(const NewtonBody* bodyPtr, unsigned state)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	body->SetContinuesCollisionMode(state ? true : false);
-}
-
-
-// Name: NewtonBodyGetContinuousCollisionMode 
-// Get the continuous collision state mode for this rigid body.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - pointer to the body.
-//
-// Return: Nothing.
-//
-// Remarks: 
-//Remark: Because there is there is penalty of about 3 to 5 depending of the shape complexity of the collision geometry, this feature is set 
-//off by default. It is the job of the application to determine what bodies need this feature on. Good guidelines are: very small objects, 
-//and bodies that move a height speed.  
-//
-//Remark: this feature is currently disabled:
-//
-// See also: NewtonBodySetContinuousCollisionMode, NewtonBodySetContinuousCollisionMode
-int NewtonBodyGetContinuousCollisionMode(const NewtonBody* bodyPtr)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	return body->GetContinuesCollisionMode() ? 1 : false;
-}
-
-
 // Name: NewtonBodySetFreezeTreshold 
 // Set the minimum values for velocity of a body that will be considered at rest.
 //

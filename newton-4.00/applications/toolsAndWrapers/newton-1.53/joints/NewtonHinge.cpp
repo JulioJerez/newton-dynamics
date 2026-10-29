@@ -304,3 +304,9 @@ void NewtonHingeSetLimits(const NewtonJoint* const joint, dFloat minTwistAngle, 
 	userJoint->SetLimits(minTwistAngle, maxTwistAngle);
 }
 
+void NewtonHingeSetAsMotor(const NewtonJoint* const joint, dFloat speed, dFloat maxTorque)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	userJoint->SetAsMotor(speed, maxTorque);
+}

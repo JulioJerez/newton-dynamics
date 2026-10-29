@@ -23,9 +23,6 @@
 #include "Newton.h"
 #include "NewtonUtils.h"
 #include "newtonWorld.h"
-//#include "newtonMaterial.h"
-//#include "newtonBodyNotify.h"
-
 
 // Name: NewtonReleaseCollision 
 // Release a reference from this collision object returning control to Newton.
@@ -262,48 +259,6 @@ NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* newtonWorld, dFl
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
-// Name: NewtonCreateConvexHull 
-// Create a ConvexHull primitive for collision from a cloud of points.
-//
-// Parameters:
-// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
-// *dFloat* count  - number of consecutive point to follow must be at least 4.  
-// *const dFloat* vertexCloud - pointer to and array of point.  
-// *dFloat* strideInBytes - vertex size in bytes, must be at least 12.  
-// *const dFloat* *offsetMatrix - pointer to an array of 16 floats containing the offset matrix of the box relative to the body. If this parameter is NULL, then the primitive is centered at the origin of the body.
-// 
-// Return: Pointer to the box
-//
-// Remarks: Convex hulls are the solution to collision primitive that can not be easily represented by and implicit solid.
-// The implicit solid primitives (spheres, cubes, cylinders, capsules, cones, etc.), have constant time complexity for contact calculation
-// and are also extremely efficient on memory usage, therefore the application get perfect smooth behavior.
-// However for cases where the shape is too difficult or a polygonal representation is desired convex hulls are the ultimate solution. 
-// For example it is a mistake to model a 10000 point sphere as a convex hull, when the perfect sphere is available.
-//
-// Remarks: There is not upper limit as to how many vertex the application can pass to Newton to make a hull shape, 
-// however for performance and memory usage concern it is the application responsibility to keep the max vertex at the possible minimum. 
-// The minimum number of vertex should be equal or larger than 4 and it is the application responsibility that the points are part of a solid geometry. 
-// Unpredictable results will occur if all points happen to be collinear or coplanar.  
-//
-// Remarks: Collision primitives are reference counted objects. The application should call *NewtonReleaseCollision* in order to release references to the object.
-// Neglecting to release references to collision primitives is a common cause of memory leaks.
-// Collision primitives can be reused with more than one body. This will reduce the amount of memory used be the engine, as well
-// as speed up some calculations.
-//
-// See also: NewtonReleaseCollision, NewtonCreateConvexHullModifier
-NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* newtonWorld, int count, const dFloat* vertexCloud, int strideInBytes, const dFloat* offsetMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndMatrix matrix(ndGetIdentityMatrix());
-	if (offsetMatrix)
-	{
-		matrix = ndMatrix(offsetMatrix);
-	}
-	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeConvexHull(count, strideInBytes, ndFloat32 (1.0e-3f), vertexCloud));
-	instance->SetLocalMatrix(matrix);
-	ndShapeMaterial material = instance->GetMaterial();
-	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
-}
 
 /*!
   Calculate an axis-aligned bounding box for this collision, the box is calculated relative to *offsetMatrix*.
@@ -358,4 +313,127 @@ void NewtonConvexCollisionCalculateInertialMatrix(const NewtonCollision* const c
 	origin[0] = tmpInertia[3][0];
 	origin[1] = tmpInertia[3][1];
 	origin[2] = tmpInertia[3][2];
+}
+
+// Name: NewtonCreateConvexHull 
+// Create a ConvexHull primitive for collision from a cloud of points.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
+// *dFloat* count  - number of consecutive point to follow must be at least 4.  
+// *const dFloat* vertexCloud - pointer to and array of point.  
+// *dFloat* strideInBytes - vertex size in bytes, must be at least 12.  
+// *const dFloat* *offsetMatrix - pointer to an array of 16 floats containing the offset matrix of the box relative to the body. If this parameter is NULL, then the primitive is centered at the origin of the body.
+// 
+// Return: Pointer to the box
+//
+// Remarks: Convex hulls are the solution to collision primitive that can not be easily represented by and implicit solid.
+// The implicit solid primitives (spheres, cubes, cylinders, capsules, cones, etc.), have constant time complexity for contact calculation
+// and are also extremely efficient on memory usage, therefore the application get perfect smooth behavior.
+// However for cases where the shape is too difficult or a polygonal representation is desired convex hulls are the ultimate solution. 
+// For example it is a mistake to model a 10000 point sphere as a convex hull, when the perfect sphere is available.
+//
+// Remarks: There is not upper limit as to how many vertex the application can pass to Newton to make a hull shape, 
+// however for performance and memory usage concern it is the application responsibility to keep the max vertex at the possible minimum. 
+// The minimum number of vertex should be equal or larger than 4 and it is the application responsibility that the points are part of a solid geometry. 
+// Unpredictable results will occur if all points happen to be collinear or coplanar.  
+//
+// Remarks: Collision primitives are reference counted objects. The application should call *NewtonReleaseCollision* in order to release references to the object.
+// Neglecting to release references to collision primitives is a common cause of memory leaks.
+// Collision primitives can be reused with more than one body. This will reduce the amount of memory used be the engine, as well
+// as speed up some calculations.
+//
+// See also: NewtonReleaseCollision, NewtonCreateConvexHullModifier
+NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* newtonWorld, int count, const dFloat* vertexCloud, int strideInBytes, const dFloat* offsetMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(ndGetIdentityMatrix());
+	if (offsetMatrix)
+	{
+		matrix = ndMatrix(offsetMatrix);
+	}
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeConvexHull(count, strideInBytes, ndFloat32(1.0e-3f), vertexCloud));
+	instance->SetLocalMatrix(matrix);
+	ndShapeMaterial material = instance->GetMaterial();
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
+
+// Name: NewtonCreateConvexHullModifier
+// Create a collision modifier for any convex collision part.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
+// *NewtonCollision* convexHullCollision.
+// 
+// Return: Pointer to the collision modifier
+//
+// Remarks: The matrix should be arranged in row-major order (this is the way directX stores matrices).
+// a collision modifier can take any type of transformation matrix, as long as the matrix can be invertible by straight
+// Gaussian elimination process. Typical uses are non-uniform scaling, translation and skewing.
+//
+// Remarks: Collision modifier can be used by the application to achieve effects like animating collision geometry at run time, 
+// however care must taken as animation of a collision primitive could result in unwanted penetrations. 
+//
+// See also: NewtonReleaseCollision, NewtonConvexHullModifierSetMatrix, NewtonConvexHullModifierGetMatrix
+NewtonCollision* NewtonCreateConvexHullModifier(const NewtonWorld* newtonWorld, const NewtonCollision* convexHullCollision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(convexHullCollision);
+	ndShapeInstance* const clonedInstance = new ndShapeInstance(*instance, instance->m_shape);
+	return PointerCast<NewtonCollision, ndShapeInstance>(clonedInstance);
+}
+
+// Name: NewtonConvexHullModifierGetMatrix
+// Get the transformation matrix of a convex hull modifier collision.
+//
+// Parameters:
+// *const NewtonCollision* *convexHullModifier - pointer to the body.
+// *dFloat* *matrixPtr - pointer to an array of 16 floats containing the global matrix of the collision modifier.
+//
+// Return: Nothing.
+//
+// Remarks: The matrix should be arranged in row-major order (this is the way directX stores matrices).
+// a collision modifier can take any type of transformation matrix, as long as the matrix can be invertible by straight
+// Gaussian elimination process. Typical uses are non-uniform scaling, translation and skewing.
+//
+// Remarks: Collision modifier can be used by the application to achieve effects like animating collision geometry at run time, 
+// however care must taken as animation of a collision primitive could result into unwanted penetrations. 
+//
+// See also: NewtonCreateConvexHullModifier, NewtonConvexHullModifierSetMatrix
+void NewtonConvexHullModifierGetMatrix(const NewtonCollision* convexHullModifier, dFloat* matrixPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(convexHullModifier);
+	ndMatrix matrix(instance->GetLocalMatrix());
+	ndMemCpy(matrixPtr, &matrix[0][0], sizeof(ndMatrix) / sizeof(ndFloat32));
+}
+
+// Name: NewtonConvexHullModifierSetMatrix
+// Set the transformation matrix of a convex hull modifier collision.
+//
+// Parameters:
+// *const NewtonCollision* *convexHullModifier - pointer to the body.
+// *const dFloat* *matrixPtr - pointer to an array of 16 floats containing the global matrix of the collision modifier.
+//
+// Return: Nothing.
+//
+// Remarks: The matrix should be arranged in row-major order (this is the way directX stores matrices).
+// a collision modifier can take any type of transformation matrix, as long as the matrix can be invertible by straight
+// Gaussian elimination process. Typical uses are non-uniform scaling, translation and skewing.
+//
+// Remarks: Collision modifier can be used by the application to achieve effects like animating collision geometry at run time, 
+// however care must taken as animation of a collision primitive could result into unwanted penetrations. 
+//
+// See also: NewtonCreateConvexHullModifier, NewtonConvexHullModifierGetMatrix
+void NewtonConvexHullModifierSetMatrix(const NewtonCollision* convexHullModifier, const dFloat* matrixPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(convexHullModifier);
+	ndMatrix matrix(GetMatrix(matrixPtr));
+
+	matrix.m_front.m_w = ndFloat32(0.0f);
+	matrix.m_up.m_w = ndFloat32(0.0f);
+	matrix.m_right.m_w = ndFloat32(0.0f);
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+	instance->SetLocalMatrix(matrix);
 }
