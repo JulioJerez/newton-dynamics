@@ -503,42 +503,6 @@ void NewtonBodyGetAABB(const NewtonBody* bodyPtr, dFloat* p0, dFloat* p1)
 	p1[2] = vector1.m_z;
 
 }
-
-
-// Name: NewtonAddBodyImpulse
-// Add an impulse to a specific point on a body.
-//
-// Parameters:
-// *const NewtonWorld* *newtonWorld - pointer to the Newton world.
-// *const NewtonBody* *bodyPtr - is the pointer to the body.
-// *const dFloat* pointDeltaVeloc - pointer to an array of at least three floats containing the desired change in velocity to point pointPosit.
-// *const dFloat* pointPosit	- pointer to an array of at least three floats containing the center of the impulse in global space.
-//
-// Return: Nothing.
-// 
-// Remarks: This function will activate the body.
-//
-// Remarks: *pointPosit* and *pointDeltaVeloc* must be specified in global space.
-//
-// Remarks: *pointDeltaVeloc* represent a change in velocity. For example, a value of *pointDeltaVeloc* of (1, 0, 0) changes the velocity 
-// of *bodyPtr* in such a way that the velocity of point *pointDeltaVeloc* will increase by (1, 0, 0)
-//
-// Remarks: Because *pointDeltaVeloc* represents a change in velocity, this function must be used with care. Repeated calls
-// to this function will result in an increase of the velocity of the body and may cause to integrator to lose stability.
-void NewtonAddBodyImpulse(const NewtonBody* bodyPtr, const dFloat* pointDeltaVeloc, const dFloat* pointPosit)
-{
-	dgBody* body;
-	dgWorld* world;
-
-	body = (dgBody*)bodyPtr;
-	world = body->GetWorld();
-
-	dgVector p(pointPosit);
-	dgVector v(pointDeltaVeloc);
-
-	world->AddBodyImpulse(body, v, p);
-}
-
 #endif
 
 
@@ -1396,4 +1360,41 @@ int NewtonBodyGetJointRecursiveCollision(const NewtonBody* bodyPtr)
 	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
 	return bodyNotify->m_collideWithConnectedBodies? 1 : 0;
+}
+
+// Name: NewtonAddBodyImpulse
+// Add an impulse to a specific point on a body.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - pointer to the Newton world.
+// *const NewtonBody* *bodyPtr - is the pointer to the body.
+// *const dFloat* pointDeltaVeloc - pointer to an array of at least three floats containing the desired change in velocity to point pointPosit.
+// *const dFloat* pointPosit	- pointer to an array of at least three floats containing the center of the impulse in global space.
+//
+// Return: Nothing.
+// 
+// Remarks: This function will activate the body.
+//
+// Remarks: *pointPosit* and *pointDeltaVeloc* must be specified in global space.
+//
+// Remarks: *pointDeltaVeloc* represent a change in velocity. For example, a value of *pointDeltaVeloc* of (1, 0, 0) changes the velocity 
+// of *bodyPtr* in such a way that the velocity of point *pointDeltaVeloc* will increase by (1, 0, 0)
+//
+// Remarks: Because *pointDeltaVeloc* represents a change in velocity, this function must be used with care. Repeated calls
+// to this function will result in an increase of the velocity of the body and may cause to integrator to lose stability.
+void NewtonAddBodyImpulse(const NewtonBody* bodyPtr, const dFloat* pointDeltaVeloc, const dFloat* pointPosit)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
+	ndAssert(0);
+	//dgBody* body;
+	//dgWorld* world;
+	//
+	//body = (dgBody*)bodyPtr;
+	//world = body->GetWorld();
+	//
+	//dgVector p(pointPosit);
+	//dgVector v(pointDeltaVeloc);
+	//
+	//world->AddBodyImpulse(body, v, p);
 }

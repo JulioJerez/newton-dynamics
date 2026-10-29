@@ -181,16 +181,6 @@ extern "C" {
 
 	// **********************************************************************************************
 	//
-	// Up vector joint functions
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonJoint* NewtonConstraintCreateUpVector (const NewtonWorld* newtonWorld, const dFloat* pinDir, const NewtonBody* body); 
-	NEWTON_API void NewtonUpVectorGetPin (const NewtonJoint* upVector, dFloat *pin);
-	NEWTON_API void NewtonUpVectorSetPin (const NewtonJoint* upVector, const dFloat *pin);
-
-
-	// **********************************************************************************************
-	//
 	// User defined bilateral Joint
 	//
 	// **********************************************************************************************
@@ -320,11 +310,12 @@ extern "C" {
 	//NEWTON_API void NewtonSetPlatformArchitecture(const NewtonWorld* newtonWorld, int mode);
 	//NEWTON_API void NewtonSetSolverModel(const NewtonWorld* newtonWorld, int model);
 	//NEWTON_API void NewtonSetFrictionModel(const NewtonWorld* newtonWorld, int model);
-	//NEWTON_API dFloat NewtonGetTimeStep(const NewtonWorld* newtonWorld);
 	//NEWTON_API void NewtonSetBodyLeaveWorldEvent(const NewtonWorld* newtonWorld, NewtonBodyLeaveWorld callback);
 	//NEWTON_API void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* newtonWorld, const dFloat* p0, const dFloat* p1, NewtonBodyIterator callback);
 	
 	// world utility functions
+	NEWTON_API dFloat NewtonGetTimeStep(const NewtonWorld* newtonWorld); 
+	 
 	// NEWTON_API int NewtonGetBodiesCount();
 	// NEWTON_API int NewtonGetActiveBodiesCount();
 	// NEWTON_API int NewtonGetActiveConstraintsCount();
@@ -570,7 +561,6 @@ extern "C" {
 	NEWTON_API void NewtonSliderEnableLimits(const NewtonJoint* const slider, int state);
 	NEWTON_API void NewtonSliderSetLimits(const NewtonJoint* const slider, dFloat minPosit, dFloat maxPosit);
 
-
 	// **********************************************************************************************
 	//
 	// Corkscrew joint functions
@@ -619,6 +609,15 @@ extern "C" {
 	NEWTON_API void NewtonUniversalSetAsMotor1(const NewtonJoint* const corkscrew, dFloat speed, dFloat MaxTorque);
 	NEWTON_API void NewtonUniversalEnableLimits1(const NewtonJoint* const corkscrew, int state);
 	NEWTON_API void NewtonUniversalSetLimits1(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit);
+
+	// **********************************************************************************************
+	//
+	// Up vector joint functions
+	//
+	// **********************************************************************************************
+	NEWTON_API NewtonJoint* NewtonConstraintCreateUpVector(const NewtonWorld* newtonWorld, const dFloat* pinDir, const NewtonBody* body);
+	NEWTON_API void NewtonUpVectorGetPin(const NewtonJoint* upVector, dFloat* pin);
+	NEWTON_API void NewtonUpVectorSetPin(const NewtonJoint* upVector, const dFloat* pin);
 
 #ifdef __cplusplus 
 }
