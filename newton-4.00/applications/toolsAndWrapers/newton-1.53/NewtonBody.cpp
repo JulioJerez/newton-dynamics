@@ -1336,7 +1336,6 @@ void  NewtonBodyAddBuoyancyForce(
 	ndPlane plane;
 	const ndMatrix matrix(body->GetMatrix());
 	ndInt32 hasPlane = buoyancyPlane (0, context, &matrix[0][0], &plane.m_x);
-//hasPlane = 0;
 	if (hasPlane)
 	{
 		ndVector centerOfPreasure(ndVector::m_zero);
@@ -1363,8 +1362,10 @@ void  NewtonBodyAddBuoyancyForce(
 			// now with the mass and center of mass of the volume under water, calculate buoyancy force and torque
 			ndVector bouyancyTorque (centerOfPreasure.CrossProduct(bouyancyForce));
 
-			body->SetForce(body->GetForce() + bouyancyForce);
-			body->SetTorque(body->GetTorque() + bouyancyTorque);
+			bouyancyForce += body->GetForce();
+			bouyancyTorque += body->GetTorque();
+			body->SetForce(bouyancyForce);
+			body->SetTorque(bouyancyTorque);
 
 			// apply a fake viscous drag to damp the under water motion 
 			ndVector omega(body->GetOmega());

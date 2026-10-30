@@ -161,38 +161,14 @@ void PhysicsApplyGravityForce (const NewtonBody* body)
 	dVector force (0.0f, mass * GRAVITY, 0.0f);
 	NewtonBodySetForce (body, &force.m_x);
 
-
-/*
-static int xxx = 0;
-xxx ++;
-dMatrix matrix;
-NewtonBodyGetMatrix(body, &matrix[0][0]);
-if (xxx  == 100){
-dVector impulse (0, 0, 4);
-NewtonAddBodyImpulse(body, &impulse[0], &matrix.m_posit[0]);
-}
-
-if (xxx == 400){
-//if (xxx == 130){
-dVector impulse (-0.15,0,-10.50);
-NewtonAddBodyImpulse(body, &impulse[0], &matrix.m_posit[0]);
-}
-
-if (xxx > 130)
-{
-	xxx *= 1;
-}
-*/
-
 	#ifdef USE_BOUYANCY_FORCE
+		dFloat bodyDensity = 1.5f;
+		dFloat airViscosity = 0.996f;
 		dVector gravity (0.0f, GRAVITY, 0.0f);
 //		NewtonBodyAddBuoyancyForce (body, 1.0f, 0.8f, 0.8f, &gravity[0], PhysicsBouyancyPlane, (void*) body);
-		NewtonBodyAddBuoyancyForce (body, 1.0f, 0.8f, 0.8f, &gravity[0], PhysicsBouyancyPlane, (void*) body);
+		NewtonBodyAddBuoyancyForce (body, bodyDensity, airViscosity, airViscosity, &gravity[0], PhysicsBouyancyPlane, (void*) body);
 	#endif
 }
-
-
-
 
 // set the transform and all child object transform
 void PhysicsSetTransform (const NewtonBody* body, const dFloat* matrix)

@@ -67,8 +67,6 @@ class NewtonProceduralCollition : public ndShapeStaticProceduralMesh
 
 	virtual void GetFacesPatch(ndPatchMesh& patch) const override
 	{
-		ndAssert(0);
-#if 0
 		ndVector minBox;
 		ndVector maxBox;
 		if (m_onGetFacePatch && ndBoxBoxIntersection(minBox, maxBox, m_box0, m_box1, patch.m_boxP0, patch.m_boxP1))
@@ -102,17 +100,16 @@ class NewtonProceduralCollition : public ndShapeStaticProceduralMesh
 			{
 				collideDescData.m_boxP0[i] = minBox[i];
 				collideDescData.m_boxP1[i] = maxBox[i];
-				collideDescData.m_boxDistanceTravel[i] = ndFloat32(0.0f);
 			}
-			collideDescData.m_threadNumber = 0;
+
 			collideDescData.m_userData = PointerCast<void, void>(*m_userData);
-			collideDescData.m_skinThickness = ndFloat32(0.0f);
 
 			collideDescData.m_objBody = nullptr;                  	// pointer to the colliding body
 			collideDescData.m_polySoupBody = nullptr;             	// pointer to the rigid body owner of this collision tree 
-			collideDescData.m_polySoupCollision = nullptr;		// collision shape of the collision tree, (no necessarily the collision of m_polySoupBody)
-			collideDescData.m_objCollision = PointerCast<NewtonCollision, ndShapeInstance>(patch.m_convexShapeInstance);
-			m_onGetFacePatch(&collideDescData, nullptr);
+			//collideDescData.m_polySoupCollision = nullptr;		// collision shape of the collision tree, (no necessarily the collision of m_polySoupBody)
+			//collideDescData.m_objCollision = PointerCast<NewtonCollision, ndShapeInstance>(patch.m_convexShapeInstance);
+			m_onGetFacePatch(&collideDescData);
+
 			if (collideDescData.m_faceCount)
 			{
 				if (patch.m_queryType == patch.m_vertexListOnly)
@@ -121,30 +118,19 @@ class NewtonProceduralCollition : public ndShapeStaticProceduralMesh
 				}
 				else
 				{
-					// the application should set here the pointer index array for each vertex on a face.
-					//int* m_faceVertexIndex;                 	
-					//the format of a face is I0, I1, I2, I3, ..., M, N, E0, E1, E2, ..., A
-					//I0, I1, I2, .. are the indices to the vertex, relative to m_vertex pointer
-					//M is the index to the material sub shape id
-					//N in the index to the vertex normal relative to m_vertex pointer
-					//E0, E1, E2, ... are the indices of the the face normal that is shared to that face edge, when the edge does not share a face normal then the edge index is set to index N, which the index to the face normal    
-					//A is and estimate of the largest diagonal of the face, this used internally as a hint to improve floating point accuracy and algorithm performance. 
-
 					ndInt32 faceIndex = 0;
 					patch.m_vertexArrayHasDuplicated = true;
 					const ndFloat32* const vertex = collideDescData.m_vertex;
 					const ndInt32* const indexArray = collideDescData.m_faceVertexIndex;
+					const ndInt32* const attributes = collideDescData.m_userAttribute;
 					const ndInt32* const facesIndexArray = collideDescData.m_faceIndexCount;
 					const ndInt32 stride = collideDescData.m_vertexStrideInBytes / sizeof(ndFloat32);
 					for (ndInt32 i = 0; i < collideDescData.m_faceCount; ++i)
 					{
 						const ndInt32 indexCount = facesIndexArray[i];
 						patch.m_faceArray.PushBack(indexCount);
-						patch.m_faceMaterialArray.PushBack(indexArray[faceIndex + indexCount]);
+						patch.m_faceMaterialArray.PushBack(attributes[indexCount]);
 
-						ndInt32 n = stride * indexArray[faceIndex + indexCount + 1];
-						const ndVector normal(vertex[n + 0], vertex[n + 1], vertex[n + 2], ndFloat32(0.0f));
-						patch.m_normalArray.PushBack(normal);
 						for (ndInt32 j = 0; j < indexCount; ++j)
 						{
 							ndInt32 k = stride * indexArray[faceIndex + j];
@@ -152,19 +138,20 @@ class NewtonProceduralCollition : public ndShapeStaticProceduralMesh
 							patch.m_indexArray.PushBack(patch.m_pointArray.GetCount());
 							patch.m_pointArray.PushBack(point);
 						}
-						faceIndex += 2 * (indexCount + 1);
+						ndInt32 start = patch.m_pointArray.GetCount() - indexCount;
+						const ndVector e0(patch.m_pointArray[start + 1] - patch.m_pointArray[start]);
+						const ndVector e1(patch.m_pointArray[start + 2] - patch.m_pointArray[start]);
+						const ndVector normal((e0.CrossProduct(e1) & ndVector::m_triplexMask).Normalize());
+						patch.m_normalArray.PushBack(normal);
+						faceIndex += indexCount;
 					}
 				}
 			}
 		}
-#endif
 	}
 
-	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const
+	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const owner) const override
 	{
-		ndAssert(0);
-		return 0;
-#if 0
 		if (m_onRaycast)
 		{
 			//typedef struct NewtonUserMeshCollisionRayHitDesc
@@ -196,7 +183,6 @@ class NewtonProceduralCollition : public ndShapeStaticProceduralMesh
 			return param;
 		}
 		return ndFloat32(1.2f);
-#endif
 	}
 
 	ndWeakPtr<void> m_userData;
@@ -384,6 +370,13 @@ NewtonCollision* NewtonCreateCapsule(const NewtonWorld* newtonWorld, dFloat radi
 	{
 		matrix = ndMatrix(offsetMatrix);
 	}
+
+	height -= ndFloat32(2.0f) * radius;
+	if (height < ndFloat32(0.01f))
+	{
+		height = ndFloat32(0.01f);
+	}
+
 	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeCapsule(radius, radius, height));
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
@@ -448,6 +441,12 @@ NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* newtonWorld, dFl
 	{
 		matrix = ndMatrix(offsetMatrix);
 	}
+	radius -= ndFloat32(0.5f) * height;
+	if (radius < ndFloat32(0.01f))
+	{
+		radius = ndFloat32(0.01f);
+	}
+
 	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeChamferCylinder(radius, height));
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
