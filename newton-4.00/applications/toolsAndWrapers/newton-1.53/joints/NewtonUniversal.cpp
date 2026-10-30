@@ -33,79 +33,39 @@ class NewtonUniversal: public ndJointDoubleHinge
 
 	NewtonUniversal(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointDoubleHinge(pinAndPivotFrame, child, parent)
+		,m_desc(nullptr)
 		,m_callback(nullptr)
 	{
 	}
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		if (m_callback && (**GetUserData()))
+		m_desc = ndWeakPtr<ndConstraintDescritor>(&desc);
+		if (m_callback)
 		{
-			//NewtonHingeSliderUpdateDesc userDesc[2];
-			//unsigned state = 0;
-			//userDesc[0].m_accel = 0.0f;
-			//userDesc[0].m_timestep = desc.m_timestep;
-			//userDesc[0].m_minFriction = -1.0e-20f;
-			//userDesc[0].m_maxFriction = 1.0e-20f;
-			//userDesc[1].m_accel = 0.0f;
-			//userDesc[1].m_timestep = desc.m_timestep;
-			//userDesc[1].m_minFriction = -1.0e-20f;
-			//userDesc[1].m_maxFriction = 1.0e-20f;
-			//
-			//NewtonJoint* const joint = PointerCast<NewtonJoint, NewtonUniversal>(this);
-			//ndInt32 code = m_callback(joint, userDesc);
+			NewtonHingeSliderUpdateDesc userDesc[2];
+			unsigned state = 0;
+			userDesc[0].m_accel = 0.0f;
+			userDesc[0].m_timestep = desc.m_timestep;
+			userDesc[0].m_minFriction = -1.0e-20f;
+			userDesc[0].m_maxFriction = 1.0e-20f;
+			userDesc[1].m_accel = 0.0f;
+			userDesc[1].m_timestep = desc.m_timestep;
+			userDesc[1].m_minFriction = -1.0e-20f;
+			userDesc[1].m_maxFriction = 1.0e-20f;
 
-			//NewtonHingeSliderUpdateDesc userDesc;
-			//unsigned state = 0;
-			//userDesc.m_accel = 0.0f;
-			//userDesc.m_timestep = desc.m_timestep;
-			//userDesc.m_minFriction = -1.0e-20f;
-			//userDesc.m_maxFriction = 1.0e-20f;
-			//NewtonJoint* const joint = PointerCast<NewtonJoint, NewtonCylinder>(this);
-			//SetAsMotor(ndFloat32 (0.0f), ndFloat32(0.0f));
-			//if (m_callback(joint, &userDesc))
-			//{
-			//	SetAsMotor(GetSpeed() + userDesc.m_accel * desc.m_invTimestep, ndMax (-userDesc.m_minFriction, userDesc.m_maxFriction));
-			//}
+			NewtonJoint* const joint = PointerCast<NewtonJoint, NewtonUniversal>(this);
+			m_callback(joint, userDesc);
 		}
 
 		ndJointDoubleHinge::JacobianDerivative(desc);
 	}
 
+	ndWeakPtr<ndConstraintDescritor> m_desc;
 	NewtonUniversalCallBack m_callback;
 };
 
 #if 0
-
-// Name: NewtonUniversalSetUserCallback
-// Set an update call back to be called when either of the two body linked by the joint is active.
-//
-// Parameters:
-// *const NewtonJoint* *Universal - pointer to the joint.
-// *NewtonUniversalCallBack* callback - pointer to the joint function call back.
-//
-// Return: nothing.
-//
-// Remarks: if the application wants to have some feedback from the joint simulation, the application can register a function
-// update callback to be called every time any of the bodies linked by this joint is active. This is useful to provide special
-// effects like particles, sound or even to simulate breakable moving parts.
-//
-// Remarks: the function *NewtonUniversalCallBack callback* should return a bit field code.
-// if the application does not want to set the joint acceleration the return code is zero
-// if the application only wants to change the joint linear acceleration the return code is 1
-// if the application only wants to change the joint angular acceleration the return code is 2
-// if the application only wants to change the joint angular and linear acceleration the return code is 3
-// 
-// See also: NewtonJointGetUserData, NewtonJointSetUserData
-void NewtonUniversalSetUserCallback(const NewtonJoint* joint, NewtonUniversalCallBack callback)
-{
-	dgUniversalConstraint* contraint;
-
-	contraint = (dgUniversalConstraint*)Universal;
-	contraint->SetJointParameterCallBack((dgUniversalJointAcceleration)callback);
-}
-
-
 // Name: NewtonUniversalGetJointForce
 // Get the total force asserted over the joint pivot point, to maintain the constraint.
 //
@@ -175,6 +135,33 @@ NewtonJoint* NewtonConstraintCreateUniversal(const NewtonWorld* newtonWorld, con
 	ndSharedPtr<ndJointBilateralConstraint> joint(new NewtonUniversal(matrix, body0, body1));
 	world->AddJoint(joint);
 	return PointerCast<NewtonJoint, ndJointBilateralConstraint>(*joint);
+}
+
+// Name: NewtonUniversalSetUserCallback
+// Set an update call back to be called when either of the two body linked by the joint is active.
+//
+// Parameters:
+// *const NewtonJoint* *Universal - pointer to the joint.
+// *NewtonUniversalCallBack* callback - pointer to the joint function call back.
+//
+// Return: nothing.
+//
+// Remarks: if the application wants to have some feedback from the joint simulation, the application can register a function
+// update callback to be called every time any of the bodies linked by this joint is active. This is useful to provide special
+// effects like particles, sound or even to simulate breakable moving parts.
+//
+// Remarks: the function *NewtonUniversalCallBack callback* should return a bit field code.
+// if the application does not want to set the joint acceleration the return code is zero
+// if the application only wants to change the joint linear acceleration the return code is 1
+// if the application only wants to change the joint angular acceleration the return code is 2
+// if the application only wants to change the joint angular and linear acceleration the return code is 3
+// 
+// See also: NewtonJointGetUserData, NewtonJointSetUserData
+void NewtonUniversalSetUserCallback(const NewtonJoint* joint, NewtonUniversalCallBack callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUniversal* const userJoint = PointerCast<NewtonUniversal, NewtonJoint>(joint);
+	userJoint->m_callback = callback;
 }
 
 // Name: NewtonUniversalGetJointAngle0
@@ -253,48 +240,44 @@ dFloat NewtonUniversalGetJointOmega1(const NewtonJoint* joint)
 	return userJoint->GetOmega1();
 }
 
-
-// Name: NewtonUniversalCalculateStopAlpha0
-// Calculate the angular acceleration needed to stop the universal at the desired angle.
-//
-// Parameters:
-// *const NewtonJoint* *Universal - pointer to the joint.
-// *NewtonUniversalSliderUpdateDesc* *desc - is the pointer to the Universal or slide structure.
-// *dFloat* angle - is the desired universal stop angle rotation around pin0
-//
-// Return: the relative angular acceleration needed to stop the universal.
-//
-// Remarks: this function can only be called from a *NewtonUniversalCallBack* and it can be used by the application to implement universal limits.
-// 
-// See also: NewtonUniversalSetUserCallback
-dFloat NewtonUniversalCalculateStopAlpha0(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat angle)
+void NewtonUniversalSetAsMotor0(const NewtonJoint* const joint, dFloat speed, dFloat maxTorque)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	NewtonUniversal* const userJoint = PointerCast<NewtonUniversal, NewtonJoint>(joint);
-	ndAssert(0);
-	return 0;
+	userJoint->SetAsMotor0(speed, maxTorque);
 }
 
-// Name: NewtonUniversalCalculateStopAlpha1
-// Calculate the angular acceleration needed to stop the universal at the desired angle.
-//
-// Parameters:
-// *const NewtonJoint* *Universal - pointer to the joint.
-// *NewtonUniversalSliderUpdateDesc* *desc - is the pointer to and the Universal or slide structure.
-// *dFloat* angle - is the desired universal stop angle rotation around pin1
-//
-// Return: the relative angular acceleration needed to stop the universal.
-//
-// Remarks: this function can only be called from a *NewtonUniversalCallBack* and it can be used by the application to implement universal limits.
-// 
-// See also: NewtonUniversalSetUserCallback
-dFloat NewtonUniversalCalculateStopAlpha1(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat angle)
+void NewtonUniversalEnableLimits0(const NewtonJoint* const joint, int state)
 {
-	//dgUniversalConstraint* contraint;
-	//contraint = (dgUniversalConstraint*)universal;
-	//return contraint->CalculateStopAlpha1(angle, (dgJointCallBackParam*)desc);
 	TRACE_FUNCTION(__FUNCTION__);
 	NewtonUniversal* const userJoint = PointerCast<NewtonUniversal, NewtonJoint>(joint);
-	ndAssert(0);
-	return 0;
+	userJoint->SetLimitState0(state ? true : false);
+}
+
+void NewtonUniversalSetLimits0(const NewtonJoint* const joint, dFloat minAngle, dFloat maxAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUniversal* const userJoint = PointerCast<NewtonUniversal, NewtonJoint>(joint);
+	userJoint->SetLimits0(minAngle, maxAngle);
+}
+
+void NewtonUniversalSetAsMotor1(const NewtonJoint* const joint, dFloat speed, dFloat maxTorque)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUniversal* const userJoint = PointerCast<NewtonUniversal, NewtonJoint>(joint);
+	userJoint->SetAsMotor1(speed, maxTorque);
+}
+
+void NewtonUniversalEnableLimits1(const NewtonJoint* const joint, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUniversal* const userJoint = PointerCast<NewtonUniversal, NewtonJoint>(joint);
+	userJoint->SetLimitState1(state ? true : false);
+}
+
+void NewtonUniversalSetLimits1(const NewtonJoint* const joint, dFloat minAngle, dFloat maxAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUniversal* const userJoint = PointerCast<NewtonUniversal, NewtonJoint>(joint);
+	userJoint->SetLimits1(minAngle, maxAngle);
 }

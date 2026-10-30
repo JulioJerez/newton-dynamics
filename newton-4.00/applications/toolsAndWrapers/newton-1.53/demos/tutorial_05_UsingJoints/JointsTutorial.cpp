@@ -116,29 +116,6 @@ void AddRope (NewtonWorld* nWorld, dSceneNode* root)
 }
 
 
-
-
-static unsigned DoubleDoorUserCallback (const NewtonJoint* hinge, NewtonHingeSliderUpdateDesc* desc)
-{
-	dFloat angle;
-	const dFloat angleLimit = 90.0f;
-
-	angle = NewtonHingeGetJointAngle (hinge);
-	if (angle > ((angleLimit / 180.0f) * 3.1416f)) {
-		// if the joint angle is large than the predefine interval, stop the hinge
-		desc->m_accel = NewtonHingeCalculateStopAlpha (hinge, desc, (angleLimit / 180.0f) * 3.1416f);
-		return 1;
-	} else if (angle < ((-angleLimit / 180.0f) * 3.1416f)) {
-		// if the joint angle is large than the predefine interval, stop the hinge
-		desc->m_accel = NewtonHingeCalculateStopAlpha (hinge, desc, (-angleLimit / 180.0f) * 3.1416f);
-		return 1;
-	}
-
-	// no action need it if the joint angle is with the limits
-	return 0;
-}
-
-
 void AddDoubleSwingDoors (NewtonWorld* nWorld, dSceneNode* root)
 {
 	dFloat mass;
@@ -210,8 +187,9 @@ void AddDoubleSwingDoors (NewtonWorld* nWorld, dSceneNode* root)
 		joint = NewtonConstraintCreateHinge (nWorld, &pivot.m_x, &pin.m_x, link1, NULL);
 
 		// set limit to the door
-		NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
-
+		//NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
+		NewtonHingeEnableLimits(joint, 1);
+		NewtonHingeSetLimits(joint, -80.0f * 3.1416f / 180.0f, 45.0f * 3.1416f / 180.0f);
 	}
 
 
@@ -256,7 +234,9 @@ void AddDoubleSwingDoors (NewtonWorld* nWorld, dSceneNode* root)
 		joint = NewtonConstraintCreateHinge (nWorld, &pivot.m_x, &pin.m_x, link0, link1);
 
 		// set limit to the door
-		NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
+		//NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
+		NewtonHingeEnableLimits(joint, 1);
+		NewtonHingeSetLimits(joint, -60.0f * 3.1416f / 180.0f, 120.0f * 3.1416f / 180.0f);
 	}
 
 	// release the collision geometry when not need it
@@ -273,125 +253,40 @@ struct JointControlStruct
 
 static void DestroyJointControlStruct(const NewtonJoint* slider)
 {
-	JointControlStruct* limits;
-	limits = (JointControlStruct*) NewtonJointGetUserData (slider);
+	JointControlStruct* limits = (JointControlStruct*) NewtonJointGetUserData (slider);
 	delete limits; 
 }
 
 static unsigned SliderUpdateEvent (const NewtonJoint* slider, NewtonHingeSliderUpdateDesc* desc)
 {
-	dFloat distance;
-	JointControlStruct* limits;
+	const JointControlStruct* const limits = (JointControlStruct*) NewtonJointGetUserData (slider);
+	// or se limits at update time 
+	NewtonSliderEnableLimits(slider, 1);
+	NewtonSliderSetLimits(slider, limits->m_min, limits->m_max);
 
-	limits = (JointControlStruct*) NewtonJointGetUserData (slider);
-
-	distance = NewtonSliderGetJointPosit (slider);
-	if (distance < limits->m_min) {
-		// if the distance is smaller than the predefine interval, stop the slider
-		desc->m_accel = NewtonSliderCalculateStopAccel (slider, desc, limits->m_min);
-		return 1;
-	} else if (distance > limits->m_max) {
-		// if the distance is larger than the predefine interval, stop the slider
-		desc->m_accel = NewtonSliderCalculateStopAccel (slider, desc, limits->m_max);
-		return 1;
-	}
-
+	// you can also set motors or proportional derivative controller
 	// no action need it if the joint angle is with the limits
 	return 0;
 }
 
 static unsigned CorkScrewUpdateEvent (const NewtonJoint* screw, NewtonHingeSliderUpdateDesc* desc)
 {
-	unsigned retCode; 
-	dFloat distance;
-	dFloat omega;
-	JointControlStruct* limits;
+	const JointControlStruct* const limits = (JointControlStruct*) NewtonJointGetUserData (screw);
+	NewtonCorkscrewEnableLimitsPosit(screw, 1);
+	NewtonCorkscrewSetLimitsPosit(screw, limits->m_min, limits->m_max);
 
-	// no action need it if the joint angle is with the limits
-	retCode = 0;
-
-	limits = (JointControlStruct*) NewtonJointGetUserData (screw);
-
-	// the first entry in NewtonHingeSliderUpdateDesc control the screw linear acceleration 
-	distance = NewtonCorkscrewGetJointPosit (screw);
-	if (distance < limits->m_min) {
-		// if the distance is smaller than the predefine interval, stop the slider
-		desc[0].m_accel = NewtonCorkscrewCalculateStopAccel (screw, &desc[0], limits->m_min);
-		retCode |= 1;
-	} else if (distance > limits->m_max) {
-		// if the distance is larger than the predefine interval, stop the slider
-		desc[0].m_accel = NewtonCorkscrewCalculateStopAccel (screw, &desc[0], limits->m_max);
-		retCode |= 1;
-	}
-
-	// the second entry in NewtonHingeSliderUpdateDesc control the screw angular acceleration. 
-	// Make s small screw motor by setting the angular acceleration of the screw axis
-	// We are not going to limit the angular rotation of the screw, but is we did we should or return code with 2,
-	omega = NewtonCorkscrewGetJointOmega (screw);
-	desc[1].m_accel = 2.5f - 0.2f * omega;
-
-	// or with 0x10 to tell newton this axis is active
-	retCode |= 2;
-	
-	// return the code
-	return retCode;
-
+	NewtonCorkscrewSetAsMotorAngular(screw, 10.0f, 1000.0f);
+	return 0;
 }
-
 
 static unsigned UniversalUpdateEvent (const NewtonJoint* screw, NewtonHingeSliderUpdateDesc* desc)
 {
-	unsigned retCode; 
-	dFloat angle;
-	dFloat omega;
-	JointControlStruct* limits;
+	JointControlStruct* const limits = (JointControlStruct*)NewtonJointGetUserData(screw);
 
-	// no action need it if the joint angle is with the limits
-	retCode = 0;
-
-// change this to #if 0 put a double limit on the universal joint
-#if 1
-	// the first entry in is the axis fixes of the spinning beat
-	// apply a simple motor to this object
-	omega = NewtonUniversalGetJointOmega0 (screw);
-	desc[0].m_accel = -4.5f - 0.2f * omega;
-	// or with 0x10 to tell newton this axis is active
-	retCode |= 1;
-
-#else
-	// put a top limit on the joint
-	limits = (JointControlStruct*) NewtonJointGetUserData (screw);
-	angle = NewtonUniversalGetJointAngle0 (screw);
-	if (angle < limits->m_min) {
-		// if the distance is smaller than the predefine interval, stop the slider
-		desc[0].m_accel = NewtonUniversalCalculateStopAlpha0 (screw, &desc[0], limits->m_min);
-		retCode |= 1;
-	} else if (angle > limits->m_max) {
-		// if the distance is larger than the predefine interval, stop the slider
-		desc[0].m_accel = NewtonUniversalCalculateStopAlpha0 (screw, &desc[0], limits->m_max);
-		retCode |= 1;
-	}
-#endif
-
-
-
-	limits = (JointControlStruct*) NewtonJointGetUserData (screw);
-
-	// the first entry in NewtonHingeSliderUpdateDesc control the screw linear acceleration 
-	angle = NewtonUniversalGetJointAngle1 (screw);
-	if (angle < limits->m_min) {
-		// if the distance is smaller than the predefine interval, stop the slider
-		desc[1].m_accel = NewtonUniversalCalculateStopAlpha1 (screw, &desc[0], limits->m_min);
-		retCode |= 2;
-	} else if (angle > limits->m_max) {
-		// if the distance is larger than the predefine interval, stop the slider
-		desc[1].m_accel = NewtonUniversalCalculateStopAlpha1 (screw, &desc[0], limits->m_max);
-		retCode |= 2;
-	}
-	
-	// return the code
-	return retCode;
-
+	NewtonUniversalEnableLimits1(screw, 1);
+	NewtonUniversalSetLimits1(screw, limits->m_min, limits->m_max);
+	NewtonUniversalSetAsMotor0(screw, -5.0f, 2000.0f);
+	return 0;
 }
 
 
@@ -409,7 +304,7 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 	dMatrix location (GetIdentityMatrix());
 	location.m_posit.m_x =  5.0f; 
 	location.m_posit.m_y = -1.0f; 
-	location.m_posit.m_z = -2.0f; 
+	location.m_posit.m_z = -0.0f; 
 	dVector size (10.0f, 0.25f, 0.25f);
 
 	bar = NULL;
@@ -465,9 +360,11 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		dVector pivot (location.m_posit);
 		pivot.m_x -= size.m_x * 0.5f;
 		joint = NewtonConstraintCreateHinge (nWorld, &pivot.m_x, &pin.m_x, bar, NULL);
-		NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
-	}
 
+		//NewtonHingeSetUserCallback (joint, DoubleDoorUserCallback);
+		NewtonHingeEnableLimits(joint, 1);
+		NewtonHingeSetLimits(joint, -90.0f * 3.1416f/ 180.0f, 90.0f * 3.1416f / 180.0f);
+	}
 
 	{
 		// ////////////////////////////////////////////////////////////////////////////////////
@@ -524,9 +421,6 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		dVector pin (beatLocation.m_front);
 		joint = NewtonConstraintCreateSlider (nWorld, &pivot.m_x, &pin.m_x, beat, bar);
 
-		// assign a control function for this joint
-		NewtonHingeSetUserCallback (joint, SliderUpdateEvent);
-
 		JointControlStruct *limits;
 		limits = new JointControlStruct;
 
@@ -539,8 +433,13 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 
 		// tell this joint to destroy its local private data when destroyed
 		NewtonJointSetDestructor (joint, DestroyJointControlStruct);			
-	}
 
+		// assign a control function for this joint
+		NewtonSliderSetUserCallback(joint, SliderUpdateEvent);
+
+		NewtonSliderEnableLimits(joint, 1);
+		NewtonSliderSetLimits(joint, limits->m_min, limits->m_max);
+	}
 
 	{
 		// ////////////////////////////////////////////////////////////////////////////////////
@@ -617,7 +516,6 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		NewtonJointSetDestructor (joint, DestroyJointControlStruct);			
 	}
 
-
 	{
 		// ////////////////////////////////////////////////////////////////////////////////////
 		//
@@ -629,7 +527,7 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		dMatrix beatLocation (location);
 		dVector beatSize (0.5f, 1.25f, 1.25f);
 
-		beatLocation.m_posit.m_x -= size.m_x * 0.5f;
+		beatLocation.m_posit.m_x += size.m_x * 0.5f;
 
 		// create the a graphic character (use a visualObject as our body
 		//visualObject = new BoxPrimitive (beatLocation, beatSize);
@@ -678,7 +576,7 @@ void AddRollingBeats (NewtonWorld* nWorld, dSceneNode* root)
 		joint = NewtonConstraintCreateUniversal (nWorld, &pivot.m_x, &pin0.m_x, &pin1.m_x, beat, bar);
 		
 		// assign a control function for this joint
-		NewtonCorkscrewSetUserCallback (joint, UniversalUpdateEvent);
+		NewtonUniversalSetUserCallback(joint, UniversalUpdateEvent);
 
 		JointControlStruct *limits;
 		limits = new JointControlStruct;

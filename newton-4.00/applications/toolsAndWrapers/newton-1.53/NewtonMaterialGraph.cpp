@@ -570,125 +570,6 @@ void NewtonMaterialSetContactSoftness(const NewtonMaterial* materialHandle, dFlo
 	material->m_softness = ClampValue(softness, dFloat(0.01f), dFloat(0.7f));
 }
 
-// Name: NewtonMaterialSetContactElasticity 
-// Override the default elasticity (coefficient of restitution) value for the contact.
-//
-// Parameters:
-// *const NewtonMaterial* materialHandle - pointer to a material pair.
-// *dFloat* restitution  - elasticity value, must be positive.
-// 
-// Return: Nothing.
-//
-// Remarks: This function can only be called from a material callback event handler.
-// 
-// See also: NewtonMaterialSetCollisionCallback, NewtonMaterialSetDefaultElasticity
-void NewtonMaterialSetContactElasticity(const NewtonMaterial* materialHandle, dFloat restitution)
-{
-	dgContactMaterial* material;
-
-	material = (dgContactMaterial*)materialHandle;
-
-	material->m_restitution = ClampValue(restitution, dFloat(0.01f), dFloat(2.0f));
-}
-
-
-
-
-
-// Name: NewtonMaterialSetContactFrictionState 
-// Enable or disable friction calculation for this contact.
-//
-// Parameters:
-// *const NewtonMaterial* materialHandle - pointer to a material pair.
-// *int* state* - new state. 0 makes the contact frictionless along the index tangent vector.
-// *int* index - index to the tangent vector. 0 for primary tangent vector or 1 for the secondary tangent vector.
-// 
-// Return: Nothing.
-//
-// Remarks: This function can only be called from a material callback event handler.
-// 
-// See also: NewtonMaterialSetCollisionCallback
-void NewtonMaterialSetContactFrictionState(const NewtonMaterial* materialHandle, int state, int index)
-{
-	dgContactMaterial* material;
-
-	material = (dgContactMaterial*)materialHandle;
-
-	if (index) {
-		material->m_friction1Enable = state ? true : false;
-	}
-	else {
-		material->m_friction0Enable = state ? true : false;
-	}
-}
-
-
-
-// Name: NewtonMaterialSetContactStaticFrictionCoef
-// Override the default value of the static coefficient of friction for this contact.
-//
-// Parameters:
-// *const NewtonMaterial* materialHandle - pointer to a material pair.
-// *dFloat* coef - static friction coeficient. Must be positive.
-// *int* index - index to the tangent vector. 0 for primary tangent vector or 1 for the secondary tangent vector.
-// 
-// Return: nothing
-//
-// Remarks: this function can only be called from a material callback event handler.
-//
-// Remarks: It is recommended that *coef* be set to a value lower or equal to 1.0, however because some synthetic materials
-// can have hight than one coeficient of friction Newton allows for the coeficient of friction to be as high as 2.0.
-//
-// Remarks: the value *coef* will be clamped between the current kinetic friction and 2.0 (the maximum friction allowed).
-// If the application wants to set a static friction lower than the current kinetic friction it must decrease the kinetic friction first.
-// 
-// See also: NewtonMaterialSetCollisionCallback, NewtonMaterialSetDefaultFriction, NewtonMaterialSetContactKineticFrictionCoef
-void NewtonMaterialSetContactStaticFrictionCoef(const NewtonMaterial* materialHandle, dFloat coef, int index)
-{
-	dgContactMaterial* material;
-
-	material = (dgContactMaterial*)materialHandle;
-
-	if (index) {
-		material->m_staticFriction1 = ClampValue(coef, material->m_dynamicFriction1, dFloat(2.0f));
-	}
-	else {
-		material->m_staticFriction0 = ClampValue(coef, material->m_dynamicFriction0, dFloat(2.0f));
-	}
-}
-
-// Name: NewtonMaterialSetContactKineticFrictionCoef
-// Override the default value of the kinetic coefficient of friction for this contact.
-//
-// Parameters:
-// *const NewtonMaterial* materialHandle - pointer to a material pair.
-// *dFloat* coef - static friction coefficient. Must be positive.
-// *int* index - index to the tangent vector. 0 for primary tangent vector or 1 for the secondary tangent vector.
-// 
-// Return: Nothing.
-//
-// Remarks: This function can only be called from a material callback event handler.
-//
-// Remarks: It is recommended that *coef* be set to a value lower or equal to 1.0, however because some synthetic materials
-// can have hight than one coeficient of friction Newton allows for the coeficient of friction to be as high as 2.0.
-//
-// Remarks: the value *coef* will be clamped between 0.01f (minimum friction value) and that of the current static friction.
-// If the application wants to set a kinetic friction higher than the current static friction it must increase the static friction first.
-// 
-// See also: NewtonMaterialSetCollisionCallback, NewtonMaterialSetDefaultFriction, NewtonMaterialSetContactStaticFrictionCoef
-void NewtonMaterialSetContactKineticFrictionCoef(const NewtonMaterial* materialHandle, dFloat coef, int index)
-{
-	dgContactMaterial* material;
-
-	material = (dgContactMaterial*)materialHandle;
-
-	if (index) {
-		material->m_dynamicFriction1 = ClampValue(coef, dFloat(0.01f), material->m_staticFriction1);
-	}
-	else {
-		material->m_dynamicFriction0 = ClampValue(coef, dFloat(0.01f), material->m_staticFriction0);
-	}
-}
 
 // Name: NewtonMaterialSetContactNormalAcceleration
 // Force the contact point to have a non-zero acceleration aligned this the contact normal.
@@ -1342,27 +1223,6 @@ int NewtonMaterialGetDefaultGroupID(const NewtonWorld* const)
 	return 0;
 }
 
-/*!
-  Set the default softness coefficients for the material interaction between two physics materials .
-
-  @param *newtonWorld pointer to the Newton world.
-  @param  id0 - group id0
-  @param  id1 - group id1
-  @param softnessCoef softness coefficient
-
-  @return Nothing.
-
-  *softnessCoef* must be a positive value.
-  It is recommended that *softnessCoef* be set to value lower or equal to 1.0
-  A low value for *softnessCoef* will make the material soft. A typical value for *softnessCoef* is 0.15
-*/
-void NewtonMaterialSetDefaultSoftness(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat softnessCoef)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
-}
-
-
 unsigned NewtonMaterialGetBodyCollisionID(const NewtonMaterial* material, const NewtonBody* body)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -1722,6 +1582,7 @@ dFloat NewtonMaterialGetContactNormalSpeed(const NewtonMaterial* materialHandle,
 */
 dFloat NewtonMaterialGetContactTangentSpeed(const NewtonMaterial* materialHandle, const NewtonContact* contactlHandle, int index)
 {
+	TRACE_FUNCTION(__FUNCTION__);
 	const ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
 	const ndBodyKinematic* const body0 = material->m_body0;
 	const ndBodyKinematic* const body1 = material->m_body1;
@@ -1734,4 +1595,125 @@ dFloat NewtonMaterialGetContactTangentSpeed(const NewtonMaterial* materialHandle
 	ndAssert(dir.m_w == ndFloat32(0.0f));
 	dFloat speed = dv.DotProduct(dir).GetScalar();
 	return -speed;
+}
+
+// Name: NewtonMaterialSetContactElasticity 
+// Override the default elasticity (coefficient of restitution) value for the contact.
+//
+// Parameters:
+// *const NewtonMaterial* materialHandle - pointer to a material pair.
+// *dFloat* restitution  - elasticity value, must be positive.
+// 
+// Return: Nothing.
+//
+// Remarks: This function can only be called from a material callback event handler.
+// 
+// See also: NewtonMaterialSetCollisionCallback, NewtonMaterialSetDefaultElasticity
+void NewtonMaterialSetContactElasticity(const NewtonMaterial* materialHandle, dFloat restitution)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgContactMaterial* material;
+	//material = (dgContactMaterial*)materialHandle;
+	//material->m_restitution = ClampValue(restitution, dFloat(0.01f), dFloat(2.0f));
+	ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
+	material->m_material.m_restitution = ndClamp(restitution, dFloat(0.0f), dFloat(1.0f));
+}
+
+// Name: NewtonMaterialSetContactFrictionState 
+// Enable or disable friction calculation for this contact.
+//
+// Parameters:
+// *const NewtonMaterial* materialHandle - pointer to a material pair.
+// *int* state* - new state. 0 makes the contact frictionless along the index tangent vector.
+// *int* index - index to the tangent vector. 0 for primary tangent vector or 1 for the secondary tangent vector.
+// 
+// Return: Nothing.
+//
+// Remarks: This function can only be called from a material callback event handler.
+// 
+// See also: NewtonMaterialSetCollisionCallback
+void NewtonMaterialSetContactFrictionState(const NewtonMaterial* materialHandle, int state, int index)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndAssert(0);
+	//dgContactMaterial* material;
+	//
+	//material = (dgContactMaterial*)materialHandle;
+	//
+	//if (index) {
+	//	material->m_friction1Enable = state ? true : false;
+	//}
+	//else {
+	//	material->m_friction0Enable = state ? true : false;
+	//}
+}
+
+// Name: NewtonMaterialSetContactStaticFrictionCoef
+// Override the default value of the static coefficient of friction for this contact.
+//
+// Parameters:
+// *const NewtonMaterial* materialHandle - pointer to a material pair.
+// *dFloat* coef - static friction coeficient. Must be positive.
+// *int* index - index to the tangent vector. 0 for primary tangent vector or 1 for the secondary tangent vector.
+// 
+// Return: nothing
+//
+// Remarks: this function can only be called from a material callback event handler.
+//
+// Remarks: It is recommended that *coef* be set to a value lower or equal to 1.0, however because some synthetic materials
+// can have hight than one coeficient of friction Newton allows for the coeficient of friction to be as high as 2.0.
+//
+// Remarks: the value *coef* will be clamped between the current kinetic friction and 2.0 (the maximum friction allowed).
+// If the application wants to set a static friction lower than the current kinetic friction it must decrease the kinetic friction first.
+// 
+// See also: NewtonMaterialSetCollisionCallback, NewtonMaterialSetDefaultFriction, NewtonMaterialSetContactKineticFrictionCoef
+void NewtonMaterialSetContactStaticFrictionCoef(const NewtonMaterial* materialHandle, dFloat coef, int index)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndAssert(0);
+	//dgContactMaterial* material;
+	//
+	//material = (dgContactMaterial*)materialHandle;
+	//
+	//if (index) {
+	//	material->m_staticFriction1 = ClampValue(coef, material->m_dynamicFriction1, dFloat(2.0f));
+	//}
+	//else {
+	//	material->m_staticFriction0 = ClampValue(coef, material->m_dynamicFriction0, dFloat(2.0f));
+	//}
+}
+
+// Name: NewtonMaterialSetContactKineticFrictionCoef
+// Override the default value of the kinetic coefficient of friction for this contact.
+//
+// Parameters:
+// *const NewtonMaterial* materialHandle - pointer to a material pair.
+// *dFloat* coef - static friction coefficient. Must be positive.
+// *int* index - index to the tangent vector. 0 for primary tangent vector or 1 for the secondary tangent vector.
+// 
+// Return: Nothing.
+//
+// Remarks: This function can only be called from a material callback event handler.
+//
+// Remarks: It is recommended that *coef* be set to a value lower or equal to 1.0, however because some synthetic materials
+// can have hight than one coeficient of friction Newton allows for the coeficient of friction to be as high as 2.0.
+//
+// Remarks: the value *coef* will be clamped between 0.01f (minimum friction value) and that of the current static friction.
+// If the application wants to set a kinetic friction higher than the current static friction it must increase the static friction first.
+// 
+// See also: NewtonMaterialSetCollisionCallback, NewtonMaterialSetDefaultFriction, NewtonMaterialSetContactStaticFrictionCoef
+void NewtonMaterialSetContactKineticFrictionCoef(const NewtonMaterial* materialHandle, dFloat coef, int index)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndAssert(0);
+	//dgContactMaterial* material;
+	//
+	//material = (dgContactMaterial*)materialHandle;
+	//
+	//if (index) {
+	//	material->m_dynamicFriction1 = ClampValue(coef, dFloat(0.01f), material->m_staticFriction1);
+	//}
+	//else {
+	//	material->m_dynamicFriction0 = ClampValue(coef, dFloat(0.01f), material->m_staticFriction0);
+	//}
 }

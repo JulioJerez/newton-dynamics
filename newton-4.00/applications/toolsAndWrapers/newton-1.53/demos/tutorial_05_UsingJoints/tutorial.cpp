@@ -251,9 +251,9 @@ void InitScene()
 	// /////////////////////////////////////////////////////////////////////
 	//
 	// add some joint configurations
-//	AddRope (nWorld, nGrapphicWorld);
-//	AddRollingBeats (nWorld, nGrapphicWorld);
-//	AddDoubleSwingDoors (nWorld, nGrapphicWorld);
+	AddRope (nWorld, nGrapphicWorld);
+	AddRollingBeats (nWorld, nGrapphicWorld);
+	AddDoubleSwingDoors (nWorld, nGrapphicWorld);
 
 	// add some object to the background
 	PopulateLevel ();
@@ -411,7 +411,7 @@ void BallCharacterApplyForceAndTorque (const NewtonBody* body)
 		NewtonBodyGetForce(body, &force.m_x);
 		NewtonBodyGetVelocity(body, &velocity.m_x);
 
-		force += (forceDir.Scale (mass * 30.0f) - forceDir.Scale (5.0f * (velocity % forceDir))); 
+		force += (forceDir.Scale (mass * 20.0f) - forceDir.Scale (5.0f * (velocity % forceDir))); 
 		NewtonBodySetForce (body, &force.m_x);
 	} else {
 		// this is the rolling mode
@@ -420,7 +420,7 @@ void BallCharacterApplyForceAndTorque (const NewtonBody* body)
 		// rotate the torque direction to align with the camera
 		dVector torqueDir (matrix.RotateVector (cameraTorqueVector));
 		NewtonBodyGetOmega(body, &omega.m_x);
-		dVector torque (torqueDir.Scale (Ixx * 75.0f) - torqueDir.Scale (5.0f * Ixx * (omega % torqueDir))); 
+		dVector torque (torqueDir.Scale (Ixx * 50.0f) - torqueDir.Scale (5.0f * Ixx * (omega % torqueDir))); 
 		NewtonBodySetTorque (body, &torque.m_x);
 	}
 }

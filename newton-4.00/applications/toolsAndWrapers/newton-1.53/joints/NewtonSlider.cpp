@@ -33,13 +33,15 @@ class NewtonSlider: public ndJointSlider
 
 	NewtonSlider(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointSlider(pinAndPivotFrame, child, parent)
+		,m_desc(nullptr)
 		,m_callback(nullptr)
 	{
 	}
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		if (m_callback && (**GetUserData()))
+		m_desc = ndWeakPtr<ndConstraintDescritor>(&desc);
+		if (m_callback)
 		{
 			NewtonHingeSliderUpdateDesc userDesc;
 			unsigned state = 0;
@@ -48,16 +50,13 @@ class NewtonSlider: public ndJointSlider
 			userDesc.m_minFriction = -1.0e-20f;
 			userDesc.m_maxFriction = 1.0e-20f;
 			NewtonJoint* const joint = PointerCast<NewtonJoint, NewtonSlider>(this);
-			SetAsMotor(ndFloat32 (0.0f), ndFloat32(0.0f));
-			if (m_callback(joint, &userDesc))
-			{
-				SetAsMotor(GetSpeed() + userDesc.m_accel * desc.m_invTimestep, ndMax (-userDesc.m_minFriction, userDesc.m_maxFriction));
-			}
+			m_callback(joint, &userDesc);
 		}
 
 		ndJointSlider::JacobianDerivative(desc);
 	}
 
+	ndWeakPtr<ndConstraintDescritor> m_desc;
 	NewtonSliderCallBack m_callback;
 };
 
@@ -341,23 +340,23 @@ dFloat NewtonSliderGetJointPosit(const NewtonJoint* joint)
 	return userJoint->GetPosit();
 }
 
-// Name: NewtonSliderGetJointForce
-// Calculate the angular acceleration needed to stop the slider at the desired angle.
-//
-// Parameters:
-// *const NewtonJoint* *slider - pointer to the joint.
-// *NewtonSliderSliderUpdateDesc* *desc - is the pointer to the Slider or slide structure.
-// *dFloat* distance - desired stop distance relative to the pivot point
-//
-// Return: the relative linear acceleration needed to stop the slider.
-//
-// Remarks: this function can only be called from a *NewtonSliderCallBack* and it can be used by the application to implement slider limits.
-// 
-// See also: NewtonSliderSetUserCallback
-dFloat NewtonSliderCalculateStopAccel(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat distance)
+void NewtonSliderEnableLimits(const NewtonJoint* const joint, int state)
 {
+	TRACE_FUNCTION(__FUNCTION__);
 	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
-	//return contraint->CalculateStopAccel(distance, (dgJointCallBackParam*)desc);
-	ndAssert(0);
-	return 0;
+	userJoint->SetLimitState(state ? true : false);
+}
+
+void NewtonSliderSetLimits(const NewtonJoint* const joint, dFloat minPosit, dFloat maxPosit)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
+	userJoint->SetLimits(minPosit, maxPosit);
+}
+
+void NewtonSliderSetAsMotor(const NewtonJoint* const joint, dFloat speed, dFloat maxForce)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
+	userJoint->SetAsMotor(speed, maxForce);
 }

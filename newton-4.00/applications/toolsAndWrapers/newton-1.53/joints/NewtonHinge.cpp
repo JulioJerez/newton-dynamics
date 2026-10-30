@@ -33,13 +33,15 @@ class NewtonHinge: public ndJointHinge
 
 	NewtonHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointHinge(pinAndPivotFrame, child, parent)
+		,m_desc(nullptr)
 		,m_callback(nullptr)
 	{
 	}
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		if (m_callback && (**GetUserData()))
+		m_desc = ndWeakPtr<ndConstraintDescritor>(&desc);
+		if (m_callback)
 		{
 			NewtonHingeSliderUpdateDesc userDesc;
 			unsigned state = 0;
@@ -48,16 +50,13 @@ class NewtonHinge: public ndJointHinge
 			userDesc.m_minFriction = -1.0e-20f;
 			userDesc.m_maxFriction = 1.0e-20f;
 			NewtonJoint* const joint = PointerCast<NewtonJoint, NewtonHinge>(this);
-			SetAsMotor(ndFloat32 (0.0f), ndFloat32(0.0f));
-			if (m_callback(joint, &userDesc))
-			{
-				SetAsMotor(GetOmega() + userDesc.m_accel * desc.m_invTimestep, ndMax (-userDesc.m_minFriction, userDesc.m_maxFriction));
-			}
+			m_callback(joint, &userDesc);
 		}
 
 		ndJointHinge::JacobianDerivative(desc);
 	}
 
+	ndWeakPtr<ndConstraintDescritor> m_desc;
 	NewtonHingeCallBack m_callback;
 };
 
@@ -291,25 +290,23 @@ dFloat NewtonHingeGetJointAngle(const NewtonJoint* const joint)
 	return userJoint->GetAngle();
 }
 
-// Name: NewtonHingeGetJointForce
-// Calculate the angular acceleration needed to stop the hinge at the desired angle.
-//
-// Parameters:
-// *const NewtonJoint* *Hinge - pointer to the joint.
-// *NewtonHingeSliderUpdateDesc* *desc - is the pointer to and the Hinge or slide structure.
-// *dFloat* angle - is the desired hinge stop angle 
-//
-// Return: the relative angular acceleration needed to stop the hinge.
-//
-// Remarks: this function can only be called from a *NewtonHingeCallBack* and it can be used by the application to implement hinge limits.
-// 
-// See also: NewtonHingeSetUserCallback
-dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat angle)
+void NewtonHingeEnableLimits(const NewtonJoint* const joint, int state)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
-	ndAssert(0);
-	//return userJoint->GetMotorZeroAcceleration(angle, (dgJointCallBackParam*)desc);
-	return 0;
+	userJoint->SetLimitState(state ? true : false);
 }
 
+void NewtonHingeSetLimits(const NewtonJoint* const joint, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	userJoint->SetLimits(minTwistAngle, maxTwistAngle);
+}
+
+void NewtonHingeSetAsMotor(const NewtonJoint* const joint, dFloat speed, dFloat maxTorque)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	userJoint->SetAsMotor(speed, maxTorque);
+}

@@ -33,13 +33,15 @@ class NewtonBallAndSockect: public ndJointSpherical
 
 	NewtonBallAndSockect(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointSpherical(pinAndPivotFrame, child, parent)
+		,m_desc(nullptr)
 		,m_callback(nullptr)
 	{
 	}
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		if (m_callback && (**GetUserData()))
+		m_desc = ndWeakPtr<ndConstraintDescritor>(&desc);
+		if (m_callback)
 		{
 			NewtonJoint* const joint = PointerCast<NewtonJoint, NewtonBallAndSockect>(this);
 			m_callback(joint);
@@ -47,6 +49,7 @@ class NewtonBallAndSockect: public ndJointSpherical
 		ndJointSpherical::JacobianDerivative(desc);
 	}
 
+	ndWeakPtr<ndConstraintDescritor> m_desc;
 	NewtonBallCallBack m_callback;
 };
 

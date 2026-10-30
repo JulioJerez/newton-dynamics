@@ -97,6 +97,12 @@ void ndJointDoubleHinge::SetTargetAngle0(ndFloat32 angle)
 	m_axis0.m_targetParam = angle;
 }
 
+void ndJointDoubleHinge::SetAsMotor0(ndFloat32 omega, ndFloat32 maxTorque)
+{
+	m_axis0.m_motorSpeed = omega;
+	m_axis0.m_motorForce = ndAbs(maxTorque);
+}
+
 void ndJointDoubleHinge::SetAsSpringDamper0(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
 {
 	m_axis0.m_springK = ndAbs(spring);
@@ -157,6 +163,12 @@ ndFloat32 ndJointDoubleHinge::GetTargetAngle1() const
 void ndJointDoubleHinge::SetTargetAngle1(ndFloat32 angle)
 {
 	m_axis1.m_targetParam = angle;
+}
+
+void ndJointDoubleHinge::SetAsMotor1(ndFloat32 omega, ndFloat32 maxTorque)
+{
+	m_axis1.m_motorSpeed = omega;
+	m_axis1.m_motorForce = ndAbs(maxTorque);
 }
 
 void ndJointDoubleHinge::SetAsSpringDamper1(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
@@ -342,6 +354,7 @@ void ndJointDoubleHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatri
 		{
 			if ((m_axis0.m_minLimit > (ndFloat32(-1.0f) * ndDegreeToRad)) && (m_axis0.m_maxLimit < (ndFloat32(1.0f) * ndDegreeToRad)))
 			{
+				m_axis0.m_hitLimits = true;
 				const ndVector frontDir((matrix0.m_front - matrix1.m_up.Scale(matrix0.m_front.DotProduct(matrix1.m_up).GetScalar())).Normalize());
 				const ndFloat32 angle = ndAtan2(-localMatrix.m_right.m_y, localMatrix.m_up.m_y);
 				AddAngularRowJacobian(desc, frontDir, -angle);
@@ -379,6 +392,7 @@ void ndJointDoubleHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatri
 		{
 			if ((m_axis1.m_minLimit > (ndFloat32(-1.0f) * ndDegreeToRad)) && (m_axis1.m_maxLimit < (ndFloat32(1.0f) * ndDegreeToRad)))
 			{
+				m_axis1.m_hitLimits = true;
 				const ndFloat32 angle = ndAtan2(localMatrix.m_front.m_z, localMatrix.m_front.m_x);
 				AddAngularRowJacobian(desc, &matrix1.m_up[0], angle);
 			}
@@ -410,11 +424,39 @@ void ndJointDoubleHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatri
 	}
 }
 
+void ndJointDoubleHinge::SubmitMotor0(ndConstraintDescritor& desc, const ndMatrix& matrix0)
+{
+	AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
+	ndFloat32 relativeSpeed = m_axis0.m_motorSpeed - GetOmega0();
+	ndFloat32 motorAccel = relativeSpeed * desc.m_invTimestep;
+	SetMotorAcceleration(desc, motorAccel);
+	SetLowerFriction(desc, -m_axis0.m_motorForce);
+	SetHighFriction(desc, m_axis0.m_motorForce);
+	if (m_axis0.m_hitLimits)
+	{
+		SetDiagonalRegularizer(desc, ndFloat32(1.0e-3f));
+	}
+}
+
 void ndJointDoubleHinge::SubmitSpringDamper0(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
 	const ndVector frontDir((matrix0.m_front - matrix1.m_up.Scale(matrix0.m_front.DotProduct(matrix1.m_up).GetScalar())).Normalize());
 	AddAngularRowJacobian(desc, frontDir, m_axis0.m_targetParam - m_axis0.m_param);
 	SetMassSpringDamperAcceleration(desc, m_axis0.m_springDamperRegularizer, m_axis0.m_springK, m_axis0.m_damperC);
+}
+
+void ndJointDoubleHinge::SubmitMotor1(ndConstraintDescritor& desc, const ndMatrix& matrix1)
+{
+	AddAngularRowJacobian(desc, matrix1.m_up, ndFloat32(0.0f));
+	ndFloat32 relativeSpeed = m_axis1.m_motorSpeed - GetOmega1();
+	ndFloat32 motorAccel = relativeSpeed * desc.m_invTimestep;
+	SetMotorAcceleration(desc, motorAccel);
+	SetLowerFriction(desc, -m_axis1.m_motorForce);
+	SetHighFriction(desc, m_axis1.m_motorForce);
+	if (m_axis1.m_hitLimits)
+	{
+		SetDiagonalRegularizer(desc, ndFloat32(1.0e-3f));
+	}
 }
 
 void ndJointDoubleHinge::SubmitSpringDamper1(ndConstraintDescritor& desc, const ndMatrix&, const ndMatrix& matrix1)
@@ -431,18 +473,26 @@ void ndJointDoubleHinge::JacobianDerivative(ndConstraintDescritor& desc)
 
 	ApplyBaseRows(desc, matrix0, matrix1);
 	
+	SubmitLimits(desc, matrix0, matrix1);
 	if (m_axis0.m_springDamperRegularizer && ((m_axis0.m_springK > ndFloat32(0.0f)) || (m_axis0.m_damperC > ndFloat32(0.0f))))
 	{
 		// spring damper with limits
 		SubmitSpringDamper0(desc, matrix0, matrix1);
 	}
+	else if (m_axis0.m_motorForce != ndFloat32(0.0f))
+	{
+		SubmitMotor0(desc, matrix0);
+	}
+
 
 	if (m_axis1.m_springDamperRegularizer && ((m_axis1.m_springK > ndFloat32(0.0f)) || (m_axis1.m_damperC > ndFloat32(0.0f))))
 	{
 		// spring damper with limits
 		SubmitSpringDamper1(desc, matrix0, matrix1);
 	}
-
-	SubmitLimits(desc, matrix0, matrix1);
+	else if (m_axis1.m_motorForce != ndFloat32(0.0f))
+	{
+		SubmitMotor1(desc, matrix1);
+	}
 }
 

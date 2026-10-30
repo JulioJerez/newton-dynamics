@@ -36,17 +36,11 @@ class ndJointSlider: public ndJointBilateralConstraint
 	D_NEWTON_API void SetLimits(ndFloat32 minLimit, ndFloat32 maxLimit);
 	D_NEWTON_API void GetLimits(ndFloat32& minLimit, ndFloat32& maxLimit) const;
 
-	//D_NEWTON_API ndFloat32 GetMaxForce() const;
-	//D_NEWTON_API bool GetMaxForceState() const;
-	//D_NEWTON_API void SetMaxForceState(bool state);
-	//D_NEWTON_API void SetMaxForce(ndFloat32 force);
-
-	D_NEWTON_API void SetAsDryFriction(ndFloat32 maxFrictionForce);
 	D_NEWTON_API void SetAsMotor(ndFloat32 speed, ndFloat32 maxForce);
 	D_NEWTON_API virtual void SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper);
-
 	D_NEWTON_API void GetSpringDamper(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const;
 	D_NEWTON_API void DebugJoint(ndConstraintDebugCallback& debugCallback) const override;
+
 	D_NEWTON_API void ClearMemory() override;
 
 	protected:

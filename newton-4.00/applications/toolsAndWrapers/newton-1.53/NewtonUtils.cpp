@@ -214,6 +214,7 @@ int NewtonAtomicSwap(int* const ptr, int value)
 
 void NewtonYield()
 {
+	TRACE_FUNCTION(__FUNCTION__);
 	ndInt32 loop = 0;
 	ndThreadYield(loop);
 }
@@ -231,3 +232,20 @@ void NewtonYield()
 //	TRACE_FUNCTION(__FUNCTION__);
 //	task (PointerCast<NewtonWorld, NewtonWorld>(newtonWorld), userData, 0);
 //}
+
+
+// Name: NewtonGetTimeStep 
+// Return the correct time step for this simulation update.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
+//
+// Remark: This application can used this function to get the current simulation time step. 
+// 
+// Return: correct update timestep.
+dFloat NewtonGetTimeStep(const NewtonWorld* newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	return world->GetScene()->GetTimestep();
+}
