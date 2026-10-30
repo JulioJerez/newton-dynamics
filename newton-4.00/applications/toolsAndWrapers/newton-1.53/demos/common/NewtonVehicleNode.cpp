@@ -6,17 +6,17 @@
 // 
 //********************************************************************
 
-// NewtonVehicle.cpp: implementation of the NewtonVehicle class.
+// NewtonVehicleNode.cpp: implementation of the NewtonVehicleNode class.
 //
 //////////////////////////////////////////////////////////////////////
 #include <stdafx.h>
-#include "NewtonVehicle.h"
+#include "NewtonVehicleNode.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-NewtonVehicle::NewtonVehicle(dSceneNode* parent, const dMatrix& matrix)
+NewtonVehicleNode::NewtonVehicleNode(dSceneNode* parent, const dMatrix& matrix)
   :dSceneNode(parent)
 {
 	SetMatrix (matrix);
@@ -25,22 +25,22 @@ NewtonVehicle::NewtonVehicle(dSceneNode* parent, const dMatrix& matrix)
 	m_vehicleJoint = NULL;
 }
 
-NewtonVehicle::~NewtonVehicle()
+NewtonVehicleNode::~NewtonVehicleNode()
 {
 }
 
 
-NewtonJoint* NewtonVehicle::GetJoint() const
+NewtonVehicle* NewtonVehicleNode::GetJoint() const
 {
 	return m_vehicleJoint;
 }
 
-NewtonBody* NewtonVehicle::GetRigidBody() const
+NewtonBody* NewtonVehicleNode::GetRigidBody() const
 {
 	return m_vehicleBody;
 }
 
-dFloat NewtonVehicle::GetSpeed() const
+dFloat NewtonVehicleNode::GetSpeed() const
 {
 	dVector veloc;
 	NewtonBodyGetVelocity(m_vehicleBody, &veloc[0]);

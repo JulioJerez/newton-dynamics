@@ -37,70 +37,55 @@
 
 //#define ND_USE_VEHICLE_DOUBLE_PASS_SOLVER	
 
-class ndConvexCastVehicle::ndBicycleModelStability : public ndJointBilateralConstraint
+ndConvexCastVehicle::ndBicycleModelStability::ndBicycleModelStability(ndConvexCastVehicle* const owner)
+	:ndJointBilateralConstraint(2, *owner->m_chassis, &m_sentinel, owner->m_chassis->GetMatrix())
+	,m_owner(owner)
+	,m_u(ndFloat32(0.0f))
+	,m_a(ndFloat32(0.0f))
+	,m_r(ndFloat32(0.0f))
+	,m_vx(ndFloat32(0.0f))
+	,m_vz(ndFloat32(0.0f))
+	,m_beta(ndFloat32(0.0f))
+	,m_betaRate(ndFloat32(0.0f))
+	,m_targetYawRate(ndFloat32(0.0f))
+	,m_modelIsValid(false)
 {
-	public:
-	ndBicycleModelStability(ndConvexCastVehicle* const owner)
-		:ndJointBilateralConstraint(2, *owner->m_chassis, &m_sentinel, owner->m_chassis->GetMatrix())
-		,m_owner(owner)
-		,m_u(ndFloat32(0.0f))
-		,m_a(ndFloat32(0.0f))
-		,m_r(ndFloat32(0.0f))
-		,m_vx(ndFloat32(0.0f))
-		,m_vz(ndFloat32(0.0f))
-		,m_beta(ndFloat32(0.0f))
-		,m_betaRate(ndFloat32(0.0f))
-		,m_targetYawRate(ndFloat32(0.0f))
-		,m_modelIsValid(false)
-	{
-	}
+}
 
-	void JacobianDerivative(ndConstraintDescritor& desc) override
+void ndConvexCastVehicle::ndBicycleModelStability::JacobianDerivative(ndConstraintDescritor& desc)
+{
+	// only add row when the model is applicable
+	if (m_modelIsValid)
 	{
-		// only add row when the model is applicable
-		if (m_modelIsValid)
 		{
-			{
-				// add angular row
-				ndMatrix matrix0;
-				ndMatrix matrix1;
+			// add angular row
+			ndMatrix matrix0;
+			ndMatrix matrix1;
 
-				// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
-				CalculateGlobalMatrix(matrix0, matrix1);
-				AddAngularRowJacobian(desc, matrix0.m_up, ndFloat32(0.0f));
+			// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
+			CalculateGlobalMatrix(matrix0, matrix1);
+			AddAngularRowJacobian(desc, matrix0.m_up, ndFloat32(0.0f));
 
-				const ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
-				const ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
+			const ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
+			const ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
 
-				const ndVector omega0 (m_body0->GetOmega());
-				const ndVector omega1 (m_body1->GetOmega());
+			const ndVector omega0 (m_body0->GetOmega());
+			const ndVector omega1 (m_body1->GetOmega());
 
-				//const ndFloat32 targetRate = m_betaRate;
-				const ndFloat32 targetRate = -0.2f;
-				const ndVector relOmega(omega0 * jacobian0.m_angular + omega1 * jacobian1.m_angular);
-				const ndFloat32 w = targetRate + relOmega.AddHorizontal().GetScalar();
-				SetMotorAcceleration(desc, -w * desc.m_invTimestep);
-			}
-
-
-			//const ndVector omega0(m_body0->GetVelocity());
-			//const ndVector omega1(m_body1->GetVelocity());
-
+			//const ndFloat32 targetRate = m_betaRate;
+			const ndFloat32 targetRate = -0.2f;
+			const ndVector relOmega(omega0 * jacobian0.m_angular + omega1 * jacobian1.m_angular);
+			const ndFloat32 w = targetRate + relOmega.AddHorizontal().GetScalar();
+			SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 		}
-	}
 
-	ndBodyDynamic m_sentinel;
-	ndWeakPtr<ndConvexCastVehicle> m_owner;
-	ndFloat32 m_u;
-	ndFloat32 m_a;
-	ndFloat32 m_r;
-	ndFloat32 m_vx;
-	ndFloat32 m_vz;
-	ndFloat32 m_beta;
-	ndFloat32 m_betaRate;
-	ndFloat32 m_targetYawRate;
-	bool m_modelIsValid;
-};
+
+		//const ndVector omega0(m_body0->GetVelocity());
+		//const ndVector omega1(m_body1->GetVelocity());
+
+	}
+}
+
 
 class ndConvexCastVehicle::ndBicycleModelContact: public ndContact
 {

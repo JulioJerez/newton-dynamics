@@ -48,6 +48,7 @@ extern "C" {
 	typedef struct NewtonCollision{} NewtonCollision;
 
 	typedef struct NewtonRagDoll{} NewtonRagDoll;
+	typedef struct NewtonVehicle {} NewtonVehicle;
 	typedef struct NewtonRagDollBone{} NewtonRagDollBone;
 	
 	typedef struct NewtonUserMeshCollisionCollideDescTag
@@ -115,7 +116,7 @@ extern "C" {
 	typedef void (*NewtonSetRagDollTransform) (const NewtonRagDollBone* bone);
 	typedef int (*NewtonGetBuoyancyPlane) (const int collisionID, void *context, const dFloat* globalSpaceMatrix, dFloat* globalSpacePlane);
 
-	typedef void (*NewtonVehicleTireUpdate) (const NewtonJoint* vehicle);
+	typedef void (*NewtonVehicleTireUpdate) (const NewtonVehicle* const vehicle);
 	
 	typedef unsigned (*NewtonWorldRayPrefilterCallback)(const NewtonBody* body, const NewtonCollision* collision, void* userData);
 	typedef dFloat (*NewtonWorldRayFilterCallback)(const NewtonBody* body, const dFloat* hitNormal, int collisionID, void* userData, dFloat intersetParam);
@@ -239,47 +240,6 @@ extern "C" {
 
 	NEWTON_API void NewtonRagDollBoneGetLocalMatrix (const NewtonRagDollBone* bone, dFloat* matrix);
 	NEWTON_API void NewtonRagDollBoneGetGlobalMatrix (const NewtonRagDollBone* bone, dFloat* matrix);
-
-
-
-	// **********************************************************************************************
-	//
-	// Vehicle joint functions
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonJoint* NewtonConstraintCreateVehicle (const NewtonWorld* newtonWorld, const dFloat* upDir, const NewtonBody* body); 
-	NEWTON_API void NewtonVehicleReset (const NewtonJoint* vehicle); 
-	NEWTON_API void NewtonVehicleSetTireCallback (const NewtonJoint* vehicle, NewtonVehicleTireUpdate update);
-	NEWTON_API void* NewtonVehicleAddTire (const NewtonJoint* vehicle, const dFloat* localMatrix, const dFloat* pin, dFloat mass, dFloat width, dFloat radius, 
-		       dFloat suspesionShock, dFloat suspesionSpring, dFloat suspesionLength, void* userData, int collisionID);
-	NEWTON_API void NewtonVehicleRemoveTire (const NewtonJoint* vehicle, void* tireId);
-
-	NEWTON_API void* NewtonVehicleGetFirstTireID (const NewtonJoint* vehicle);
-	NEWTON_API void* NewtonVehicleGetNextTireID (const NewtonJoint* vehicle, void* tireId);
-
-	NEWTON_API int NewtonVehicleTireIsAirBorne (const NewtonJoint* vehicle, void* tireId);
-	NEWTON_API int NewtonVehicleTireLostSideGrip (const NewtonJoint* vehicle, void* tireId);
-	NEWTON_API int NewtonVehicleTireLostTraction (const NewtonJoint* vehicle, void* tireId);
-
-	NEWTON_API void* NewtonVehicleGetTireUserData (const NewtonJoint* vehicle, void* tireId);
-	NEWTON_API dFloat NewtonVehicleGetTireOmega (const NewtonJoint* vehicle, void* tireId);
-	NEWTON_API dFloat NewtonVehicleGetTireNormalLoad (const NewtonJoint* vehicle, void* tireId);
-	NEWTON_API dFloat NewtonVehicleGetTireSteerAngle (const NewtonJoint* vehicle, void* tireId);
-	NEWTON_API dFloat NewtonVehicleGetTireLateralSpeed (const NewtonJoint* vehicle, void* tireId);
-	NEWTON_API dFloat NewtonVehicleGetTireLongitudinalSpeed (const NewtonJoint* vehicle, void* tireId);
-	NEWTON_API void NewtonVehicleGetTireMatrix (const NewtonJoint* vehicle, void* tireId, dFloat* matrix);
-
-
-	NEWTON_API void NewtonVehicleSetTireTorque (const NewtonJoint* vehicle, void* tireId, dFloat torque);
-	NEWTON_API void NewtonVehicleSetTireSteerAngle (const NewtonJoint* vehicle, void* tireId, dFloat angle);
-	
-	NEWTON_API void NewtonVehicleSetTireMaxSideSleepSpeed (const NewtonJoint* vehicle, void* tireId, dFloat speed);
-	NEWTON_API void NewtonVehicleSetTireSideSleepCoeficient (const NewtonJoint* vehicle, void* tireId, dFloat coeficient);
-	NEWTON_API void NewtonVehicleSetTireMaxLongitudinalSlideSpeed (const NewtonJoint* vehicle, void* tireId, dFloat speed);
-	NEWTON_API void NewtonVehicleSetTireLongitudinalSlideCoeficient (const NewtonJoint* vehicle, void* tireId, dFloat coeficient);
-
-	NEWTON_API dFloat NewtonVehicleTireCalculateMaxBrakeAcceleration (const NewtonJoint* vehicle, void* tireId);
-	NEWTON_API void NewtonVehicleTireSetBrakeAcceleration (const NewtonJoint* vehicle, void* tireId, dFloat accelaration, dFloat torqueLimit);
 
 #endif
 
@@ -620,6 +580,44 @@ extern "C" {
 	NEWTON_API NewtonJoint* NewtonConstraintCreateUpVector(const NewtonWorld* newtonWorld, const dFloat* pinDir, const NewtonBody* body);
 	NEWTON_API void NewtonUpVectorGetPin(const NewtonJoint* upVector, dFloat* pin);
 	NEWTON_API void NewtonUpVectorSetPin(const NewtonJoint* upVector, const dFloat* pin);
+
+	// **********************************************************************************************
+	//
+	// Vehicle joint functions
+	//
+	// **********************************************************************************************
+	NEWTON_API NewtonVehicle* NewtonConstraintCreateVehicle(const NewtonWorld* newtonWorld, const dFloat* upDir, const NewtonBody* body);
+	NEWTON_API void NewtonVehicleReset(const NewtonVehicle* const vehicle);
+	NEWTON_API void NewtonVehicleSetTireCallback(const NewtonVehicle* const vehicle, NewtonVehicleTireUpdate update);
+	NEWTON_API void* NewtonVehicleAddTire(const NewtonVehicle* const vehicle, const dFloat* localMatrix, const dFloat* pin, dFloat mass, dFloat width, dFloat radius,
+		dFloat suspesionShock, dFloat suspesionSpring, dFloat suspesionLength, void* userData, int collisionID);
+	NEWTON_API void NewtonVehicleRemoveTire(const NewtonVehicle* const vehicle, void* tireId);
+
+	NEWTON_API void* NewtonVehicleGetFirstTireID(const NewtonVehicle* const vehicle);
+	NEWTON_API void* NewtonVehicleGetNextTireID(const NewtonVehicle* const vehicle, void* tireId);
+
+	NEWTON_API int NewtonVehicleTireIsAirBorne(const NewtonVehicle* const vehicle, void* tireId);
+	NEWTON_API int NewtonVehicleTireLostSideGrip(const NewtonVehicle* const vehicle, void* tireId);
+	NEWTON_API int NewtonVehicleTireLostTraction(const NewtonVehicle* const vehicle, void* tireId);
+
+	NEWTON_API void* NewtonVehicleGetTireUserData(const NewtonVehicle* const vehicle, void* tireId);
+	NEWTON_API dFloat NewtonVehicleGetTireOmega(const NewtonVehicle* const vehicle, void* tireId);
+	NEWTON_API dFloat NewtonVehicleGetTireNormalLoad(const NewtonVehicle* const vehicle, void* tireId);
+	NEWTON_API dFloat NewtonVehicleGetTireSteerAngle(const NewtonVehicle* const vehicle, void* tireId);
+	NEWTON_API dFloat NewtonVehicleGetTireLateralSpeed(const NewtonVehicle* const vehicle, void* tireId);
+	NEWTON_API dFloat NewtonVehicleGetTireLongitudinalSpeed(const NewtonVehicle* const vehicle, void* tireId);
+	NEWTON_API void NewtonVehicleGetTireMatrix(const NewtonVehicle* const vehicle, void* tireId, dFloat* matrix);
+
+	NEWTON_API void NewtonVehicleSetTireTorque(const NewtonVehicle* const vehicle, void* tireId, dFloat torque);
+	NEWTON_API void NewtonVehicleSetTireSteerAngle(const NewtonVehicle* const vehicle, void* tireId, dFloat angle);
+
+	NEWTON_API void NewtonVehicleSetTireMaxSideSleepSpeed(const NewtonVehicle* const vehicle, void* tireId, dFloat speed);
+	NEWTON_API void NewtonVehicleSetTireSideSleepCoeficient(const NewtonVehicle* const vehicle, void* tireId, dFloat coeficient);
+	NEWTON_API void NewtonVehicleSetTireMaxLongitudinalSlideSpeed(const NewtonVehicle* const vehicle, void* tireId, dFloat speed);
+	NEWTON_API void NewtonVehicleSetTireLongitudinalSlideCoeficient(const NewtonVehicle* const vehicle, void* tireId, dFloat coeficient);
+
+	NEWTON_API dFloat NewtonVehicleTireCalculateMaxBrakeAcceleration(const NewtonVehicle* const vehicle, void* tireId);
+	NEWTON_API void NewtonVehicleTireSetBrakeAcceleration(const NewtonVehicle* const vehicle, void* tireId, dFloat accelaration, dFloat torqueLimit);
 
 #ifdef __cplusplus 
 }

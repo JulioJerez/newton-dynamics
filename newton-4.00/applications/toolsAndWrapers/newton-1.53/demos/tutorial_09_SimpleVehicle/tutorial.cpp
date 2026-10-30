@@ -24,9 +24,9 @@ static dSceneNode* nGrapphicWorld;
 
 #define CAMERA_SPEED	10.0f
 
-static NewtonVehicle* player;
-static NewtonVehicle* raceCarVehicle;
-static NewtonVehicle* dirTractorVehicle;
+static NewtonVehicleNode* player;
+static NewtonVehicleNode* raceCarVehicle;
+static NewtonVehicleNode* dirTractorVehicle;
 
 static dFloat cameraZoon = 6.0f;
 
@@ -135,10 +135,10 @@ static dFloat FindFloor (dFloat x, dFloat z)
 // callback to handle when the car leave the world
 void BodyLeaveWorkd (const NewtonBody* body)
 {
-	NewtonVehicle* car;
+	NewtonVehicleNode* car;
 
 	// get the user data
-	car = (NewtonVehicle*) NewtonBodyGetUserData(body);
+	car = (NewtonVehicleNode*) NewtonBodyGetUserData(body);
 
 // uncomment this for destroy and recreate the vehicle
 //#define DESTROY_AND_RECREATE
@@ -168,8 +168,9 @@ void BodyLeaveWorkd (const NewtonBody* body)
 		dMatrix matrix (GetIdentityMatrix());
 		matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z) + 4.0f;
 
+		_ASSERT(0);
 		// important to rest the vehicle tires before moving the car
-		NewtonBodySetMatrixRecursive(body, &matrix[0][0]);
+		//NewtonBodySetMatrixRecursive(body, &matrix[0][0]);
 	#endif
 
 }
@@ -830,10 +831,6 @@ void AddCylinder(const dMatrix& location)
 // create physics scene
 void InitScene()
 {
-	int i;
-	i = 0;
-
-	LevelPrimitive *level;
 	// /////////////////////////////////////////////////////////////////////
 	//
 	// create the newton world
@@ -861,10 +858,8 @@ void InitScene()
 	// /////////////////////////////////////////////////////////////////////
 	//
 	// load a height field mesh
-//	level = new LevelPrimitive(nGrapphicWorld, "newtontrack.dg", nWorld, NULL);
-	level = new LevelPrimitive(nGrapphicWorld, "newtontrack_flat.dg", nWorld, NULL);
-
-
+	//LevelPrimitive* level = new LevelPrimitive(nGrapphicWorld, "newtontrack.dg", nWorld, NULL);
+	LevelPrimitive* level = new LevelPrimitive(nGrapphicWorld, "newtontrack_flat.dg", nWorld, NULL);
 
 	// set the material group id to the terrain
 	NewtonBodySetMaterialGroupID (level->GetRigidBody(), levelID);
@@ -923,7 +918,7 @@ void InitScene()
 //	AddCylinder(matrix);
 
 	matrix.m_posit.m_x += 15.0f;
-	for (i = 0; i < 20; i ++) {	
+	for (int i = 0; i < 20; i ++) {
 		// add some props 
 		matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z);
 //		new NewtonProp (nGrapphicWorld, "prop_03.dg", nWorld, matrix);
@@ -933,7 +928,7 @@ void InitScene()
 
 	matrix.m_posit.m_x -= 100.0f;
 	matrix.m_posit.m_z -= 5.0f;
-	for (i = 0; i < 20; i ++) {	
+	for (int i = 0; i < 20; i ++) {
 		// add some props 
 		matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z);
 //		new NewtonProp (nGrapphicWorld, "prop_02.dg", nWorld, matrix);

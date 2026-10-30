@@ -12,12 +12,12 @@
 
 #include <stdafx.h>
 #include "OpenGlUtil.h"
-#include "NewtonVehicle.h"
+#include "NewtonVehicleNode.h"
 
 
 class TractorControlJoint;
 
-class NewtonTractor: public NewtonVehicle  
+class NewtonTractor: public NewtonVehicleNode  
 {
 	public:
 	NewtonTractor(dSceneNode* parent, const char* fileName, NewtonWorld* nWorld, const dMatrix& matrix);

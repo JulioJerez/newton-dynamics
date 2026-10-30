@@ -6,7 +6,7 @@
 // 
 //********************************************************************
 
-// NewtonVehicle.h: interface for the NewtonVehicle class.
+// NewtonVehicleNode.h: interface for the NewtonVehicleNode class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -23,25 +23,25 @@
 #define CHASIS_COLLITION_ID	0x200
 
 
-class NewtonVehicle: public dSceneNode  
+class NewtonVehicleNode: public dSceneNode  
 {
 	public:
-	NewtonVehicle(dSceneNode* parent, const dMatrix& matrix);
-	virtual ~NewtonVehicle();
+	NewtonVehicleNode(dSceneNode* parent, const dMatrix& matrix);
+	virtual ~NewtonVehicleNode();
 
 	virtual void SetSteering(dFloat value) = 0;
 	virtual void SetTireTorque(dFloat torque) = 0;
 	virtual void SetApplyHandBrakes (dFloat value) = 0;
 	virtual void SetControl(int index, dFloat value) = 0;
 
-	NewtonJoint* GetJoint() const;
 	NewtonBody* GetRigidBody() const;
+	NewtonVehicle* GetJoint() const;
 
 	dFloat GetSpeed() const;
 	
 	protected:
 	NewtonBody* m_vehicleBody;
-	NewtonJoint* m_vehicleJoint;
+	NewtonVehicle* m_vehicleJoint;
 };
 
 

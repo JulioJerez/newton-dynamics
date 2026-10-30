@@ -8,9 +8,9 @@
 
 #include <stdafx.h>
 #include "OpenGlUtil.h"
-#include "NewtonVehicle.h"
+#include "NewtonVehicleNode.h"
 
-class NewtonRaceCar: public NewtonVehicle  
+class NewtonRaceCar: public NewtonVehicleNode  
 {
 	struct RaceCarTire
 	{

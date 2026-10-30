@@ -33,7 +33,25 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 {
 	public:
 	class ndBicycleModelContact;
-	class ndBicycleModelStability;
+	//class ndBicycleModelStability;
+	class ndBicycleModelStability : public ndJointBilateralConstraint
+	{
+		public:
+		ndBicycleModelStability(ndConvexCastVehicle* const owner);
+		void JacobianDerivative(ndConstraintDescritor& desc) override;
+
+		ndBodyDynamic m_sentinel;
+		ndWeakPtr<ndConvexCastVehicle> m_owner;
+		ndFloat32 m_u;
+		ndFloat32 m_a;
+		ndFloat32 m_r;
+		ndFloat32 m_vx;
+		ndFloat32 m_vz;
+		ndFloat32 m_beta;
+		ndFloat32 m_betaRate;
+		ndFloat32 m_targetYawRate;
+		bool m_modelIsValid;
+	};
 
 	D_CLASS_REFLECTION(ndConvexCastVehicle, ndMultiBodyVehicle )
 	D_NEWTON_API ndConvexCastVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));
