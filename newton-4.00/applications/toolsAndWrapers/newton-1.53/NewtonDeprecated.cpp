@@ -288,3 +288,34 @@ int NewtonBodyGetContinuousCollisionMode(const NewtonBody* bodyPtr)
 	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 	return 0;
 }
+
+// Name: NewtonSetBodyLeaveWorldEvent 
+// Set the event callback function to be called in the event a body is escaping the limits of the world
+// during simulation time.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world
+// *NewtonBodyLeaveWorld* callback - is the pointer to the function callback
+// 
+// Return: Nothing
+//
+// Remarks: When a body moves outside the bounding box that defines the world space the body is automatically disabled
+// and Newton calls the application defined callback function *NewtonBodyLeaveWorld callback*. 
+// The application should decide how to handle the event, because Newton will make the callback once.
+// The only options available to the application are: do nothing or destroy the object. 
+//
+// Remarks: if the application wants to reinitialize the body, it will have to used the function 
+// NewtonBodySetMatrixRecursive, this is because it is possible that the rigid body is part of a set of 
+// articulate bodies and only one part leave the world while the others are still inside the world volume,
+// and in and situation like this the function NewtonSetMatrix will lead to unpredictable results.
+//
+// See also: NewtonSetWorldSize, NewtonBodySetMatrixRecursive
+void NewtonSetBodyLeaveWorldEvent(const NewtonWorld* newtonWorld, NewtonBodyLeaveWorld callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("TO DO: %s\n", __FUNCDNAME__));
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+	//Newton* world;
+	//world = (Newton*)newtonWorld;
+	//world->SetLeavingWorldCallback((OnLeavingWorldAction)callback);
+}
