@@ -274,7 +274,7 @@ void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSh
 	if (!node)
 	{
 		ndAssert(tireJoint->GetBody1() == GetRoot()->m_body->GetAsBody());
-		AddLimb(GetRoot(), tireBody, tireJoint);
+		AddLimb(GetRoot(), tireBody, joint);
 	}
 	body->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(360.0f) * ndDegreeToRad, ndFloat32(10.0f));
 }
