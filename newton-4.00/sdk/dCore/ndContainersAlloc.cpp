@@ -33,7 +33,7 @@ class ndFreeListHeader
 {
 	public:
 	ndInt32 m_count;
-	ndInt32 m_schunkSize;
+	ndInt32 m_chunkSize;
 	ndMemory::ndMemoryHeader* m_headPointer;
 };
 
@@ -134,7 +134,7 @@ class ndFreeListDictionary: public ndFixSizeArray<ndFreeListHeader, D_FREELIST_D
 		while ((i1 - i0 > 4))
 		{
 			ndInt32 mid = (i1 + i0) / 2;
-			if (me[mid].m_schunkSize <= size)
+			if (me[mid].m_chunkSize <= size)
 			{
 				i0 = mid;
 			}
@@ -146,7 +146,7 @@ class ndFreeListDictionary: public ndFixSizeArray<ndFreeListHeader, D_FREELIST_D
 
 		for (ndInt32 i = i0; i <= i1; ++i)
 		{
-			if (me[i].m_schunkSize == size)
+			if (me[i].m_chunkSize == size)
 			{
 				return &me[i];
 			}
@@ -155,19 +155,19 @@ class ndFreeListDictionary: public ndFixSizeArray<ndFreeListHeader, D_FREELIST_D
 		#ifdef _DEBUG
 			for (ndInt32 i = 0; i < GetCount(); ++i)
 			{
-				ndAssert(me[i].m_schunkSize != size);
+				ndAssert(me[i].m_chunkSize != size);
 			}
 		#endif
 
 		ndFreeListHeader header;
 		header.m_count = 0;
-		header.m_schunkSize = size;
+		header.m_chunkSize = size;
 		header.m_headPointer = nullptr;
 		PushBack(header);
 		ndInt32 index = GetCount() - 1;
 		for (ndInt32 i = GetCount() - 2; i >= 0; --i)
 		{
-			if (size < me[i].m_schunkSize)
+			if (size < me[i].m_chunkSize)
 			{
 				me[i + 1] = me[i];
 				me[i + 0] = header;
