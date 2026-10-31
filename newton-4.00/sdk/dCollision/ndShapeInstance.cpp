@@ -33,7 +33,8 @@
 
 ndVector ndShapeInstance::m_padding(D_MAX_SHAPE_AABB_PADDING, D_MAX_SHAPE_AABB_PADDING, D_MAX_SHAPE_AABB_PADDING, ndFloat32(0.0f));
 
-ndShapeInstance::ndShapeInstance(ndShape* const shape)
+//ndShapeInstance::ndShapeInstance(ndShape* const shape)
+ndShapeInstance::ndShapeInstance(ndSharedPtr<ndShape> shape)
 	:ndContainersFreeListAlloc<ndShapeInstance>()
 	,m_globalMatrix(ndGetIdentityMatrix())
 	,m_localMatrix(ndGetIdentityMatrix())
