@@ -431,7 +431,7 @@ void ndConvexCastVehicle::Debug(ndConstraintDebugCallback& context) const
 {
 	ndMultiBodyVehicle::Debug(context);
 
-	// try to render the a represenation of teh tire her, for now nothong
+	// try to render the a representation of the tires here, for now nothing
 	//ndVector red(ndVector::m_wOne);
 	//red.m_x = 1.0f;
 	//for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
@@ -503,6 +503,11 @@ void ndConvexCastVehicle::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 
 void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 {
+	if (!m_skeleton)
+	{
+		return;
+	}
+
 	ndWorld* const world = GetWorld();
 	ndAssert(world);
 	m_savedBody.SetCount(0);

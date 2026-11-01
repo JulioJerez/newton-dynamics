@@ -148,21 +148,20 @@ NewtonRaceCar::NewtonRaceCar(
 	//
 	// ////////////////////////////////////////////////////////////////////////////////////////////////
 	dVector updir (matrix.m_up);
-	m_vehicleJoint = NewtonConstraintCreateVehicle (nWorld, &updir[0], m_vehicleBody); 
 
-#if 0
+	m_vehicleJoint = NewtonConstraintCreateVehicle (nWorld, &updir[0], m_vehicleBody); 
 	// Set the vehicle control functions
 	NewtonVehicleSetTireCallback (m_vehicleJoint, TireUpdate);
+
 
  	// set the linear drag to the minimum
 	NewtonBodySetLinearDamping (m_vehicleBody, 0.0f);
 
 	// Add tires;
 	m_rearRighTire.Setup (this, "RR");
-	m_rearLeftTire.Setup (this, "RL");
-	m_frontRighTire.Setup (this, "FR");
-	m_frontLeftTire.Setup (this, "FL");
-#endif
+	//m_rearLeftTire.Setup (this, "RL");
+	//m_frontRighTire.Setup (this, "FR");
+	//m_frontLeftTire.Setup (this, "FL");
 
 	delete[] vertex;
 }
@@ -351,18 +350,14 @@ void NewtonRaceCar::SetApplyHandBrakes (dFloat value)
 
 
 
-void NewtonRaceCar::TireUpdate (const NewtonJoint* vehicle)
+void NewtonRaceCar::TireUpdate (const NewtonVehicle* vehicle)
 {
-	_ASSERTE(0);
-	//void* tyreId;
-	//RaceCarTire* tire;
-	//
-	//// iterate trough each tire applying the tire dynamics
-	//for (tyreId = NewtonVehicleGetFirstTireID (vehicle); tyreId; tyreId = NewtonVehicleGetNextTireID (vehicle, tyreId)) {
-	//	// get the graphic object and set the transformation matrix 
-	//	tire = (RaceCarTire*) NewtonVehicleGetTireUserData (vehicle, tyreId);
-	//	tire->SetTirePhysics (vehicle, tyreId);
-	//}
+	// iterate trough each tire applying the tire dynamics
+	for (void* tyreId = NewtonVehicleGetFirstTireID (vehicle); tyreId; tyreId = NewtonVehicleGetNextTireID (vehicle, tyreId)) {
+		// get the graphic object and set the transformation matrix 
+		RaceCarTire* tire = (RaceCarTire*) NewtonVehicleGetTireUserData (vehicle, tyreId);
+		tire->SetTirePhysics (vehicle, tyreId);
+	}
 
 
 	// uncomment this code to simulate losing a tire 
@@ -382,14 +377,8 @@ void NewtonRaceCar::TireUpdate (const NewtonJoint* vehicle)
 
 void NewtonRaceCar::RaceCarTire::Setup (NewtonRaceCar *root, const char* label)
 {
-	int i;
-	dFloat tireMass; 
-	dFloat tireSuspesionShock;
-	dFloat tireSuspesionSpring; 
-
-
 	// add vehicle tires
-	tireMass = 5.0f; 
+	dFloat tireMass = 5.0f;
 //	tireSuspesionShock = 1.0f;
 //	tireSuspesionSpring = 1.0f; 
 
@@ -407,7 +396,7 @@ void NewtonRaceCar::RaceCarTire::Setup (NewtonRaceCar *root, const char* label)
 	// use the main body part to create the the main collision geometry
 	dGeometrySegment& segment = m_tireNode->GetGeometry()->GetFirst()->GetInfo();
 	GLfloat *vertex = segment.m_vertex;
-	for (i = 0; i < segment.m_vertexCount; i ++) {
+	for (int i = 0; i < segment.m_vertexCount; i ++) {
 		m_width = (vertex[i * 3 + 0] > m_width) ? vertex[i * 3 + 0] : m_width;   
 		m_radius = (vertex[i * 3 + 1] > m_radius) ? vertex[i * 3 + 1] : m_radius;   
 	}
@@ -433,7 +422,7 @@ void NewtonRaceCar::RaceCarTire::Setup (NewtonRaceCar *root, const char* label)
 	// several gravity forces
 	// m * gravity = k * SUSPENSION_LENGTH * 0.5f, 
 	dFloat x = SUSPENSION_LENGTH;
-	tireSuspesionSpring = (200.0f * dAbs (GRAVITY)) / x;
+	dFloat tireSuspesionSpring = (200.0f * dAbs (GRAVITY)) / x;
 //	tireSuspesionSpring = (100.0f * dAbs (GRAVITY)) / x;
 
 	// from the equation of a simple spring / damper system
@@ -450,17 +439,14 @@ void NewtonRaceCar::RaceCarTire::Setup (NewtonRaceCar *root, const char* label)
 	float w = dSqrt (tireSuspesionSpring);
 
 //  a critically damped suspension act too jumpy for a race car, 	
-	tireSuspesionShock = 1.0f * w;
+	dFloat tireSuspesionShock = 1.0f * w;
 
 //	make it a little super critical y damped
 //	tireSuspesionShock = 2.0f * w;
 
-	_ASSERTE(0);
-#if 0
 	// add the tire and set this as the user data
 	NewtonVehicleAddTire (root->GetJoint(), &tirePosition[0][0], &tirePin[0], tireMass, m_width * 1.25f, m_radius, 
 						  tireSuspesionShock, tireSuspesionSpring, SUSPENSION_LENGTH, this, TIRE_COLLITION_ID);
-
 
 	// save the original tire set h
 	m_tireRefHeight = m_tireNode->GetMatrix().m_posit.m_y;
@@ -489,12 +475,10 @@ void NewtonRaceCar::RaceCarTire::Setup (NewtonRaceCar *root, const char* label)
  	m_axelNode = root->Find (name);
 	_ASSERTE (m_axelNode);
  	m_axelMatrix = m_axelNode->GetMatrix();
-#endif
 }
 
 
-
-void NewtonRaceCar::RaceCarTire::SetTirePhysics(const NewtonJoint* vehicle, void* tireId)
+void NewtonRaceCar::RaceCarTire::SetTirePhysics(const NewtonVehicle* vehicle, void* tireId)
 {
 /*
 	dFloat slipAngle; 
@@ -520,44 +504,40 @@ void NewtonRaceCar::RaceCarTire::SetTirePhysics(const NewtonJoint* vehicle, void
 */
 }
 
-void NewtonRaceCar::RearTire::SetTirePhysics(const NewtonJoint* vehicle, void* tireId)
+void NewtonRaceCar::RearTire::SetTirePhysics(const NewtonVehicle* vehicle, void* tireId)
 {
-	_ASSERTE(0);
-	//NewtonVehicleSetTireTorque (vehicle, tireId, m_torque);
-	//
-	//RaceCarTire::SetTirePhysics (vehicle, tireId);
-	//
-	//
-	//if (m_brakes > 0.0f) {
-	//	dFloat speed;
-	//	dFloat brakeAcceleration;
-	//
-	//	// ask Newton for the precise acceleration needed to stop the tire
-    // 	brakeAcceleration = NewtonVehicleTireCalculateMaxBrakeAcceleration (vehicle, tireId);
-	//
-	//	// tell Newton you want this tire stooped but only if the torque need it is less than 
-	//	// the brakes pad can withstand (assume max brake pad torque is 500 newton * meter)
-	//	NewtonVehicleTireSetBrakeAcceleration (vehicle, tireId, brakeAcceleration, 10000.0f);
-	//
-	//	// set some side slip as function of the linear speed 
-	//	speed = NewtonVehicleGetTireLongitudinalSpeed (vehicle, tireId);
-	//	NewtonVehicleSetTireMaxSideSleepSpeed (vehicle, tireId, speed * 0.1f);
-	//} else {
-	//	m_brakes = 0.0f;
-	//}
+	NewtonVehicleSetTireTorque (vehicle, tireId, m_torque);
+	
+	RaceCarTire::SetTirePhysics (vehicle, tireId);
+	
+	
+	if (m_brakes > 0.0f) {
+		dFloat speed;
+		dFloat brakeAcceleration;
+	
+		// ask Newton for the precise acceleration needed to stop the tire
+     	brakeAcceleration = NewtonVehicleTireCalculateMaxBrakeAcceleration (vehicle, tireId);
+	
+		// tell Newton you want this tire stooped but only if the torque need it is less than 
+		// the brakes pad can withstand (assume max brake pad torque is 500 newton * meter)
+		NewtonVehicleTireSetBrakeAcceleration (vehicle, tireId, brakeAcceleration, 10000.0f);
+	
+		// set some side slip as function of the linear speed 
+		speed = NewtonVehicleGetTireLongitudinalSpeed (vehicle, tireId);
+		NewtonVehicleSetTireMaxSideSleepSpeed (vehicle, tireId, speed * 0.1f);
+	} else {
+		m_brakes = 0.0f;
+	}
 
 }
 
 
-void NewtonRaceCar::FrontTire::SetTirePhysics(const NewtonJoint* vehicle, void* tireId)
+void NewtonRaceCar::FrontTire::SetTirePhysics(const NewtonVehicle* vehicle, void* tireId)
 {
-	_ASSERTE(0);
-	//dFloat currSteerAngle;
-	//
-	//currSteerAngle = NewtonVehicleGetTireSteerAngle (vehicle, tireId);
-	//NewtonVehicleSetTireSteerAngle (vehicle, tireId, currSteerAngle +  (m_steer - currSteerAngle) * 0.035f);
-	//
-	//RaceCarTire::SetTirePhysics (vehicle, tireId);
+	dFloat currSteerAngle = NewtonVehicleGetTireSteerAngle (vehicle, tireId);
+	NewtonVehicleSetTireSteerAngle (vehicle, tireId, currSteerAngle +  (m_steer - currSteerAngle) * 0.035f);
+	
+	RaceCarTire::SetTirePhysics (vehicle, tireId);
 }
 
 	

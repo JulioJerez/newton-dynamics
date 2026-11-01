@@ -179,17 +179,14 @@ void BodyLeaveWorkd (const NewtonBody* body)
 
 void DebugShowGeometryCollision (const NewtonBody* body, dInt32 vertexCount, const dFloat* faceVertec, dInt32 id)
 {
-	dInt32 i;
-
-	i = vertexCount - 1;
-	dVector p0 (faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
-	for (i = 0; i < vertexCount; i ++) {
+	dInt32 j = vertexCount - 1;
+	dVector p0 (faceVertec[j * 3 + 0], faceVertec[j * 3 + 1], faceVertec[j * 3 + 2]);
+	for (dInt32 i = 0; i < vertexCount; i ++) {
 		dVector p1 (faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
-//		glVertex3f (p0.m_x, p0.m_y, p0.m_z);
-//		glVertex3f (p1.m_x, p1.m_y, p1.m_z);
+		glVertex3f (p0.m_x, p0.m_y, p0.m_z);
+		glVertex3f (p1.m_x, p1.m_y, p1.m_z);
 		p0 = p1;
 	}
-
 }
 
 
@@ -239,8 +236,6 @@ void  DebugShowBodyCollision (const NewtonBody* body)
 						 									    
 	glVertex3f(origin.m_x - size, origin.m_y + size, origin.m_z - size);
 	glVertex3f(origin.m_x - size, origin.m_y + size, origin.m_z + size);
-
-
 
 	// render the collision is wire frame
 	NewtonBodyForEachPolygonDo (body, DebugShowGeometryCollision);

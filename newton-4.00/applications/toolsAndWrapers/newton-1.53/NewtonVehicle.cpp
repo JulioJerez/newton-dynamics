@@ -29,77 +29,94 @@ class NewtonConvexCastVehicle : public ndConvexCastVehicle
 {
 	public:
 	D_CLASS_REFLECTION(NewtonConvexCastVehicle, ndConvexCastVehicle)
-
 	NewtonConvexCastVehicle(const ndVector& gravityDir)
 		:ndConvexCastVehicle()
 		,m_gravityDir(gravityDir)
 	{
 	}
 
+	~NewtonConvexCastVehicle() override
+	{
+	}
+
+	virtual void Update(ndFloat32 timestep, ndInt32 threadId) override
+	{
+		ndConvexCastVehicle::Update(timestep, threadId);
+	}
+
+	virtual void Debug(ndConstraintDebugCallback& context) const override
+	{
+		ndConvexCastVehicle::Debug(context);
+	}
+
 	ndVector m_gravityDir;
 };
 
+class NewtonVehicleNotify: public ndModelNotify
+{
+	public:
+	D_CLASS_REFLECTION(NewtonConvexCastVehicle, ndModelNotify)
+
+	typedef void (*NewtonVehicleTireUpdate) (const NewtonVehicle* const vehicle);
+
+	NewtonVehicleNotify()
+		:ndModelNotify()
+		,m_onTireUpdate(nullptr)
+	{
+	}
+
+	NewtonVehicleNotify(const NewtonVehicleNotify& src)
+		:ndModelNotify(src)
+		,m_onTireUpdate(src.m_onTireUpdate)
+	{
+	}
+
+	virtual ~NewtonVehicleNotify() override
+	{
+	}
+
+	virtual ndModelNotify* Clone() const override
+	{
+		return new NewtonVehicleNotify(*this);
+	}
+
+	virtual void Update(ndFloat32 timestep, ndInt32 threadId) override
+	{
+		NewtonConvexCastVehicle* const vehicle = PointerCast<NewtonConvexCastVehicle, ndModel>(GetModel());
+		vehicle->Update(timestep, threadId);
+	}
+
+	virtual void PostUpdate(ndFloat32 timestep, ndInt32 threadId) override
+	{
+		NewtonConvexCastVehicle* const vehicle = PointerCast<NewtonConvexCastVehicle, ndModel>(GetModel());
+		ndAssert(vehicle);
+		vehicle->PostUpdate(timestep, threadId);
+	}
+
+	virtual bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) override
+	{
+		NewtonConvexCastVehicle* const vehicle = PointerCast<NewtonConvexCastVehicle, ndModel>(GetModel());
+		ndAssert(vehicle);
+
+		ndAssert(0);
+		return false;
+	}
+
+	void NewtonVehicleNotify::PostTransformUpdate(ndFloat32 timestep, ndInt32 threadId)
+	{
+		NewtonConvexCastVehicle* const vehicle = PointerCast<NewtonConvexCastVehicle, ndModel>(GetModel());
+		ndAssert(vehicle);
+		if (m_onTireUpdate)
+		{
+			m_onTireUpdate(PointerCast<NewtonVehicle, NewtonConvexCastVehicle>(vehicle));
+		}
+	}
+
+	NewtonVehicleTireUpdate m_onTireUpdate;
+};
+
+
 #if 0
-
-// Name: NewtonVehicleSetTireCallback
-// Store a function callback pointer for vehicle update.
-//
-// Parameters:
-// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
-// *NewtonVehicleTireUpdate* update - pointer to the callback function.
-//
-// Return: nothing
-//
-// Remarks: The only way to control a vehicle is by implementing the vehicle update callback. 
-// The application should iterate through each tire applying tire dynamics to each one. 
-//
-// See also: NewtonVehicleGetFirstTireID, NewtonVehicleGetNextTireID
-void NewtonVehicleSetTireCallback(const NewtonVehicle* const vehicle, NewtonVehicleTireUpdate update)
-{
-	dgVehicleConstraint* joint;
-
-	joint = (dgVehicleConstraint*)vehicle;
-	joint->SetTireCallback((OnVehicleUpdate)update);
-}
-
-
-// Name: NewtonVehicleAddTire
-// Add a new tire to the vehicle container.
-//
-// Parameters:
-// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
-// *const dFloat* *localMatrix - pointer to an array of 16 floats containing the offset of the tire relative to the vehicle body.
-// *const dFloat* pin - pointer to an array of 3 floats containing the rotation axis of the tire, in the space of the tire.
-// *dFloat* mass - tire mass, must be much smaller than the vehicle body. ratio of 50:1 to 100:1 are the recommended values. 
-// *dFloat* width - width of the tire, must be smaller than the tire radius.
-// *dFloat* radius - tire radius.
-// *dFloat* suspesionShock - parametrized damping constant for a spring, mass, damper system. A value of one corresponds to a critically damped system.
-// *dFloat* suspesionSpring - parametrized spring constant for a spring, mass, damper system. A value of one corresponds to a critically damped system.
-// *dFloat* suspesionLength - distance from the tire set position to the upper stop on the vehicle body frame. The total suspension length is twice that. 
-// *void* *userData - pointer to a user define data value. Usually used to store the pointer to the graphical representation of the tire.
-// *int* collisionID - the collision ID use by the application to identify the tire contacts in a contact callback function.
-//
-// Return: the tire ID.
-//
-// Remarks: After the application creates the vehicle joint, it must add the tires. 
-// Tires are added one at a time at the graphics set position and with the appropriate.
-// the application should calculate the correct tire parameters, like tire mass, position, width height,
-// spring and damper constants.
-//
-// See also: NewtonVehicleRemoveTire
-void* NewtonVehicleAddTire(const NewtonVehicle* const vehicle, const dFloat* localMatrix, const dFloat* pin, dFloat mass, dFloat width, dFloat radius,
-	dFloat suspesionShock, dFloat suspesionSpring, dFloat suspesionLength, void* userData, int collisionID)
-{
-	dgVehicleConstraint* joint;
-
-	joint = (dgVehicleConstraint*)vehicle;
-
-	dgMatrix& matrix(*((dgMatrix*)localMatrix));
-	dgVector tirePin(pin[0], pin[1], pin[2]);
-	//return joint->AddTire (matrix, pin, mass, width, radius, suspesionShock, suspesionSpring, suspesionLength, (void*)(dgUnsigned64(collisionID)), userData);
-	return joint->AddTire(matrix, pin, mass, width, radius, suspesionShock, suspesionSpring, suspesionLength, IntToPointer(collisionID), userData);
-}
-
 // Name: NewtonVehicleReset
 // Reset all tires velocities to zero. 
 //
@@ -134,88 +151,6 @@ void NewtonVehicleRemoveTire(const NewtonVehicle* const vehicle, void* tireId)
 	joint->RemoveTire(tireId);
 }
 
-
-// Name: NewtonVehicleGetTireSteerAngle
-// Get the tire steering angle.
-//
-// Parameters:
-// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
-// *void* *tireId - index to current tire.
-//
-// Return: steering angle.
-//
-// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
-// is only determined by the level of fidelity the application wants to achieve. In not case the use of one method is better than 
-// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
-//
-// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
-// So the application should set the desired value in each simulation frame.
-//
-// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
-dFloat NewtonVehicleGetTireSteerAngle(const NewtonVehicle* const vehicle, void* tireId)
-{
-	dgVehicleConstraint* joint;
-	joint = (dgVehicleConstraint*)vehicle;
-
-	return joint->GetSteerAngle(tireId);
-}
-
-
-// Name: NewtonVehicleSetTireSteerAngle
-// Set the tire steering angle.
-//
-// Parameters:
-// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
-// *void* *tireId - index to current tire.
-// *dFloat* angle - new steering angle.
-//
-// Return: nothing.
-//
-// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
-// is only determined by the level of fidelity the application wants to achieve. In not case the use of one method is better than 
-// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
-//
-// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
-// So the application should set the desired value in each simulation frame.
-//
-// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
-void NewtonVehicleSetTireSteerAngle(const NewtonVehicle* const vehicle, void* tireId, dFloat angle)
-{
-	dgVehicleConstraint* joint;
-	joint = (dgVehicleConstraint*)vehicle;
-
-	return joint->SetSteerAngle(tireId, angle);
-}
-
-
-// Name: NewtonVehicleSetTireTorque
-// Set the tire torque.
-//
-// Parameters:
-// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
-// *void* *tireId - index to current tire.
-// *dFloat* torque - new torque value.
-//
-// Return: nothing.
-//
-// Remarks: This function is useful to simulate normal vehicles with wheels that propel by applying torque to a the tire axis
-// in order to move.
-//
-// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
-// is only determined by the level of fidelity the application wants to achieve. In not case the use of one method is better than 
-// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
-//
-// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
-// So the application should set the desired value in each simulation frame.
-//
-// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
-void NewtonVehicleSetTireTorque(const NewtonVehicle* const vehicle, void* tireId, dFloat torque)
-{
-	dgVehicleConstraint* joint;
-	joint = (dgVehicleConstraint*)vehicle;
-
-	return joint->SetTireTorque(tireId, torque);
-}
 
 // Name: NewtonVehicleGetTireOmega
 // Retrieve the tire angular velocity.
@@ -267,79 +202,6 @@ dFloat NewtonVehicleGetTireNormalLoad(const NewtonVehicle* const vehicle, void* 
 	return joint->GetTireNormalLoad(tireId);
 }
 
-// Name: NewtonVehicleTireSetBrakeAcceleration
-// Apply the acceleration and max friction torque to a tire axis.
-//
-// Parameters:
-// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
-// *void* *tireId - index to current tire.
-// *dFloat* acceleration - desire tire acceleration.
-// *dFloat* maxFrictionTorque - maximum friction torque the tire brake, or tire motor can withstand.
-//
-// Return: noting.
-//
-// Remarks: This is a multipurpose function. The more common use is to apply hand or soft brakes to a vehicle. 
-// To apply brakes the application may use the function *NewtonVehicleTireSetBrakeAcceleration* to determine the exact acceleration
-// needed to stop the tire from continue to spin in one frame. To simulated the variable brakes strength the application can use 
-// a nominal maximum friction torque (just like in real life any device will withstand a max value) and modulate this value with an analog 
-// control. For hand brakes the application set the control to the maximum and for soft brakes it can just modulate the variable friction.
-// Another use for this function is to simulate rolling friction, For this effect the application apply the acceleration to stop
-// but with a friction value set to a minimum non zero fixed value. Note that brakes and tire torque are not mutually exclusive, 
-// the application can apply then simultaneously. As a matter of fact doing so is quite a satisfying test showing how the vehicles rocks 
-// forth and back due to the engine torque, while the tire prevent it from moving. Another use for this function is the simulation of 
-// track based vehicles. For this the application apply an arbitrary fix acceleration to 
-// the tires on each side of the vehicle. A function as simple as *A = Ad minus Ks x Omega* can do the trick, where Ad is the desire acceleration 
-// controlled by the application joystick, Ks is some viscous velocity damping, and omega is the current tire angular velocity reported by the 
-// function *NewtonVehicleGetTireOmega*. 
-// To make the vehicle take turns the application can elaborate the equation like *A = Ad + At minus Ks x Omega* where At is the differential 
-// acceleration supplied by the steering control, for the tires on the right side At is positive while for tires of the left side At is negative.
-//
-// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
-// is only determined by the level of fidelity the application wants to achieve. In not case the use of one method is better than 
-// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
-//
-// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
-// So the application should set the desired value in each simulation frame.
-//
-// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
-//
-// See also: NewtonVehicleTireCalculateMaxBrakeAcceleration, NewtonVehicleGetTireOmega
-void NewtonVehicleTireSetBrakeAcceleration(const NewtonVehicle* const vehicle, void* tireId, dFloat acceleration, dFloat maxFrictionTorque)
-{
-	dgVehicleConstraint* joint;
-	joint = (dgVehicleConstraint*)vehicle;
-
-	return joint->TireSetBrakeAcceleration(tireId, acceleration, maxFrictionTorque);
-}
-
-// Name: NewtonVehicleTireCalculateMaxBrakeAcceleration
-// Calculate the exact acceleration needed to be applied to a tire axis in order to bring it to full stop in one time step.
-//
-// Parameters:
-// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
-// *void* *tireId - index to current tire.
-//
-// Return: exact acceleration for full stop of the tire.
-//
-// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
-// is only determined by the level of fidelity the application want to achieve. In not case the use of one method is better than 
-// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
-//
-// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
-// So the application should set the desired value in each simulation frame.
-//
-// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
-//
-// See also: NewtonVehicleTireSetBrakeAcceleration
-dFloat NewtonVehicleTireCalculateMaxBrakeAcceleration(const NewtonVehicle* const vehicle, void* tireId)
-{
-	dgVehicleConstraint* joint;
-	joint = (dgVehicleConstraint*)vehicle;
-
-	return joint->TireCalculateMaxBrakeAcceleration(tireId);
-}
-
-
 // Name: NewtonVehicleGetTireLateralSpeed
 // Return the tire speed along the tire pin axis.
 //
@@ -365,88 +227,6 @@ dFloat NewtonVehicleGetTireLateralSpeed(const NewtonVehicle* const vehicle, void
 	return joint->GetTireLateralSpeed(tireId);
 }
 
-// Name: NewtonVehicleGetTireLongitudinalSpeed
-// Return the tire speed along tire center line.
-//
-// Parameters:
-// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
-// *void* *tireId - index to current tire.
-//
-// Return: tire longitudinal speed.
-//
-// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
-// is only determined by the level of fidelity the application want to achieve. In not case the use of one method is better than 
-// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
-//
-// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
-// So the application should set the desired value in each simulation frame.
-//
-// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
-dFloat NewtonVehicleGetTireLongitudinalSpeed(const NewtonVehicle* const vehicle, void* tireId)
-{
-	dgVehicleConstraint* joint;
-	joint = (dgVehicleConstraint*)vehicle;
-
-	return joint->GetTireLongitudinalSpeed(tireId);
-}
-
-
-// Name: NewtonVehicleSetTireMaxSideSleepSpeed
-// Set the maximum side slip velocity for the tire to be considered to lose grip.
-// 
-// Parameters:
-// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
-// *void* *tireId - index to current tire.
-// *dFloat* speed - maximum side speed before the vehicle is considered to loose side grip.
-//
-// Return: nothing.
-//
-// Remarks: Tire operation involve a mix of elastic distortion and sliding friction. To have and idea how to code a convincing 
-// approximation of a real tire we must run some experiment and make some reflection upon the result. First we will run a static 
-// test: keeping a tire at equilibrium applying a constant load and without rolling, we will apply a lateral force perpendicular 
-// to the tire plane and applied at the tire center. If we run this experiment we will find that the tire will deflect in response 
-// to the lateral force. If we increase the magnitude of the lateral force, the magnitude of the deflection is proportional to the 
-// magnitude of the lateral force, until the tire begins to slide. This show that when a tire is not moving it behaves like a spring 
-// (elastic distortion). If we repeat this experiment but this time increasing the tire load, but still not moving the tire, we will 
-// see that the max deflection is proportional to the magnitude of the tire load. This indicates the tire behavior is proportional 
-// to two variables, the lateral force and the tire load. (Fortunately the side force in practice is a linear function of the tire 
-// load so this keeps the model simple) Now we will run the first experiment but this time we will rotate the tire with a constant 
-// angular velocity (think of those tune up machines at check up stations.) With the tire rolling at constant angular velocity if we 
-// apply a lateral force we will see that as the tire deflect, the part of the tire in contact with the floor keeps rolling and another
-// part take its place, but this part also start to deflect, allowing the tire to move sideways with a velocity proportional to the 
-// tire rolling angular velocity. Notice that the tire does this without sliding as the part of it in contact with the floor never 
-// loses grip. Now if we increase the lateral force we will find that the lateral speed of the tire will also increase. This suggests 
-// that the side speed of the tire is proportional to the lateral force and also proportional to the rolling angular velocity. This 
-// is the tire elastic properties give then some kind of damping property when they are rolling. There is not known macroscopic 
-// mathematical model that can explain this behavior. The best we can do is to write the values of the experiment and use then to 
-// interpolate and extrapolate intermediate values. One thing we know is that the tires operates within some limits, and we can use 
-// those parameters to treat then as a constraint optimization problem, which is the Newton approach. When the tire is rolling and 
-// side slipping is not that the tire lost grip, nor that the tire is generating some force. It is rather that the tire have the 
-// capacity to absorb some of the lateral force by sliding and convert it to side velocity, this means that for the tire to 
-// loose grip a stronger force is necessary. In another word at rest a tire will lose grip under a much lower lateral force than 
-// if the tire was rolling. In Newton this behavior is treaded as a constrain optimization problem by asking the application how 
-// much side slip velocity is the tire allow to have before it is considered to lose grip, and how much of the lateral forces 
-// generated by the rigid body dynamics will be adsorbed by the tire at a given speed. It is the application responsibility to 
-// set these parameters as close to the real tire as it chooses. This approach allows for a very wide range of behaviors form arcade, 
-// to toy cars to very realistic.
-//
-// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
-// is only determined by the level of fidelity the application want to achieve. In not case the use of one method is better than 
-// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
-//
-// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
-// So the application should set the desired value in each simulation frame.
-//
-// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
-//
-// See also: NewtonVehicleSetTireSideSleepCoeficient
-void NewtonVehicleSetTireMaxSideSleepSpeed(const NewtonVehicle* const vehicle, void* tireId, dFloat speed)
-{
-	dgVehicleConstraint* joint;
-	joint = (dgVehicleConstraint*)vehicle;
-
-	return joint->SetTireMaxSideSleepSpeed(tireId, speed);
-}
 
 // Name: NewtonVehicleSetTireSideSleepCoeficient
 // Set the coefficient that tell the engine how much of the lateral force can be absorbed by the tire.
@@ -647,6 +427,8 @@ NewtonVehicle* NewtonConstraintCreateVehicle(const NewtonWorld* const newtonWorl
 	const ndVector pin(upDir[0], upDir[1], upDir[2], ndFloat32 (0.0f));
 	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	NewtonConvexCastVehicle* const vehicle = new NewtonConvexCastVehicle(pin);
+	ndSharedPtr<ndModelNotify> nofify(new NewtonVehicleNotify());
+	vehicle->SetNotifyCallback(nofify);
 
 	ndBodyKinematic* const body = PointerCast<ndBodyKinematic, NewtonBody>(chassisBody);
 	ndBodyListView::ndNode* const sceneNode = body->GetSceneNode();
@@ -655,6 +437,107 @@ NewtonVehicle* NewtonConstraintCreateVehicle(const NewtonWorld* const newtonWorl
 
 	world->AddModel(ndSharedPtr<ndModel>(vehicle));
 	return PointerCast<NewtonVehicle, NewtonConvexCastVehicle>(vehicle);
+}
+
+// Name: NewtonVehicleGetTireUserData
+// Retrieve the pointer to the tire user data.
+//
+// Parameters:
+// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
+// *void* *tireId - index to current tire.
+//
+// Return: tire user data.
+//
+// Remarks: This function is usually used from the vehicle update callback or from transformation callback of the vehicle body, 
+// It can used do set the transformation matrix of the tire graphical representation.
+void* NewtonVehicleGetTireUserData(const NewtonVehicle* const vehicle, void* tireId)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndList<ndMultiBodyVehicleTireJoint*>::ndNode* const tireNodeList = PointerCast<ndList<ndMultiBodyVehicleTireJoint*>::ndNode, void>(tireId);
+	ndMultiBodyVehicleTireJoint* const tireJoint = tireNodeList->GetInfo();
+	return NewtonJointGetUserData(PointerCast<NewtonJoint, ndMultiBodyVehicleTireJoint>(tireJoint));
+}
+
+// Name: NewtonVehicleSetTireCallback
+// Store a function callback pointer for vehicle update.
+//
+// Parameters:
+// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
+// *NewtonVehicleTireUpdate* update - pointer to the callback function.
+//
+// Return: nothing
+//
+// Remarks: The only way to control a vehicle is by implementing the vehicle update callback. 
+// The application should iterate through each tire applying tire dynamics to each one. 
+//
+// See also: NewtonVehicleGetFirstTireID, NewtonVehicleGetNextTireID
+void NewtonVehicleSetTireCallback(const NewtonVehicle* const vehicle, NewtonVehicleTireUpdate update)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonConvexCastVehicle* const veh = PointerCast<NewtonConvexCastVehicle, NewtonVehicle>(vehicle);
+	NewtonVehicleNotify* const notify = PointerCast<NewtonVehicleNotify, ndModelNotify>(*veh->GetNotifyCallback());
+	notify->m_onTireUpdate = update;
+}
+
+// Name: NewtonVehicleAddTire
+// Add a new tire to the vehicle container.
+//
+// Parameters:
+// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
+// *const dFloat* *localMatrix - pointer to an array of 16 floats containing the offset of the tire relative to the vehicle body.
+// *const dFloat* pin - pointer to an array of 3 floats containing the rotation axis of the tire, in the space of the tire.
+// *dFloat* mass - tire mass, must be much smaller than the vehicle body. ratio of 50:1 to 100:1 are the recommended values. 
+// *dFloat* width - width of the tire, must be smaller than the tire radius.
+// *dFloat* radius - tire radius.
+// *dFloat* suspesionShock - parametrized damping constant for a spring, mass, damper system. A value of one corresponds to a critically damped system.
+// *dFloat* suspesionSpring - parametrized spring constant for a spring, mass, damper system. A value of one corresponds to a critically damped system.
+// *dFloat* suspesionLength - distance from the tire set position to the upper stop on the vehicle body frame. The total suspension length is twice that. 
+// *void* *userData - pointer to a user define data value. Usually used to store the pointer to the graphical representation of the tire.
+// *int* collisionID - the collision ID use by the application to identify the tire contacts in a contact callback function.
+//
+// Return: the tire ID.
+//
+// Remarks: After the application creates the vehicle joint, it must add the tires. 
+// Tires are added one at a time at the graphics set position and with the appropriate.
+// the application should calculate the correct tire parameters, like tire mass, position, width height,
+// spring and damper constants.
+//
+// See also: NewtonVehicleRemoveTire
+void* NewtonVehicleAddTire(const NewtonVehicle* const vehicle, const dFloat* localMatrix, const dFloat* pin, dFloat mass, dFloat width, dFloat radius,
+	dFloat suspesionShock, dFloat suspesionSpring, dFloat suspesionLength, void* userData, int collisionID)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonConvexCastVehicle* const veh = PointerCast<NewtonConvexCastVehicle, NewtonVehicle>(vehicle);
+
+	ndSharedPtr<ndBody> wheelBody(new ndBodyDynamic());
+	ndBodyDynamic* const wheel = wheelBody->GetAsBodyDynamic();
+
+	ndShapeInstance wheelShape(ndSharedPtr<ndShape>(new ndShapeChamferCylinder(radius, width)));
+	wheel->SetCollisionShape(wheelShape);
+	wheel->SetMassMatrix(mass, wheelShape);
+
+	const ndBodyDynamic* const chassis = veh->GetChassis();
+	ndMatrix matrix(GetMatrix(localMatrix) * chassis->GetMatrix());
+	matrix.m_front.m_w = ndFloat32(0.0f);
+	matrix.m_up.m_w = ndFloat32(0.0f);
+	matrix.m_right.m_w = ndFloat32(0.0f);
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+	wheel->SetMatrix(matrix);
+
+	ndVector wheelAxis(pin[0], pin[1], pin[2], ndFloat32(0.0f));
+
+	ndWheelDescriptor desc;
+	desc.m_damperC = suspesionShock;
+	desc.m_springK = suspesionSpring;
+	desc.m_steeringAngle = ndFloat32(0.0f);
+	desc.m_handBrakeTorque = ndFloat32(0.0f);
+	desc.m_regularizer = ndFloat32(0.01f);
+	desc.m_lowerStop = ndFloat32(0.5f) * suspesionLength;
+	desc.m_upperStop = ndFloat32(0.5f) * suspesionLength;
+
+	ndMultiBodyVehicleTireJoint* const tireJoint = veh->AddTire(desc, wheelBody);
+	NewtonJointSetUserData(PointerCast<NewtonJoint, ndMultiBodyVehicleTireJoint>(tireJoint), userData);
+	return tireJoint;
 }
 
 // Name: NewtonVehicleGetFirstTireID
@@ -671,11 +554,9 @@ NewtonVehicle* NewtonConstraintCreateVehicle(const NewtonWorld* const newtonWorl
 void* NewtonVehicleGetFirstTireID(const NewtonVehicle* const vehicle)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgVehicleConstraint* joint;
-	//joint = (dgVehicleConstraint*)vehicle;
-	//
-	//return joint->GetFirstTireIndex();
-	return nullptr;
+	NewtonConvexCastVehicle* const veh = PointerCast<NewtonConvexCastVehicle, NewtonVehicle>(vehicle);
+	const ndList<ndMultiBodyVehicleTireJoint*>& tireList = veh->GetTireList();
+	return tireList.GetFirst();
 }
 
 // Name: NewtonVehicleGetNextTireID
@@ -693,36 +574,10 @@ void* NewtonVehicleGetFirstTireID(const NewtonVehicle* const vehicle)
 void* NewtonVehicleGetNextTireID(const NewtonVehicle* const vehicle, void* tireId)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-
-	//dgVehicleConstraint* joint;
-	//joint = (dgVehicleConstraint*)vehicle;
-	//return joint->GetNextTireIndex(tireId);
-	return nullptr;
+	ndList<ndMultiBodyVehicleTireJoint*>::ndNode* const node = PointerCast<ndList<ndMultiBodyVehicleTireJoint*>::ndNode, void>(tireId);
+	return node->GetNext();
 }
 
-// Name: NewtonVehicleGetTireUserData
-// Retrieve the pointer to the tire user data.
-//
-// Parameters:
-// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
-// *void* *tireId - index to current tire.
-//
-// Return: tire user data.
-//
-// Remarks: This function is usually used from the vehicle update callback or from transformation callback of the vehicle body, 
-// It can used do set the transformation matrix of the tire graphical representation.
-void* NewtonVehicleGetTireUserData(const NewtonVehicle* const vehicle, void* tireId)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-
-	//dgVehicleConstraint* joint;
-	//joint = (dgVehicleConstraint*)vehicle;
-	//return joint->GetTireUserData(tireId);
-	return nullptr;
-}
-	
 // Name: NewtonVehicleGetTireMatrix
 // Retrieve the transformation matrix of the tire in global space.
 //
@@ -738,11 +593,249 @@ void* NewtonVehicleGetTireUserData(const NewtonVehicle* const vehicle, void* tir
 void NewtonVehicleGetTireMatrix(const NewtonVehicle* const vehicle, void* tireId, dFloat* matrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
+	ndList<ndMultiBodyVehicleTireJoint*>::ndNode* const tireNodeList = PointerCast<ndList<ndMultiBodyVehicleTireJoint*>::ndNode, void>(tireId);
+	ndMultiBodyVehicleTireJoint* const tireJoint = tireNodeList->GetInfo();
+	return NewtonBodyGetMatrix(PointerCast<NewtonBody, ndBodyKinematic>(tireJoint->GetBody0()), matrix);
+}
+
+// Name: NewtonVehicleSetTireSteerAngle
+// Set the tire steering angle.
+//
+// Parameters:
+// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
+// *void* *tireId - index to current tire.
+// *dFloat* angle - new steering angle.
+//
+// Return: nothing.
+//
+// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
+// is only determined by the level of fidelity the application wants to achieve. In not case the use of one method is better than 
+// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
+//
+// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
+// So the application should set the desired value in each simulation frame.
+//
+// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
+void NewtonVehicleSetTireSteerAngle(const NewtonVehicle* const vehicle, void* tireId, dFloat angle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndList<ndMultiBodyVehicleTireJoint*>::ndNode* const tireNodeList = PointerCast<ndList<ndMultiBodyVehicleTireJoint*>::ndNode, void>(tireId);
+	ndMultiBodyVehicleTireJoint* const tireJoint = tireNodeList->GetInfo();
+	tireJoint->SetSteering(angle);
+}
+
+// Name: NewtonVehicleGetTireSteerAngle
+// Get the tire steering angle.
+//
+// Parameters:
+// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
+// *void* *tireId - index to current tire.
+//
+// Return: steering angle.
+//
+// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
+// is only determined by the level of fidelity the application wants to achieve. In not case the use of one method is better than 
+// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
+//
+// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
+// So the application should set the desired value in each simulation frame.
+//
+// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
+dFloat NewtonVehicleGetTireSteerAngle(const NewtonVehicle* const vehicle, void* tireId)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndList<ndMultiBodyVehicleTireJoint*>::ndNode* const tireNodeList = PointerCast<ndList<ndMultiBodyVehicleTireJoint*>::ndNode, void>(tireId);
+	const ndMultiBodyVehicleTireJoint* const tireJoint = tireNodeList->GetInfo();
+	return tireJoint->GetSteering();
+}
+
+// Name: NewtonVehicleGetTireLongitudinalSpeed
+// Return the tire speed along tire center line.
+//
+// Parameters:
+// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
+// *void* *tireId - index to current tire.
+//
+// Return: tire longitudinal speed.
+//
+// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
+// is only determined by the level of fidelity the application want to achieve. In not case the use of one method is better than 
+// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
+//
+// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
+// So the application should set the desired value in each simulation frame.
+//
+// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
+dFloat NewtonVehicleGetTireLongitudinalSpeed(const NewtonVehicle* const vehicle, void* tireId)
+{
+	ndList<ndMultiBodyVehicleTireJoint*>::ndNode* const tireNodeList = PointerCast<ndList<ndMultiBodyVehicleTireJoint*>::ndNode, void>(tireId);
+	const ndMultiBodyVehicleTireJoint* const tireJoint = tireNodeList->GetInfo();
+
+	//return joint->GetTireLongitudinalSpeed(tireId);
+	return 0.0f;
+}
+
+// Name: NewtonVehicleSetTireTorque
+// Set the tire torque.
+//
+// Parameters:
+// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
+// *void* *tireId - index to current tire.
+// *dFloat* torque - new torque value.
+//
+// Return: nothing.
+//
+// Remarks: This function is useful to simulate normal vehicles with wheels that propel by applying torque to a the tire axis
+// in order to move.
+//
+// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
+// is only determined by the level of fidelity the application wants to achieve. In not case the use of one method is better than 
+// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
+//
+// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
+// So the application should set the desired value in each simulation frame.
+//
+// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
+void NewtonVehicleSetTireTorque(const NewtonVehicle* const vehicle, void* tireId, dFloat torque)
+{
+	ndList<ndMultiBodyVehicleTireJoint*>::ndNode* const tireNodeList = PointerCast<ndList<ndMultiBodyVehicleTireJoint*>::ndNode, void>(tireId);
+	const ndMultiBodyVehicleTireJoint* const tireJoint = tireNodeList->GetInfo();
+	//return joint->SetTireTorque(tireId, torque);
+}
+
+// Name: NewtonVehicleSetTireMaxSideSleepSpeed
+// Set the maximum side slip velocity for the tire to be considered to lose grip.
+// 
+// Parameters:
+// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
+// *void* *tireId - index to current tire.
+// *dFloat* speed - maximum side speed before the vehicle is considered to loose side grip.
+//
+// Return: nothing.
+//
+// Remarks: Tire operation involve a mix of elastic distortion and sliding friction. To have and idea how to code a convincing 
+// approximation of a real tire we must run some experiment and make some reflection upon the result. First we will run a static 
+// test: keeping a tire at equilibrium applying a constant load and without rolling, we will apply a lateral force perpendicular 
+// to the tire plane and applied at the tire center. If we run this experiment we will find that the tire will deflect in response 
+// to the lateral force. If we increase the magnitude of the lateral force, the magnitude of the deflection is proportional to the 
+// magnitude of the lateral force, until the tire begins to slide. This show that when a tire is not moving it behaves like a spring 
+// (elastic distortion). If we repeat this experiment but this time increasing the tire load, but still not moving the tire, we will 
+// see that the max deflection is proportional to the magnitude of the tire load. This indicates the tire behavior is proportional 
+// to two variables, the lateral force and the tire load. (Fortunately the side force in practice is a linear function of the tire 
+// load so this keeps the model simple) Now we will run the first experiment but this time we will rotate the tire with a constant 
+// angular velocity (think of those tune up machines at check up stations.) With the tire rolling at constant angular velocity if we 
+// apply a lateral force we will see that as the tire deflect, the part of the tire in contact with the floor keeps rolling and another
+// part take its place, but this part also start to deflect, allowing the tire to move sideways with a velocity proportional to the 
+// tire rolling angular velocity. Notice that the tire does this without sliding as the part of it in contact with the floor never 
+// loses grip. Now if we increase the lateral force we will find that the lateral speed of the tire will also increase. This suggests 
+// that the side speed of the tire is proportional to the lateral force and also proportional to the rolling angular velocity. This 
+// is the tire elastic properties give then some kind of damping property when they are rolling. There is not known macroscopic 
+// mathematical model that can explain this behavior. The best we can do is to write the values of the experiment and use then to 
+// interpolate and extrapolate intermediate values. One thing we know is that the tires operates within some limits, and we can use 
+// those parameters to treat then as a constraint optimization problem, which is the Newton approach. When the tire is rolling and 
+// side slipping is not that the tire lost grip, nor that the tire is generating some force. It is rather that the tire have the 
+// capacity to absorb some of the lateral force by sliding and convert it to side velocity, this means that for the tire to 
+// loose grip a stronger force is necessary. In another word at rest a tire will lose grip under a much lower lateral force than 
+// if the tire was rolling. In Newton this behavior is treaded as a constrain optimization problem by asking the application how 
+// much side slip velocity is the tire allow to have before it is considered to lose grip, and how much of the lateral forces 
+// generated by the rigid body dynamics will be adsorbed by the tire at a given speed. It is the application responsibility to 
+// set these parameters as close to the real tire as it chooses. This approach allows for a very wide range of behaviors form arcade, 
+// to toy cars to very realistic.
+//
+// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
+// is only determined by the level of fidelity the application want to achieve. In not case the use of one method is better than 
+// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
+//
+// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
+// So the application should set the desired value in each simulation frame.
+//
+// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
+//
+// See also: NewtonVehicleSetTireSideSleepCoeficient
+void NewtonVehicleSetTireMaxSideSleepSpeed(const NewtonVehicle* const vehicle, void* tireId, dFloat speed)
+{
+	ndList<ndMultiBodyVehicleTireJoint*>::ndNode* const tireNodeList = PointerCast<ndList<ndMultiBodyVehicleTireJoint*>::ndNode, void>(tireId);
+	const ndMultiBodyVehicleTireJoint* const tireJoint = tireNodeList->GetInfo();
+
+	//dgVehicleConstraint* joint;
+	//joint = (dgVehicleConstraint*)vehicle;
+	//return joint->SetTireMaxSideSleepSpeed(tireId, speed);
+}
+
+// Name: NewtonVehicleTireCalculateMaxBrakeAcceleration
+// Calculate the exact acceleration needed to be applied to a tire axis in order to bring it to full stop in one time step.
+//
+// Parameters:
+// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
+// *void* *tireId - index to current tire.
+//
+// Return: exact acceleration for full stop of the tire.
+//
+// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
+// is only determined by the level of fidelity the application want to achieve. In not case the use of one method is better than 
+// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
+//
+// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
+// So the application should set the desired value in each simulation frame.
+//
+// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
+//
+// See also: NewtonVehicleTireSetBrakeAcceleration
+dFloat NewtonVehicleTireCalculateMaxBrakeAcceleration(const NewtonVehicle* const vehicle, void* tireId)
+{
+	ndList<ndMultiBodyVehicleTireJoint*>::ndNode* const tireNodeList = PointerCast<ndList<ndMultiBodyVehicleTireJoint*>::ndNode, void>(tireId);
+	const ndMultiBodyVehicleTireJoint* const tireJoint = tireNodeList->GetInfo();
+
+	//dgVehicleConstraint* joint;
+	//joint = (dgVehicleConstraint*)vehicle;
+	//return joint->TireCalculateMaxBrakeAcceleration(tireId);
+	return 0.0f;
+}
+
+// Name: NewtonVehicleTireSetBrakeAcceleration
+// Apply the acceleration and max friction torque to a tire axis.
+//
+// Parameters:
+// *const NewtonJoint* *vehicle - pointer to the vehicle joint.
+// *void* *tireId - index to current tire.
+// *dFloat* acceleration - desire tire acceleration.
+// *dFloat* maxFrictionTorque - maximum friction torque the tire brake, or tire motor can withstand.
+//
+// Return: noting.
+//
+// Remarks: This is a multipurpose function. The more common use is to apply hand or soft brakes to a vehicle. 
+// To apply brakes the application may use the function *NewtonVehicleTireSetBrakeAcceleration* to determine the exact acceleration
+// needed to stop the tire from continue to spin in one frame. To simulated the variable brakes strength the application can use 
+// a nominal maximum friction torque (just like in real life any device will withstand a max value) and modulate this value with an analog 
+// control. For hand brakes the application set the control to the maximum and for soft brakes it can just modulate the variable friction.
+// Another use for this function is to simulate rolling friction, For this effect the application apply the acceleration to stop
+// but with a friction value set to a minimum non zero fixed value. Note that brakes and tire torque are not mutually exclusive, 
+// the application can apply then simultaneously. As a matter of fact doing so is quite a satisfying test showing how the vehicles rocks 
+// forth and back due to the engine torque, while the tire prevent it from moving. Another use for this function is the simulation of 
+// track based vehicles. For this the application apply an arbitrary fix acceleration to 
+// the tires on each side of the vehicle. A function as simple as *A = Ad minus Ks x Omega* can do the trick, where Ad is the desire acceleration 
+// controlled by the application joystick, Ks is some viscous velocity damping, and omega is the current tire angular velocity reported by the 
+// function *NewtonVehicleGetTireOmega*. 
+// To make the vehicle take turns the application can elaborate the equation like *A = Ad + At minus Ks x Omega* where At is the differential 
+// acceleration supplied by the steering control, for the tires on the right side At is positive while for tires of the left side At is negative.
+//
+// Remarks: The vehicle joint provides a rich set of interface functions to the application. Which function to use 
+// is only determined by the level of fidelity the application wants to achieve. In not case the use of one method is better than 
+// other, and it may be that some tweaking and trial is necessary before the desired vehicle behavior is achieved.
+//
+// Remarks: The parameters applied to a tire are reset to default values each time the update function is called.
+// So the application should set the desired value in each simulation frame.
+//
+// Remarks: This function can only be called from the vehicle update call back. It can be used by the application to generate the custom vehicle dynamics.
+//
+// See also: NewtonVehicleTireCalculateMaxBrakeAcceleration, NewtonVehicleGetTireOmega
+void NewtonVehicleTireSetBrakeAcceleration(const NewtonVehicle* const vehicle, void* tireId, dFloat acceleration, dFloat maxFrictionTorque)
+{
+	ndList<ndMultiBodyVehicleTireJoint*>::ndNode* const tireNodeList = PointerCast<ndList<ndMultiBodyVehicleTireJoint*>::ndNode, void>(tireId);
+	const ndMultiBodyVehicleTireJoint* const tireJoint = tireNodeList->GetInfo();
 
 	//dgVehicleConstraint* joint;
 	//joint = (dgVehicleConstraint*)vehicle;
 	//
-	//dgMatrix& retMatrix = *((dgMatrix*)matrix);
-	//joint->GetTireMatrix(tireId, retMatrix);
+	//return joint->TireSetBrakeAcceleration(tireId, acceleration, maxFrictionTorque);
 }

@@ -17,7 +17,7 @@ class NewtonRaceCar: public NewtonVehicleNode
 		RaceCarTire() {};
 		virtual ~RaceCarTire() {};
 		void Setup (NewtonRaceCar *root, const char* label);
-		virtual void SetTirePhysics(const NewtonJoint* vehicle, void* tireId);
+		virtual void SetTirePhysics(const NewtonVehicle* vehicle, void* tireId);
 	
 
 		dFloat m_width;
@@ -48,7 +48,7 @@ class NewtonRaceCar: public NewtonVehicleNode
 		{
 			m_steer = value;
 		}
-		virtual void SetTirePhysics(const NewtonJoint* vehicle, void* tireId);
+		virtual void SetTirePhysics(const NewtonVehicle* vehicle, void* tireId);
 
 		dFloat m_steer;
 	};
@@ -72,7 +72,7 @@ class NewtonRaceCar: public NewtonVehicleNode
 			m_brakes = brake;
 		}
 
-		virtual void SetTirePhysics(const NewtonJoint* vehicle, void* tireId);
+		virtual void SetTirePhysics(const NewtonVehicle* vehicle, void* tireId);
 
 		dFloat m_torque;
 		dFloat m_brakes;
@@ -93,7 +93,7 @@ class NewtonRaceCar: public NewtonVehicleNode
 	static void DestroyVehicle (const NewtonBody* body);
 	static void ApplyGravityForce (const NewtonBody* body);
 	static void SetTransform (const NewtonBody* body, const dFloat* matrixPtr);
-	static void TireUpdate (const NewtonJoint* vehicle);
+	static void TireUpdate (const NewtonVehicle* const vehicle);
 
 	RearTire m_rearRighTire;
 	RearTire m_rearLeftTire;

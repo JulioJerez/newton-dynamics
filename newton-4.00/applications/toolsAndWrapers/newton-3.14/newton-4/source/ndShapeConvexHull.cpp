@@ -1729,24 +1729,20 @@ ndShapeInfo ndShapeConvexHull::GetShapeInfo() const
 
 void ndShapeConvexHull::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const
 {
-	ndVector vertex[512];
-	ndShapeDebugNotify::ndEdgeType edgeType[512];
-	ndMemSet(edgeType, ndShapeDebugNotify::m_shared, sizeof(edgeType) / sizeof(edgeType[0]));
-
 	for (ndInt32 i = 0; i < m_faceCount; ++i)
 	{
 		ndConvexSimplexEdge* const face = m_faceArray[i];
 		ndConvexSimplexEdge* ptr = face;
-		ndInt32 count = 0;
+
+		ndFixSizeArray<ndVector, 256> vertex;
+		ndFixSizeArray<ndShapeDebugNotify::ndEdgeType, 256> edgeType;
 		do
 		{
-			vertex[count] = m_vertexPtr[ptr->m_vertex];
-			count++;
-			ndAssert(count < ndInt32(sizeof(vertex) / sizeof(vertex[0])));
+			edgeType.PushBack(ndShapeDebugNotify::m_shared);
+			vertex.PushBack(matrix.TransformVector(m_vertexPtr[ptr->m_vertex]));
 			ptr = ptr->m_next;
 		} while (ptr != face);
-		matrix.TransformTriplex(&vertex[0].m_x, sizeof(ndVector), &vertex[0].m_x, sizeof(ndVector), count);
-		debugCallback.DrawPolygon(count, vertex, edgeType);
+		debugCallback.DrawPolygon(vertex.GetCount(), &vertex[0], &edgeType[0]);
 	}
 }
 

@@ -107,7 +107,8 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 		m_global,
 	};
 
-	D_COLLISION_API ndShapeInstance(ndShape* const shape);
+	//D_COLLISION_API ndShapeInstance(ndShape* const shape);
+	D_COLLISION_API ndShapeInstance(ndSharedPtr<ndShape> shape);
 	D_COLLISION_API ndShapeInstance(const ndShapeInstance& instance);
 	D_COLLISION_API ndShapeInstance(const ndShapeInstance& instance, const ndSharedPtr<ndShape>& shape);
 	D_COLLISION_API ~ndShapeInstance();

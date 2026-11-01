@@ -1189,7 +1189,6 @@ void NewtonBodyForEachPolygonDo(const NewtonBody* bodyPtr, NewtonCollisionIterat
 		ndForEachPolygonDo(const NewtonBody* body, NewtonCollisionIterator callback)
 			:ndShapeDebugNotify()
 			,m_body(body)
-			//,m_userData(userData)
 			,m_callback(callback)
 		{
 		}
@@ -1203,7 +1202,6 @@ void NewtonBodyForEachPolygonDo(const NewtonBody* bodyPtr, NewtonCollisionIterat
 				face.PushBack(faceVertex[i].m_y);
 				face.PushBack(faceVertex[i].m_z);
 			}
-			//typedef void (*NewtonCollisionIterator) (const NewtonBody* body, int vertexCount, const dFloat* FaceArray, int faceId);
 			m_callback(m_body, vertexCount, &face[0], 0);
 		}
 
@@ -1212,12 +1210,9 @@ void NewtonBodyForEachPolygonDo(const NewtonBody* bodyPtr, NewtonCollisionIterat
 	};
 	ndBodyKinematic* const body = PointerCast<ndBodyKinematic, NewtonBody>(bodyPtr);
 	const ndShapeInstance& instance = body->GetCollisionShape();
-	const ndMatrix matrix(instance.GetLocalMatrix() * body->GetMatrix());
-
 	ndForEachPolygonDo debugShape(bodyPtr, callback);
-	instance.DebugShape(matrix, debugShape);
+	instance.DebugShape(body->GetMatrix(), debugShape);
 }
-
 
 // Name: NewtonBodySetJointRecursiveCollision 
 // Set the collision state flag of this body when the body is connected to another body by a hierarchy of joints.

@@ -797,20 +797,10 @@ bool ndModelArticulation::IsSleeping() const
 	bool sleeping = true;
 	if (GetRoot())
 	{
-		//for (ndNode* node = GetRoot()->GetFirstIterator(); sleeping && node; node = node->GetNextIterator())
-		//{
-		//	if (!node->m_joint || node->m_joint->IsActive())
-		//	{
-		//		ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
-		//		sleeping = sleeping && body->GetSleepState();
-		//	}
-		//}
-
 		ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
 		stack.PushBack(m_rootNode);
 		while (stack.GetCount())
 		{
-			ndAssert(0);
 			ndModelArticulation::ndNode* const node = stack.Pop();
 			if (!node->m_joint || node->m_joint->IsActive())
 			{
@@ -827,7 +817,6 @@ bool ndModelArticulation::IsSleeping() const
 				stack.PushBack(child);
 			}
 		}
-
 	}
 	return sleeping;
 }
