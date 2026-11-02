@@ -33,7 +33,6 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 {
 	public:
 	class ndBicycleModelContact;
-	//class ndBicycleModelStability;
 	class ndBicycleModelStability : public ndJointBilateralConstraint
 	{
 		public:
@@ -53,7 +52,7 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 		bool m_modelIsValid;
 	};
 
-	D_CLASS_REFLECTION(ndConvexCastVehicle, ndMultiBodyVehicle )
+	D_CLASS_REFLECTION(ndConvexCastVehicle, ndMultiBodyVehicle)
 	D_NEWTON_API ndConvexCastVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));
 
 	D_NEWTON_API virtual void ConvertToMotorVehicle() override;
