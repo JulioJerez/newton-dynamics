@@ -159,9 +159,12 @@ NewtonRaceCar::NewtonRaceCar(
 
 	// Add tires;
 	m_rearRighTire.Setup (this, "RR");
-	//m_rearLeftTire.Setup (this, "RL");
-	//m_frontRighTire.Setup (this, "FR");
-	//m_frontLeftTire.Setup (this, "FL");
+	m_rearLeftTire.Setup (this, "RL");
+	m_frontRighTire.Setup (this, "FR");
+	m_frontLeftTire.Setup (this, "FL");
+
+	//new for 1.54
+	NewtonVehicleFinishAssembly(nWorld, m_vehicleJoint);
 
 	delete[] vertex;
 }

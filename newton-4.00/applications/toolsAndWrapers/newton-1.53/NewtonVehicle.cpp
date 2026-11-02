@@ -24,33 +24,7 @@
 #include "NewtonBody.h"
 #include "NewtonUtils.h"
 #include "newtonWorld.h"
-
-class NewtonConvexCastVehicle : public ndConvexCastVehicle
-{
-	public:
-	D_CLASS_REFLECTION(NewtonConvexCastVehicle, ndConvexCastVehicle)
-	NewtonConvexCastVehicle(const ndVector& gravityDir)
-		:ndConvexCastVehicle()
-		,m_gravityDir(gravityDir)
-	{
-	}
-
-	~NewtonConvexCastVehicle() override
-	{
-	}
-
-	virtual void Update(ndFloat32 timestep, ndInt32 threadId) override
-	{
-		ndConvexCastVehicle::Update(timestep, threadId);
-	}
-
-	virtual void Debug(ndConstraintDebugCallback& context) const override
-	{
-		ndConvexCastVehicle::Debug(context);
-	}
-
-	ndVector m_gravityDir;
-};
+#include "NewtonVehicle.h"
 
 class NewtonVehicleNotify: public ndModelNotify
 {
@@ -115,6 +89,39 @@ class NewtonVehicleNotify: public ndModelNotify
 	NewtonVehicleTireUpdate m_onTireUpdate;
 };
 
+
+NewtonConvexCastVehicle::NewtonConvexCastVehicle(ndNewtonWorld* const owner, const ndVector& gravityDir)
+	:ndConvexCastVehicle()
+	,m_gravityDir(gravityDir)
+	,m_onDebugDisplay(nullptr)
+	,m_owner(owner)
+{
+}
+
+NewtonConvexCastVehicle::~NewtonConvexCastVehicle()
+{
+}
+
+void NewtonConvexCastVehicle::OnAddToWorld()
+{
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = GetTireList().GetFirst(); tireNode; tireNode = tireNode->GetNext())
+	{
+		ndBodyKinematic* const tireBody = tireNode->GetInfo()->GetBody0();
+		ndNewtonBodyNotify* const notify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*tireBody->GetNotifyCallback());
+		notify->m_world = m_owner;
+	}
+	ndConvexCastVehicle::OnAddToWorld();
+}
+
+void NewtonConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
+{
+	ndConvexCastVehicle::Update(timestep, threadId);
+}
+
+void NewtonConvexCastVehicle::Debug(ndConstraintDebugCallback& context) const
+{
+	ndConvexCastVehicle::Debug(context);
+}
 
 #if 0
 // Name: NewtonVehicleReset
@@ -426,7 +433,7 @@ NewtonVehicle* NewtonConstraintCreateVehicle(const NewtonWorld* const newtonWorl
 	TRACE_FUNCTION(__FUNCTION__);
 	const ndVector pin(upDir[0], upDir[1], upDir[2], ndFloat32 (0.0f));
 	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	NewtonConvexCastVehicle* const vehicle = new NewtonConvexCastVehicle(pin);
+	NewtonConvexCastVehicle* const vehicle = new NewtonConvexCastVehicle(world, pin);
 	ndSharedPtr<ndModelNotify> nofify(new NewtonVehicleNotify());
 	vehicle->SetNotifyCallback(nofify);
 
@@ -437,6 +444,13 @@ NewtonVehicle* NewtonConstraintCreateVehicle(const NewtonWorld* const newtonWorl
 
 	world->AddModel(ndSharedPtr<ndModel>(vehicle));
 	return PointerCast<NewtonVehicle, NewtonConvexCastVehicle>(vehicle);
+}
+
+void NewtonVehicleSetDebugDisplay(const NewtonVehicle* const vehicle, NewtonDrawDebugLine drawLine)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonConvexCastVehicle* const veh = PointerCast<NewtonConvexCastVehicle, NewtonVehicle>(vehicle);
+	veh->m_onDebugDisplay = drawLine;
 }
 
 // Name: NewtonVehicleGetTireUserData
@@ -503,7 +517,7 @@ void NewtonVehicleSetTireCallback(const NewtonVehicle* const vehicle, NewtonVehi
 // spring and damper constants.
 //
 // See also: NewtonVehicleRemoveTire
-void* NewtonVehicleAddTire(const NewtonVehicle* const vehicle, const dFloat* localMatrix, const dFloat* pin, dFloat mass, dFloat width, dFloat radius,
+void* NewtonVehicleAddTire(const NewtonVehicle* const vehicle, const dFloat* localMatrixPtr, const dFloat* pin, dFloat mass, dFloat width, dFloat radius,
 	dFloat suspesionShock, dFloat suspesionSpring, dFloat suspesionLength, void* userData, int collisionID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -511,20 +525,42 @@ void* NewtonVehicleAddTire(const NewtonVehicle* const vehicle, const dFloat* loc
 
 	ndSharedPtr<ndBody> wheelBody(new ndBodyDynamic());
 	ndBodyDynamic* const wheel = wheelBody->GetAsBodyDynamic();
+	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify(nullptr, PointerCast<NewtonBody, ndBody>(*wheelBody)));
+	wheel->SetNotifyCallback(bodyNotify);
+
+	// calculate the body matrix
+	const ndBodyDynamic* const chassis = veh->GetChassis();
+	ndMatrix localMatrix(GetMatrix(localMatrixPtr));
+	localMatrix.m_front.m_w = ndFloat32(0.0f);
+	localMatrix.m_up.m_w = ndFloat32(0.0f);
+	localMatrix.m_right.m_w = ndFloat32(0.0f);
+	localMatrix.m_posit.m_w = ndFloat32(1.0f);
+	const ndMatrix chassisMatrix(chassis->GetMatrix());
+	const ndMatrix wheelBodyMatrix(localMatrix * chassisMatrix);
+	wheel->SetMatrix(wheelBodyMatrix);
+	
+	// calculate the the shape local matrix
+	ndMatrix wheelMatrix(ndGetIdentityMatrix());
+	wheelMatrix.m_front = wheelBodyMatrix.RotateVector(ndVector(pin[0], pin[1], pin[2], ndFloat32(0.0f)));
+	wheelMatrix.m_right = chassisMatrix.m_front.Scale(ndFloat32 (1.0f));
+	wheelMatrix.m_up = wheelMatrix.m_right.CrossProduct(wheelMatrix.m_front) & ndVector::m_triplexMask;
+	ndAssert(wheelMatrix.m_up.DotProduct(chassisMatrix.m_up).GetScalar() > 0.0f);
+	wheelMatrix = wheelMatrix * wheelBodyMatrix.OrthoInverse();
+	wheelMatrix.m_front.Normalize();
+	wheelMatrix.m_up.Normalize();
+	wheelMatrix.m_right.Normalize();
+	wheelMatrix.m_posit = ndVector::m_wOne;
+
+	radius = radius - ndFloat32(0.5f) * width;
+	if (radius < ndFloat32(0.01f))
+	{
+		radius = ndFloat32(0.01f);
+	}
 
 	ndShapeInstance wheelShape(ndSharedPtr<ndShape>(new ndShapeChamferCylinder(radius, width)));
+	wheelShape.SetLocalMatrix(wheelMatrix);
 	wheel->SetCollisionShape(wheelShape);
 	wheel->SetMassMatrix(mass, wheelShape);
-
-	const ndBodyDynamic* const chassis = veh->GetChassis();
-	ndMatrix matrix(GetMatrix(localMatrix) * chassis->GetMatrix());
-	matrix.m_front.m_w = ndFloat32(0.0f);
-	matrix.m_up.m_w = ndFloat32(0.0f);
-	matrix.m_right.m_w = ndFloat32(0.0f);
-	matrix.m_posit.m_w = ndFloat32(1.0f);
-	wheel->SetMatrix(matrix);
-
-	ndVector wheelAxis(pin[0], pin[1], pin[2], ndFloat32(0.0f));
 
 	ndWheelDescriptor desc;
 	desc.m_damperC = suspesionShock;
@@ -532,7 +568,7 @@ void* NewtonVehicleAddTire(const NewtonVehicle* const vehicle, const dFloat* loc
 	desc.m_steeringAngle = ndFloat32(0.0f);
 	desc.m_handBrakeTorque = ndFloat32(0.0f);
 	desc.m_regularizer = ndFloat32(0.01f);
-	desc.m_lowerStop = ndFloat32(0.5f) * suspesionLength;
+	desc.m_lowerStop = -ndFloat32(0.5f) * suspesionLength;
 	desc.m_upperStop = ndFloat32(0.5f) * suspesionLength;
 
 	ndMultiBodyVehicleTireJoint* const tireJoint = veh->AddTire(desc, wheelBody);
@@ -838,4 +874,23 @@ void NewtonVehicleTireSetBrakeAcceleration(const NewtonVehicle* const vehicle, v
 	//joint = (dgVehicleConstraint*)vehicle;
 	//
 	//return joint->TireSetBrakeAcceleration(tireId, acceleration, maxFrictionTorque);
+}
+
+void NewtonVehicleFinishAssembly(const NewtonWorld* const newtonWorld, const NewtonVehicle* const vehicle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	NewtonConvexCastVehicle* const veh = PointerCast<NewtonConvexCastVehicle, NewtonVehicle>(vehicle);
+
+	// get a reference to the model before removing from world.
+	ndSharedPtr<ndModel> model (*world->GetModel(veh));
+
+	// remove vehicel from world so that the post processing is preformed.
+	world->RemoveModel(veh);
+
+	// re add the vehicle so that new preprocessing is performed again.
+	world->AddModel(model);
+
+	// for the multibody vehicle
+	veh->ConvertToMotorVehicle();
 }

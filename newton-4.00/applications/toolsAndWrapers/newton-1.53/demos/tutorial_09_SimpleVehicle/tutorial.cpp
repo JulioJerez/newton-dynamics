@@ -52,6 +52,7 @@ static void  PhysicsFree (void *ptr, dInt32 sizeInBytes);
 
 static void  DebugShowCollision ();
 static void  DebugShowBodyCollision (const NewtonBody* body);
+static void  DebugDrawDebugLine(const dFloat* const p0, const dFloat* const p1, const dFloat* const color);
 static void DebugShowGeometryCollision (const NewtonBody* body, dInt32 vertexCount, const dFloat* faceVertec, dInt32 id);
 
 
@@ -241,6 +242,22 @@ void  DebugShowBodyCollision (const NewtonBody* body)
 	NewtonBodyForEachPolygonDo (body, DebugShowGeometryCollision);
 }
 
+void DebugDrawDebugLine(const dFloat* const p0, const dFloat* const p1, const dFloat* const color)
+{
+	glColor3f(color[0], color[1], color[2]);
+
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+
+	glPushMatrix();
+
+	glBegin(GL_LINES);
+	glVertex3f(p0[0], p0[1], p0[2]);
+	glVertex3f(p1[0], p1[1], p1[2]);
+	glEnd();
+
+	glPopMatrix();
+}
 
 void  DebugShowCollision ()
 {
@@ -881,6 +898,10 @@ void InitScene()
 	matrix.m_posit.m_y += 2.5f;
 
 	raceCarVehicle = new NewtonRaceCar (nGrapphicWorld, "f1.dg", nWorld, matrix);
+
+	// set a debug display to see vehicle intenals 
+	NewtonVehicleSetDebugDisplay(raceCarVehicle->GetJoint(), DebugDrawDebugLine);
+
 	//this is the player, Set auto freeze off
 	NewtonBodySetAutoFreeze (raceCarVehicle->GetRigidBody(), 0);
 

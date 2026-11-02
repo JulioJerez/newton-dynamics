@@ -426,7 +426,7 @@ NewtonBody* NewtonCreateBody(const NewtonWorld* newtonWorld, const NewtonCollisi
 	ndBodyDynamic* const dynBody = body->GetAsBodyDynamic();
 
 	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify(world, reinterpret_cast<NewtonBody*>(*body)));
+	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify(world, PointerCast<NewtonBody, ndBody>(*body)));
 
 	ndAssert(collision);
 	ndShapeInstance instance(*PointerCast<ndShapeInstance, NewtonCollision>(collision));

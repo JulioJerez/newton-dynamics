@@ -174,6 +174,7 @@ class ndJointBilateralConstraint : public ndConstraint
 	D_COLLISION_API void SetSkeletonFlag(bool flag);
 
 	D_COLLISION_API bool virtual GetJointHitLimits() const;
+	D_COLLISION_API ndJointList::ndNode* GetSceneNode() const;
 
 	D_COLLISION_API void SetHighFriction(ndConstraintDescritor& desc, ndFloat32 friction);
 	D_COLLISION_API void SetLowerFriction(ndConstraintDescritor& desc, ndFloat32 friction);

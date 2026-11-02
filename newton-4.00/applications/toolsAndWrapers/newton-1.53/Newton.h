@@ -138,6 +138,8 @@ extern "C" {
 
 	typedef void (*NewtonConstraintDestructor) (const NewtonJoint* me);
 
+	typedef void (*NewtonDrawDebugLine) (const dFloat* const p0, const dFloat* const p1, const dFloat* const color);
+
 #if 0
 
 	// **********************************************************************************************
@@ -618,6 +620,10 @@ extern "C" {
 
 	NEWTON_API dFloat NewtonVehicleTireCalculateMaxBrakeAcceleration(const NewtonVehicle* const vehicle, void* tireId);
 	NEWTON_API void NewtonVehicleTireSetBrakeAcceleration(const NewtonVehicle* const vehicle, void* tireId, dFloat accelaration, dFloat torqueLimit);
+
+	// new for 1.54
+	NEWTON_API void NewtonVehicleSetDebugDisplay(const NewtonVehicle* const vehicle, NewtonDrawDebugLine drawLine);
+	NEWTON_API void NewtonVehicleFinishAssembly(const NewtonWorld* const newtonWorld, const NewtonVehicle* const vehicle);
 
 #ifdef __cplusplus 
 }

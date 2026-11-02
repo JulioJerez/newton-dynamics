@@ -348,6 +348,11 @@ bool ndJointBilateralConstraint::GetJointHitLimits() const
 	//return m_hitLimits ? true : false;
 }
 
+ndJointList::ndNode* ndJointBilateralConstraint::GetSceneNode() const
+{
+	return m_worldNode;
+}
+
 void ndJointBilateralConstraint::ReplaceSentinel(ndBodyKinematic* const sentinel)
 {
 	m_body1 = sentinel;

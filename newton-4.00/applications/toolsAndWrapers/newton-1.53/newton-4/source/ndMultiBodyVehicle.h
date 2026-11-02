@@ -138,6 +138,9 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	bool CalculateNormalizedAlgniningTorque(ndMultiBodyVehicleTireJoint* const tire, ndFloat32 sideSlipTangent) const;
 	bool CoulombFrictionCircleTireModel(ndMultiBodyVehicleTireJoint* const tire, ndContactMaterial& contactPoint) const;
 
+	virtual void OnAddToWorld() override;
+	virtual void OnRemoveFromWorld() override;
+
 	ndMatrix m_localFrame;
 	ndWeakPtr<ndBodyDynamic> m_chassis;
 	ndSharedPtr<ndShapeWheel> m_tireShape;
