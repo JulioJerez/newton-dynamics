@@ -342,9 +342,12 @@ bool ndScene::RemoveBody(const ndSharedPtr<ndBody>& body)
 
 		//ndAssert(0);
 		ndBodyKinematic::ndContactMap& contactMap = kinematicBody->GetContactMap();
-		while (contactMap.GetRoot())
+		//while (contactMap.GetRoot())
+		ndBodyKinematic::ndContactMap::Iterator it(contactMap);
+		for (it.Begin(); it; )
 		{
-			ndContact* const contact = contactMap.GetRoot()->GetInfo();
+			ndContact* const contact = it.GetNode()->GetInfo();
+			++it;
 			m_contactArray.DetachContact(contact);
 		}
 
