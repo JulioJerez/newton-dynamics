@@ -790,7 +790,7 @@ NewtonTractor::NewtonTractor(
 	const char* fileName, 
 	NewtonWorld* nWorld, 
 	const dMatrix& matrix)
-	:NewtonVehicle (parent, matrix)
+	:NewtonVehicleNode (parent, matrix)
 {
 	dInt32 vertexCount; 
 	dFloat Ixx;
@@ -943,7 +943,7 @@ void NewtonTractor::Render() const
 	//m_backBucket->SetLocalMatrix();
 	//
 	//if (!hideVehicle) {
-	//	NewtonVehicle::Render();  
+	//	NewtonVehicleNode::Render();  
 	//}
 }
 

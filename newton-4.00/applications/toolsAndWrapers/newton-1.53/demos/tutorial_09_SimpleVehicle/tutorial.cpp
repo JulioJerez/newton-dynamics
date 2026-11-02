@@ -24,9 +24,9 @@ static dSceneNode* nGrapphicWorld;
 
 #define CAMERA_SPEED	10.0f
 
-static NewtonVehicle* player;
-static NewtonVehicle* raceCarVehicle;
-static NewtonVehicle* dirTractorVehicle;
+static NewtonVehicleNode* player;
+static NewtonVehicleNode* raceCarVehicle;
+static NewtonVehicleNode* dirTractorVehicle;
 
 static dFloat cameraZoon = 6.0f;
 
@@ -52,6 +52,7 @@ static void  PhysicsFree (void *ptr, dInt32 sizeInBytes);
 
 static void  DebugShowCollision ();
 static void  DebugShowBodyCollision (const NewtonBody* body);
+static void  DebugDrawDebugLine(const dFloat* const p0, const dFloat* const p1, const dFloat* const color);
 static void DebugShowGeometryCollision (const NewtonBody* body, dInt32 vertexCount, const dFloat* faceVertec, dInt32 id);
 
 
@@ -135,10 +136,10 @@ static dFloat FindFloor (dFloat x, dFloat z)
 // callback to handle when the car leave the world
 void BodyLeaveWorkd (const NewtonBody* body)
 {
-	NewtonVehicle* car;
+	NewtonVehicleNode* car;
 
 	// get the user data
-	car = (NewtonVehicle*) NewtonBodyGetUserData(body);
+	car = (NewtonVehicleNode*) NewtonBodyGetUserData(body);
 
 // uncomment this for destroy and recreate the vehicle
 //#define DESTROY_AND_RECREATE
@@ -168,8 +169,9 @@ void BodyLeaveWorkd (const NewtonBody* body)
 		dMatrix matrix (GetIdentityMatrix());
 		matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z) + 4.0f;
 
+		_ASSERT(0);
 		// important to rest the vehicle tires before moving the car
-		NewtonBodySetMatrixRecursive(body, &matrix[0][0]);
+		//NewtonBodySetMatrixRecursive(body, &matrix[0][0]);
 	#endif
 
 }
@@ -178,17 +180,14 @@ void BodyLeaveWorkd (const NewtonBody* body)
 
 void DebugShowGeometryCollision (const NewtonBody* body, dInt32 vertexCount, const dFloat* faceVertec, dInt32 id)
 {
-	dInt32 i;
-
-	i = vertexCount - 1;
-	dVector p0 (faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
-	for (i = 0; i < vertexCount; i ++) {
+	dInt32 j = vertexCount - 1;
+	dVector p0 (faceVertec[j * 3 + 0], faceVertec[j * 3 + 1], faceVertec[j * 3 + 2]);
+	for (dInt32 i = 0; i < vertexCount; i ++) {
 		dVector p1 (faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
-//		glVertex3f (p0.m_x, p0.m_y, p0.m_z);
-//		glVertex3f (p1.m_x, p1.m_y, p1.m_z);
+		glVertex3f (p0.m_x, p0.m_y, p0.m_z);
+		glVertex3f (p1.m_x, p1.m_y, p1.m_z);
 		p0 = p1;
 	}
-
 }
 
 
@@ -239,12 +238,26 @@ void  DebugShowBodyCollision (const NewtonBody* body)
 	glVertex3f(origin.m_x - size, origin.m_y + size, origin.m_z - size);
 	glVertex3f(origin.m_x - size, origin.m_y + size, origin.m_z + size);
 
-
-
 	// render the collision is wire frame
 	NewtonBodyForEachPolygonDo (body, DebugShowGeometryCollision);
 }
 
+void DebugDrawDebugLine(const dFloat* const p0, const dFloat* const p1, const dFloat* const color)
+{
+	glColor3f(color[0], color[1], color[2]);
+
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+
+	glPushMatrix();
+
+	glBegin(GL_LINES);
+	glVertex3f(p0[0], p0[1], p0[2]);
+	glVertex3f(p1[0], p1[1], p1[2]);
+	glEnd();
+
+	glPopMatrix();
+}
 
 void  DebugShowCollision ()
 {
@@ -830,10 +843,6 @@ void AddCylinder(const dMatrix& location)
 // create physics scene
 void InitScene()
 {
-	int i;
-	i = 0;
-
-	LevelPrimitive *level;
 	// /////////////////////////////////////////////////////////////////////
 	//
 	// create the newton world
@@ -861,10 +870,9 @@ void InitScene()
 	// /////////////////////////////////////////////////////////////////////
 	//
 	// load a height field mesh
-//	level = new LevelPrimitive(nGrapphicWorld, "newtontrack.dg", nWorld, NULL);
-	level = new LevelPrimitive(nGrapphicWorld, "newtontrack_flat.dg", nWorld, NULL);
-
-
+	LevelPrimitive* level = new LevelPrimitive (nGrapphicWorld, "level1.dg", nWorld, NULL);
+	//LevelPrimitive* level = new LevelPrimitive(nGrapphicWorld, "newtontrack.dg", nWorld, NULL);
+	//LevelPrimitive* level = new LevelPrimitive(nGrapphicWorld, "newtontrack_flat.dg", nWorld, NULL);
 
 	// set the material group id to the terrain
 	NewtonBodySetMaterialGroupID (level->GetRigidBody(), levelID);
@@ -891,6 +899,10 @@ void InitScene()
 	matrix.m_posit.m_y += 2.5f;
 
 	raceCarVehicle = new NewtonRaceCar (nGrapphicWorld, "f1.dg", nWorld, matrix);
+
+	// set a debug display to see vehicle intenals 
+	NewtonVehicleSetDebugDisplay(raceCarVehicle->GetJoint(), DebugDrawDebugLine);
+
 	//this is the player, Set auto freeze off
 	NewtonBodySetAutoFreeze (raceCarVehicle->GetRigidBody(), 0);
 
@@ -923,23 +935,22 @@ void InitScene()
 //	AddCylinder(matrix);
 
 	matrix.m_posit.m_x += 15.0f;
-	for (i = 0; i < 20; i ++) {	
+	for (int i = 0; i < 20; i ++) {
 		// add some props 
-		matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z);
-//		new NewtonProp (nGrapphicWorld, "prop_03.dg", nWorld, matrix);
+		//matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z);
+		//new NewtonProp (nGrapphicWorld, "prop_03.dg", nWorld, matrix);
 		matrix.m_posit.m_x += 2.0f;
 	}
 
 
 	matrix.m_posit.m_x -= 100.0f;
 	matrix.m_posit.m_z -= 5.0f;
-	for (i = 0; i < 20; i ++) {	
+	for (int i = 0; i < 20; i ++) {
 		// add some props 
-		matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z);
-//		new NewtonProp (nGrapphicWorld, "prop_02.dg", nWorld, matrix);
+		//matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z);
+		//new NewtonProp (nGrapphicWorld, "prop_02.dg", nWorld, matrix);
 		matrix.m_posit.m_x += 8.0f;
 	}
-
 }
 
 

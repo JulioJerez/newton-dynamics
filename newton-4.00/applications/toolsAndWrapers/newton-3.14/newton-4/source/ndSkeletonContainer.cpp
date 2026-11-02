@@ -576,7 +576,10 @@ void ndSkeletonContainer::Finalize(ndInt32 loopJointsCount, ndJointBilateralCons
 		joint->m_isInSkeleton = true;
 		m_permanentLoopingJoints.PushBack(joint);
 	}
-	m_owner->OnInitSkeleton(this);
+	if (m_owner)
+	{
+		m_owner->OnInitSkeleton(this);
+	}
 }
 
 void ndSkeletonContainer::AddCloseLoopJoint(ndConstraint* const joint)

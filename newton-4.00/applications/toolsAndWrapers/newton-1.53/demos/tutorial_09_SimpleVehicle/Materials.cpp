@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////
 #include <stdafx.h>
 #include "Materials.h"
-#include "NewtonVehicle.h"
+#include "NewtonVehicleNode.h"
 
 int woodID; 
 int metalID; 

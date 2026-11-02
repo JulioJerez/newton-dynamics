@@ -14,6 +14,7 @@
 #include "NewtonBody.h"
 #include "NewtonUtils.h"
 #include "newtonWorld.h"
+#include "NewtonVehicle.h"
 #include "NewtonMaterialGraph.h"
 
 ndSpinLock ndNewtonWorld::m_globalCriticalSection;
@@ -410,12 +411,61 @@ void NewtonWorldForEachBodyDo(const NewtonWorld* newtonWorld, NewtonBodyIterator
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	const ndBodyListView& bodyList = world->GetBodyList();
 
+	const ndBodyListView& bodyList = world->GetBodyList();
 	for (ndBodyListView::ndNode* node = bodyList.GetFirst()->GetNext(); node; node = node->GetNext())
 	{
 		ndSharedPtr<ndBody>& body = node->GetInfo();
 		callback(PointerCast<NewtonBody, ndBody>(*body));
+	}
+
+	class VehicleDebug : public ndConstraintDebugCallback
+	{
+		public:
+		VehicleDebug(NewtonBodyIterator callback, NewtonConvexCastVehicle* const owner)
+			:ndConstraintDebugCallback()
+			,m_callback(callback)
+			,m_owner(owner)
+		{
+		}
+
+		void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness) override
+		{
+			m_owner->m_onDebugDisplay(&point[0], &point[0], &color[0]);
+		}
+
+		void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness) override
+		{
+			m_owner->m_onDebugDisplay(&p0[0], &p1[0], &color[0]);
+		}
+
+		void DrawTriangle(const ndVector& p0, const ndVector& p1, const ndVector& p2, const ndVector& color) override
+		{
+			ndAssert(0);
+		}
+
+		NewtonBodyIterator m_callback;
+		ndWeakPtr<NewtonConvexCastVehicle> m_owner;
+	};
+
+
+	const ndModelList& modelList = world->GetModelList();
+	for (ndModelList::ndNode* node = modelList.GetFirst(); node; node = node->GetNext())
+	{
+		NewtonConvexCastVehicle* const vehicle = PointerCast<NewtonConvexCastVehicle, ndMultiBodyVehicle>(node->GetInfo()->GetAsMultiBodyVehicle());
+		if (vehicle)
+		{
+			for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = vehicle->GetTireList().GetFirst(); tireNode; tireNode = tireNode->GetNext())
+			{
+				ndBodyKinematic* const tireBody = tireNode->GetInfo()->GetBody0();
+				callback(PointerCast<NewtonBody, ndBody>(tireBody));
+			}
+			if (vehicle->m_onDebugDisplay)
+			{
+				VehicleDebug vehDebug(callback, vehicle);
+				vehicle->Debug(vehDebug);
+			}
+		}
 	}
 }
 

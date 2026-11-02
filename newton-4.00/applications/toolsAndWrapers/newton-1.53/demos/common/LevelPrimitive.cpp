@@ -13,7 +13,6 @@
 #include "OpenGlUtil.h"
 #include "LevelPrimitive.h"
 
-/*
 class PlaneCollision
 {
 	public:
@@ -107,20 +106,19 @@ class PlaneCollision
 			}
 
 
-			if (debugLinesMode) {
-				dInt32 i;
-				if (hightMap_debugCount < (MAX_DEBUG_CONTACTS - 256)) {
-					dVector p0 (me->m_collisionVertex[threadNumber][3]);
-					for (i = 0; i < 4; i ++) {
-						hightMap_debugLines[hightMap_debugCount].p0 = p0;
-						hightMap_debugLines[hightMap_debugCount].p1 = dVector (me->m_collisionVertex[threadNumber][i]);
-						hightMap_debugLines[hightMap_debugCount].isContact = 0;
-						p0 = hightMap_debugLines[hightMap_debugCount].p1;
-						hightMap_debugCount ++;
-					}
-				}
-			}
-
+			//if (debugLinesMode) {
+			//	dInt32 i;
+			//	if (hightMap_debugCount < (MAX_DEBUG_CONTACTS - 256)) {
+			//		dVector p0 (me->m_collisionVertex[threadNumber][3]);
+			//		for (i = 0; i < 4; i ++) {
+			//			hightMap_debugLines[hightMap_debugCount].p0 = p0;
+			//			hightMap_debugLines[hightMap_debugCount].p1 = dVector (me->m_collisionVertex[threadNumber][i]);
+			//			hightMap_debugLines[hightMap_debugCount].isContact = 0;
+			//			p0 = hightMap_debugLines[hightMap_debugCount].p1;
+			//			hightMap_debugCount ++;
+			//		}
+			//	}
+			//}
 		}
 	}
 
@@ -181,7 +179,7 @@ NewtonCollision* CreatePlaneCollidion (NewtonWorld* nWorld, const dVector& Plane
 	plane = new PlaneCollision (nWorld, Plane);
 	return plane->m_collision;
 }
-*/
+
 
 
 
@@ -212,8 +210,7 @@ LevelPrimitive::LevelPrimitive(
 	NewtonTreeCollisionCallback levelCallback)
 	:dSceneNode(parent)
 {
-	NewtonCollision* collision;
-	
+#if 1	
 	// open the level data
 	char fullPathName[256];
 	GetWorkingFileName (name, fullPathName);
@@ -222,7 +219,7 @@ LevelPrimitive::LevelPrimitive(
 	LoadFromFile(fullPathName, context);
   
 	// create the collision tree geometry
-	collision = NewtonCreateTreeCollision(nWorld, levelCallback);
+	NewtonCollision* collision = NewtonCreateTreeCollision(nWorld, levelCallback);
   
 	// prepare to create collision geometry
 	NewtonTreeCollisionBeginBuild(collision);
@@ -233,43 +230,12 @@ LevelPrimitive::LevelPrimitive(
 
 	// finalize the collision tree build
 	NewtonTreeCollisionEndBuild(collision, 1);
-//	NewtonTreeCollisionEndBuild(collision, 0);
+#else
 
-
-	int xxx;
-	dVector p0(-100, -100, -100);
-	dVector p1(100, 100, 100);
-	const dFloat* vertexArray;
-	int vertexStrideInBytes;
-	int vertexCount;
-	int indexList[256];
-	xxx = NewtonTreeCollisionGetVertexListIndexListInAABB (collision, &p0[0], &p1[0], 
-		&vertexArray, &vertexCount, &vertexStrideInBytes, 
-		indexList, sizeof (indexList)/sizeof (indexList[0])); 
-
-//	NewtonCollisionApplyScale(collision, 2.0f);
-
-#ifdef SERIALIZE_MESH
-	FILE* file;
-	strtok (fullPathName, ".");
-	strcat (fullPathName, ".bin");
-
-	// save the collision file
-	file = fopen (fullPathName, "wb");
-	NewtonTreeCollisionSerialize (collision, SerializeFile, file);
-	fclose (file);
-
-	// load the collision file
-	NewtonReleaseCollision (nWorld, collision);
-
-	file = fopen (fullPathName, "rb");
-	collision = NewtonCreateTreeCollisionFromSerialization (nWorld, levelCallback, DeSerializeFile, file);
-	fclose (file);
+	dVector plane (0, 1, 0, 0);
+	NewtonCollision* collision = CreatePlaneCollidion (nWorld, plane);
 
 #endif
-
-//dVector plane (0, 1, 0, 0);
-//collision = CreatePlaneCollidion (nWorld, plane);
 
 	// create the level rigid body
 	m_level = NewtonCreateBody(nWorld, collision);
@@ -304,27 +270,6 @@ LevelPrimitive::LevelPrimitive(
 
 	// set the world size
 	NewtonSetWorldSize (nWorld, &boxP0.m_x, &boxP1.m_x); 
-
-
-
-#if 0
-	int count;
-	NewtonCollision* collisionB;
-	collisionB = NewtonCreateBox (nWorld, 3.5f, 3.5f, 3.5f, NULL);
-
-	dMatrix matrixA (GetIdentityMatrix());
-	dMatrix matrixB (GetIdentityMatrix());
-	matrixA.m_posit.m_y += 10.0f;
-	matrixB.m_posit.m_z += 0.0f;
-
-	dVector contacts[20];
-	dVector normals[20];
-	dFloat depths[20];
-	count = NewtonCollisionCollide (nWorld, 10, 
-									collision, &matrixA[0][0], 
-									collisionB, &matrixB[0][0],
-									&contacts[0][0], &normals[0][0], &depths[0]);
-#endif
 }
 
 LevelPrimitive::~LevelPrimitive()
