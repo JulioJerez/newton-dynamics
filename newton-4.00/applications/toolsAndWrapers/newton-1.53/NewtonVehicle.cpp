@@ -89,12 +89,10 @@ class NewtonVehicleNotify: public ndModelNotify
 	NewtonVehicleTireUpdate m_onTireUpdate;
 };
 
-
-NewtonConvexCastVehicle::NewtonConvexCastVehicle(ndNewtonWorld* const owner, const ndVector& gravityDir)
+NewtonConvexCastVehicle::NewtonConvexCastVehicle(const ndVector& gravityDir)
 	:ndConvexCastVehicle()
 	,m_gravityDir(gravityDir)
 	,m_onDebugDisplay(nullptr)
-	,m_owner(owner)
 {
 }
 
@@ -104,13 +102,13 @@ NewtonConvexCastVehicle::~NewtonConvexCastVehicle()
 
 void NewtonConvexCastVehicle::OnAddToWorld()
 {
+	ndConvexCastVehicle::OnAddToWorld();
 	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = GetTireList().GetFirst(); tireNode; tireNode = tireNode->GetNext())
 	{
 		ndBodyKinematic* const tireBody = tireNode->GetInfo()->GetBody0();
 		ndNewtonBodyNotify* const notify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*tireBody->GetNotifyCallback());
-		notify->m_world = m_owner;
+		notify->m_world = PointerCast<ndNewtonWorld, ndWorld>(GetWorld());
 	}
-	ndConvexCastVehicle::OnAddToWorld();
 }
 
 void NewtonConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
@@ -433,7 +431,7 @@ NewtonVehicle* NewtonConstraintCreateVehicle(const NewtonWorld* const newtonWorl
 	TRACE_FUNCTION(__FUNCTION__);
 	const ndVector pin(upDir[0], upDir[1], upDir[2], ndFloat32 (0.0f));
 	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	NewtonConvexCastVehicle* const vehicle = new NewtonConvexCastVehicle(world, pin);
+	NewtonConvexCastVehicle* const vehicle = new NewtonConvexCastVehicle(pin);
 	ndSharedPtr<ndModelNotify> nofify(new NewtonVehicleNotify());
 	vehicle->SetNotifyCallback(nofify);
 
@@ -890,6 +888,32 @@ void NewtonVehicleFinishAssembly(const NewtonWorld* const newtonWorld, const New
 
 	// re add the vehicle so that new preprocessing is performed again.
 	world->AddModel(model);
+
+	// remove all tires fro the world.
+	auto DisableStructuralNodes = [world](ndModelArticulation::ndNode* const node)
+	{
+		if (node->m_body && node->m_joint)
+		{
+			ndJointBilateralConstraint* const joint = *node->m_joint;
+			ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+			if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()) ||
+				joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()) ||
+				joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
+			{
+				if (joint->GetSceneNode())
+				{
+					world->RemoveJoint(joint);
+				}
+				if (body->GetSceneNode())
+				{
+					world->RemoveBody(body);
+				}
+				joint->SetActive(false);
+			}
+		}
+	};
+	veh->NodeIterator(DisableStructuralNodes);
+
 
 	// for the multibody vehicle
 	veh->ConvertToMotorVehicle();

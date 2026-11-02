@@ -870,8 +870,9 @@ void InitScene()
 	// /////////////////////////////////////////////////////////////////////
 	//
 	// load a height field mesh
+	LevelPrimitive* level = new LevelPrimitive (nGrapphicWorld, "level1.dg", nWorld, NULL);
 	//LevelPrimitive* level = new LevelPrimitive(nGrapphicWorld, "newtontrack.dg", nWorld, NULL);
-	LevelPrimitive* level = new LevelPrimitive(nGrapphicWorld, "newtontrack_flat.dg", nWorld, NULL);
+	//LevelPrimitive* level = new LevelPrimitive(nGrapphicWorld, "newtontrack_flat.dg", nWorld, NULL);
 
 	// set the material group id to the terrain
 	NewtonBodySetMaterialGroupID (level->GetRigidBody(), levelID);
@@ -936,8 +937,8 @@ void InitScene()
 	matrix.m_posit.m_x += 15.0f;
 	for (int i = 0; i < 20; i ++) {
 		// add some props 
-		matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z);
-//		new NewtonProp (nGrapphicWorld, "prop_03.dg", nWorld, matrix);
+		//matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z);
+		//new NewtonProp (nGrapphicWorld, "prop_03.dg", nWorld, matrix);
 		matrix.m_posit.m_x += 2.0f;
 	}
 
@@ -946,11 +947,10 @@ void InitScene()
 	matrix.m_posit.m_z -= 5.0f;
 	for (int i = 0; i < 20; i ++) {
 		// add some props 
-		matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z);
-//		new NewtonProp (nGrapphicWorld, "prop_02.dg", nWorld, matrix);
+		//matrix.m_posit.m_y = FindFloor (matrix.m_posit.m_x, matrix.m_posit.m_z);
+		//new NewtonProp (nGrapphicWorld, "prop_02.dg", nWorld, matrix);
 		matrix.m_posit.m_x += 8.0f;
 	}
-
 }
 
 

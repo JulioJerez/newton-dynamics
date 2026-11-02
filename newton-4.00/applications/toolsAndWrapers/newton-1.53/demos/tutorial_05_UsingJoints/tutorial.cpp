@@ -222,7 +222,7 @@ void PopulateLevel ()
 // create physics scene
 void InitScene()
 {
-	LevelPrimitive *level;
+	//LevelPrimitive *level;
 
 	// /////////////////////////////////////////////////////////////////////
 	//
@@ -261,7 +261,7 @@ void InitScene()
 	// /////////////////////////////////////////////////////////////////////
 	//
 	// Load level geometry and add it to the display list 
-	level = new LevelPrimitive (nGrapphicWorld, "level1.dg", nWorld, NULL);
+	LevelPrimitive* level = new LevelPrimitive (nGrapphicWorld, "level1.dg", nWorld, NULL);
 
 	// assign the concrete id to the level geometry
 	NewtonBodySetMaterialGroupID (level->m_level, levelID);

@@ -431,7 +431,7 @@ void NewtonWorldForEachBodyDo(const NewtonWorld* newtonWorld, NewtonBodyIterator
 
 		void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness) override
 		{
-			ndAssert(0);
+			m_owner->m_onDebugDisplay(&point[0], &point[0], &color[0]);
 		}
 
 		void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness) override

@@ -22,7 +22,7 @@ class NewtonConvexCastVehicle : public ndConvexCastVehicle
 
 	typedef void (*NewtonDrawDebugLine) (const dFloat* const p0, const dFloat* const p1, const dFloat* const color);
 
-	NewtonConvexCastVehicle(ndNewtonWorld* const owner, const ndVector& gravityDir);
+	NewtonConvexCastVehicle(const ndVector& gravityDir);
 
 	virtual ~NewtonConvexCastVehicle() override;
 
@@ -32,7 +32,6 @@ class NewtonConvexCastVehicle : public ndConvexCastVehicle
 
 	ndVector m_gravityDir;
 	NewtonDrawDebugLine m_onDebugDisplay;
-	ndWeakPtr<ndNewtonWorld> m_owner;
 };
 
 #endif
