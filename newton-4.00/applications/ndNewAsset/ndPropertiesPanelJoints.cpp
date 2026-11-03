@@ -1035,7 +1035,7 @@ void ndAssetEditor::EditMotorWheelJoint()
 	if (ImGui::InputFloat("longitudinalStiffness", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
-		joint->m_longitudinalStiffness = ndClamp(value, ndReal(0.0f), ndReal(1.0f));
+		joint->m_longitudinalStiffness = ndClamp(value, ndReal(0.0f), ndReal(2.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 	}
 
@@ -1043,7 +1043,7 @@ void ndAssetEditor::EditMotorWheelJoint()
 	if (ImGui::InputFloat("lateralStiffness", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
-		joint->m_lateralStiffness = ndClamp(value, ndReal(0.0f), ndReal(1.0f));
+		joint->m_lateralStiffness = ndClamp(value, ndReal(0.0f), ndReal(2.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 	}
 
