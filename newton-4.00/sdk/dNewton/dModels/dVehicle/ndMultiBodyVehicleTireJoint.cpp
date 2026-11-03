@@ -296,8 +296,8 @@ void ndMultiBodyVehicleTireJoint::SetMaxSlipAngle(ndFloat32 angleInRadians)
 
 void ndMultiBodyVehicleTireJoint::SetStiffness(ndFloat32 lateral, ndFloat32 longitudinal)
 {
-	m_lateralStiffness = ndClamp(lateral, ndFloat32(0.0f), ndFloat32(1.0f));
-	m_longitudinalStiffness = ndClamp(longitudinal, ndFloat32(0.0f), ndFloat32(1.0f));
+	m_lateralStiffness = ndClamp(lateral, ndFloat32(0.0f), ndFloat32(2.0f));
+	m_longitudinalStiffness = ndClamp(longitudinal, ndFloat32(0.0f), ndFloat32(2.0f));
 }
 
 void ndMultiBodyVehicleTireJoint::GetStiffness(ndFloat32& lateral, ndFloat32& longitudinal) const
