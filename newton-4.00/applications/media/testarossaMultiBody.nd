@@ -333,8 +333,8 @@
             <steeringAngle float="0.610865" />
             <springDamperRegularizer float="0.02" />
             <frictionModel string="pacejkaSport" />
-            <lateralStiffness float="0.5" />
-            <longitudinalStiffness float="0.5" />
+            <lateralStiffness float="1.0" />
+            <longitudinalStiffness float="1.0" />
         </joint>
     </ndMesh>
     <ndMesh visible="1">
@@ -438,8 +438,8 @@
             <steeringAngle float="0.610865" />
             <springDamperRegularizer float="0.02" />
             <frictionModel string="pacejkaSport" />
-            <lateralStiffness float="0.5" />
-            <longitudinalStiffness float="0.5" />
+            <lateralStiffness float="1.0" />
+            <longitudinalStiffness float="1.0" />
         </joint>
     </ndMesh>
     <ndMesh visible="1">
@@ -543,8 +543,8 @@
             <steeringAngle float="0" />
             <springDamperRegularizer float="0.02" />
             <frictionModel string="pacejkaSport" />
-            <lateralStiffness float="0.5" />
-            <longitudinalStiffness float="0.5" />
+            <lateralStiffness float="1.0" />
+            <longitudinalStiffness float="1.0" />
         </joint>
     </ndMesh>
     <ndMesh visible="1">
@@ -648,8 +648,8 @@
             <steeringAngle float="0" />
             <springDamperRegularizer float="0.02" />
             <frictionModel string="pacejkaSport" />
-            <lateralStiffness float="0.5" />
-            <longitudinalStiffness float="0.5" />
+            <lateralStiffness float="1.0" />
+            <longitudinalStiffness float="1.0" />
         </joint>
     </ndMesh>
     <ndMesh visible="1">
