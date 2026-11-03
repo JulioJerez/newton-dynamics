@@ -103,10 +103,6 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 	auto ApplyControls = [this, vehicle, motor, gearJoint, &axis, &buttons]()
 	{
 		ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
-//throttle = 0.7f;
-//throttle = 0.0f;
-
-		//ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = motor->GetCurve();
 		ndFloat32 currentRpm = motor->GetRpm();
 		ndFloat32 idleRpm = engineCurve.GetIdleRpm();
@@ -125,12 +121,10 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			torqueFromCurve = ndFloat32(0.0f);
 
 			m_driverState = m_parked;
-			//ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
 			gearJoint->SetRatio(ndFloat32(0.0f));
 			m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
 		}
 
-		//ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
 		ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearJoint->GetGearBox();
 		gearJoint->SetClutchTorque(gearBox.m_lockedClutchTorque);
 		if ((handBrake > ndFloat32(0.1f)) || (brake > ndFloat32(0.1f)))

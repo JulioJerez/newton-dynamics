@@ -55,19 +55,30 @@ class ndMultiBodyVehicle : public ndModelArticulation
 		class ndSpeedForcePair
 		{
 			public:
+			ndSpeedForcePair()
+			{
+			}
+
+			ndSpeedForcePair(ndFloat32 speed, ndFloat32 gravityFactor, ndFloat32 aerodynamicDownforceConstant)
+				:m_speed(speed)
+				,m_gravityFactor(gravityFactor)
+				,m_aerodynamicDownforceConstant(aerodynamicDownforceConstant)
+			{
+			}
 			ndFloat32 m_speed;
-			ndFloat32 m_forceFactor;
+			ndFloat32 m_gravityFactor;
 			ndFloat32 m_aerodynamicDownforceConstant;
 		};
 	
 		ndDownForce();
+		ndFloat32 GetMaxDownforceFactor() const;
 		ndFloat32 GetDownforceFactor(ndFloat32 speed) const;
 	
 		private:
 		ndFloat32 CalculateFactor(const ndSpeedForcePair* const entry) const;
 	
 		ndFloat32 m_suspensionStiffnessModifier;
-		ndSpeedForcePair m_downForceTable[5];
+		ndFixSizeArray<ndSpeedForcePair, 8> m_downForceTable;
 		friend class ndMultiBodyVehicle;
 		friend class ndMultiBodyVehicleTireJoint;
 	};

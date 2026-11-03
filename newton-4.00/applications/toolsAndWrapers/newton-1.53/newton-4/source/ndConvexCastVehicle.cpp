@@ -806,7 +806,7 @@ void ndConvexCastVehicle::ApplyBicycleModelLateralStability(ndFloat32 timestep)
 		return;
 	}
 
-	// calacula betaRate from the vehicle current beta and previus beta
+	// calculate betaRate from the vehicle current beta and previus beta
 	const ndFloat32 invTimeStep = ndFloat32(1.0) / timestep;
 	const ndFloat32 betaRate = (beta - m_bicycleModel->m_beta) * invTimeStep;
 
@@ -915,7 +915,7 @@ void ndConvexCastVehicle::ApplyBicycleModelLateralStability(ndFloat32 timestep)
 	m_bicycleModel->m_targetYawRate = targetYawRate;
 	m_bicycleModel->m_modelIsValid = true;
 
-	ndTrace(("beta=%g v=%g betaRate=%g yawRate=%g\n", beta * ndRadToDegree, localSpeed, betaRate, yawRate))
+	//ndTrace(("beta=%g v=%g betaRate=%g yawRate=%g\n", beta * ndRadToDegree, localSpeed, betaRate, yawRate))
 	if (ndAbs(beta * ndRadToDegree) > 30.0f)
 	{
 		m_bicycleModel->m_betaRate = betaRate;
@@ -989,7 +989,7 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	ndMultiBodyVehicle::Update(timestep, threadId);
 
 	// apply vehicle stability control
-	ApplyBicycleModelLateralStability(timestep);
+	//ApplyBicycleModelLateralStability(timestep);
 
 	// solve using immediate solver.
 	ndConstraint* const bicycleModel = *m_bicycleModel;

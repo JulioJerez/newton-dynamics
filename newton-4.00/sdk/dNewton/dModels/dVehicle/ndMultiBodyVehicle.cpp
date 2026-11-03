@@ -1164,16 +1164,16 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	//I am now using the direct coeficients B, C, E, D as explained in 
 	//The multibody system approach to vehicle dynamics page 300 to 306
 	auto LongitudinalForce = [](const ndTireFrictionModel::ndPacejkaTireModel& model, ndFloat32 phi, ndFloat32 sprungWeight)
-		{
-			return model.Evaluate(phi, sprungWeight);
-		};
+	{
+		return model.Evaluate(phi, sprungWeight);
+	};
 
 	auto LateralForce = [](const ndTireFrictionModel::ndPacejkaTireModel& model, ndFloat32 phi, ndFloat32 sprungWeight)
-		{
-			// phi should be in degress
-			phi = ndAbs(ndRadToDegree * phi);
-			return model.Evaluate(phi, sprungWeight);
-		};
+	{
+		// phi should be in degress
+		phi = ndAbs(ndRadToDegree * phi);
+		return model.Evaluate(phi, sprungWeight);
+	};
 
 	//now apply the combine effect, according to Genta book page 76
 	const ndTireFrictionModel& frictionModel = tire->m_frictionModel;
@@ -1218,20 +1218,21 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, tire->m_lateralStiffness * pacejkaAmplitud);
 	const ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, tire->m_longitudinalStiffness * pacejkaAmplitud);
 
-	const ndFloat32 fx = -pure_fx * phi_x / phi;
-	const ndFloat32 fz = ndAbs(pure_fz * phi_z / phi) * ndSign(speed_z);
-
 	ndJacobianPair lateralJacobian;
 	ndJacobianPair longitudicalJacobian;
 	tire->GetJacobian(lateralJacobian, longitudicalJacobian);
 
-	ndBodyDynamic* const wheelBody = tire->GetBody0()->GetAsBodyDynamic();
-	ndBodyDynamic* const chassisBody = tire->GetBody1()->GetAsBodyDynamic();
+	const ndFloat32 absFz = ndAbs(pure_fz * phi_z / phi);
+	const ndFloat32 fx = -pure_fx * phi_x / phi;
+	const ndFloat32 fz = ndSign(speed_z) * ((lateralDir.DotProduct(lateralJacobian.m_jacobianM0.m_linear.Scale(absFz)).GetScalar()  > ndFloat32 (0.0)) ? absFz : -absFz);
+
 	const ndVector tireLaterForce(lateralJacobian.m_jacobianM0.m_linear.Scale(-fz));
 	const ndVector tireLateralTorque(lateralJacobian.m_jacobianM0.m_angular.Scale(-fz));
 	const ndVector chassisLateralForce(lateralJacobian.m_jacobianM1.m_linear.Scale(fz));
 	const ndVector chassisLateralTorque(lateralJacobian.m_jacobianM1.m_angular.Scale(fz));
 
+	ndBodyDynamic* const wheelBody = tire->GetBody0()->GetAsBodyDynamic();
+	ndBodyDynamic* const chassisBody = tire->GetBody1()->GetAsBodyDynamic();
 	wheelBody->SetForce(wheelBody->GetForce() + tireLaterForce);
 	wheelBody->SetTorque(wheelBody->GetTorque() + tireLateralTorque);
 

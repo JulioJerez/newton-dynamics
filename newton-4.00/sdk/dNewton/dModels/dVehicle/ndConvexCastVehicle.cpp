@@ -86,7 +86,6 @@ void ndConvexCastVehicle::ndBicycleModelStability::JacobianDerivative(ndConstrai
 	}
 }
 
-
 class ndConvexCastVehicle::ndBicycleModelContact: public ndContact
 {
 	public:
@@ -117,34 +116,34 @@ class ndConvexCastVehicle::ndBicycleModelContact: public ndContact
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		ndBicycleModelStability& bicycle = **m_owner->m_bicycleModel;
-		if (bicycle.m_modelIsValid)
-		{
-			const ndBodyDynamic* const chassis = m_owner->GetChassis();
-			const ndBicycleModelStability* const bicycleModel = *m_owner->m_bicycleModel;
-			const ndVector chassisOmega(chassis->GetOmega());
-			const ndVector chassisVelocity(chassis->GetVelocity());
-			ndVector targetChassisOmega(chassisOmega);
-			targetChassisOmega.m_y = bicycleModel->m_targetYawRate - bicycleModel->m_r;
-			for (ndContactPointList::ndNode* pointNode = GetContactPoints().GetFirst(); pointNode; pointNode = pointNode->GetNext())
-			{
-				// set that target accelration equred to inforce targetBataRate
-				ndContactMaterial& contactPoint = pointNode->GetInfo();
-				const ndVector tireHubVeloc(targetChassisOmega.CrossProduct(contactPoint.m_point));
-				const ndVector larealDir(contactPoint.m_dir1);
-
-				ndFloat32 relAccel = larealDir.DotProduct(tireHubVeloc).GetScalar() * desc.m_invTimestep;
-				contactPoint.OverrideFriction1Accel(-relAccel);
-
-				// TODO: need to add expliction frintion limits, 
-				// for now max force.
-				//ndContactMaterial& point = pointNode->GetInfo();
-				//point.m_material.m_staticFriction0 = ndFloat32(0.01f);
-				//point.m_material.m_staticFriction1 = ndFloat32(0.01f);
-				//point.m_material.m_kineticFriction0 = ndFloat32(0.01f);
-				//point.m_material.m_kineticFriction1 = ndFloat32(0.01f);
-			}
-		}
+		//ndBicycleModelStability& bicycle = **m_owner->m_bicycleModel;
+		//if (bicycle.m_modelIsValid)
+		//{
+		//	const ndBodyDynamic* const chassis = m_owner->GetChassis();
+		//	const ndBicycleModelStability* const bicycleModel = *m_owner->m_bicycleModel;
+		//	const ndVector chassisOmega(chassis->GetOmega());
+		//	const ndVector chassisVelocity(chassis->GetVelocity());
+		//	ndVector targetChassisOmega(chassisOmega);
+		//	targetChassisOmega.m_y = bicycleModel->m_targetYawRate - bicycleModel->m_r;
+		//	for (ndContactPointList::ndNode* pointNode = GetContactPoints().GetFirst(); pointNode; pointNode = pointNode->GetNext())
+		//	{
+		//		// set that target accelration equred to inforce targetBataRate
+		//		ndContactMaterial& contactPoint = pointNode->GetInfo();
+		//		const ndVector tireHubVeloc(targetChassisOmega.CrossProduct(contactPoint.m_point));
+		//		const ndVector larealDir(contactPoint.m_dir1);
+		//
+		//		ndFloat32 relAccel = larealDir.DotProduct(tireHubVeloc).GetScalar() * desc.m_invTimestep;
+		//		contactPoint.OverrideFriction1Accel(-relAccel);
+		//
+		//		// TODO: need to add expliction frintion limits, 
+		//		// for now max force.
+		//		//ndContactMaterial& point = pointNode->GetInfo();
+		//		//point.m_material.m_staticFriction0 = ndFloat32(0.01f);
+		//		//point.m_material.m_staticFriction1 = ndFloat32(0.01f);
+		//		//point.m_material.m_kineticFriction0 = ndFloat32(0.01f);
+		//		//point.m_material.m_kineticFriction1 = ndFloat32(0.01f);
+		//	}
+		//}
 		ndContact::JacobianDerivative(desc);
 	}
 
@@ -156,7 +155,7 @@ ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 	:ndMultiBodyVehicle(gravityMagnitud)
 	,m_solver()
 	,m_sleepCounter(0)
-	,m_bicycleModel(nullptr)
+	//,m_bicycleModel(nullptr)
 {
 }
 
@@ -164,7 +163,7 @@ void ndConvexCastVehicle::OnAddToWorld()
 {
 	ndMultiBodyVehicle::OnAddToWorld();
 
-	m_bicycleModel = ndSharedPtr<ndBicycleModelStability>(new ndBicycleModelStability(this));
+	//m_bicycleModel = ndSharedPtr<ndBicycleModelStability>(new ndBicycleModelStability(this));
 
 	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
 	{
@@ -179,7 +178,7 @@ void ndConvexCastVehicle::OnAddToWorld()
 
 void ndConvexCastVehicle::OnRemoveFromWorld()
 {
-	m_bicycleModel = ndSharedPtr<ndBicycleModelStability>(nullptr);
+	//m_bicycleModel = ndSharedPtr<ndBicycleModelStability>(nullptr);
 	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
 	{
 		// support up to two contacts per tire
@@ -753,8 +752,10 @@ void ndConvexCastVehicle::ApplyBicycleModelLateralStability(ndFloat32 timestep)
 // The goal is to help control the vehicle while it is operating  
 // in the nonlinear range, producing behavior that is closer to  
 // what an experienced driver would do. 
-void ndConvexCastVehicle::ApplyBicycleModelLateralStability(ndFloat32 timestep)
+//void ndConvexCastVehicle::ApplyBicycleModelLateralStability(ndFloat32 timestep)
+void ndConvexCastVehicle::ApplyBicycleModelLateralStability(ndFloat32)
 {
+#if 0
 	// we first check if the vehicel mets the steady state 
 	// wher the bicycle model apply, by apply a series of checks
 	// 
@@ -806,7 +807,7 @@ void ndConvexCastVehicle::ApplyBicycleModelLateralStability(ndFloat32 timestep)
 		return;
 	}
 
-	// calacula betaRate from the vehicle current beta and previus beta
+	// calculate betaRate from the vehicle current beta and previus beta
 	const ndFloat32 invTimeStep = ndFloat32(1.0) / timestep;
 	const ndFloat32 betaRate = (beta - m_bicycleModel->m_beta) * invTimeStep;
 
@@ -915,11 +916,12 @@ void ndConvexCastVehicle::ApplyBicycleModelLateralStability(ndFloat32 timestep)
 	m_bicycleModel->m_targetYawRate = targetYawRate;
 	m_bicycleModel->m_modelIsValid = true;
 
-	ndTrace(("beta=%g v=%g betaRate=%g yawRate=%g\n", beta * ndRadToDegree, localSpeed, betaRate, yawRate))
+	//ndTrace(("beta=%g v=%g betaRate=%g yawRate=%g\n", beta * ndRadToDegree, localSpeed, betaRate, yawRate))
 	if (ndAbs(beta * ndRadToDegree) > 30.0f)
 	{
 		m_bicycleModel->m_betaRate = betaRate;
 	}
+#endif
 }
 #endif
 
@@ -989,23 +991,22 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	ndMultiBodyVehicle::Update(timestep, threadId);
 
 	// apply vehicle stability control
-	ApplyBicycleModelLateralStability(timestep);
+	//ApplyBicycleModelLateralStability(timestep);
 
 	// solve using immediate solver.
-	ndConstraint* const bicycleModel = *m_bicycleModel;
-	m_solver.SolverBegin(*m_skeleton, &bicycleModel, 1, world, timestep, threadId);
+	//ndConstraint* const bicycleModel = *m_bicycleModel;
+	//m_solver.SolverBegin(*m_skeleton, &bicycleModel, 1, world, timestep, threadId);
+	m_solver.SolverBegin(*m_skeleton, nullptr, 0, world, timestep, threadId);
 
 	//m_solver.FactorizationUpdate();
 
 	// calculate forces
 	m_solver.Solve();
 
-	if (m_bicycleModel->m_modelIsValid)
-	{
-		ndFloat32 xxx = m_bicycleModel->m_beta;
-		ApplyBicycleModelLateralStability(timestep);
-		m_bicycleModel->m_beta = xxx;
-	}
+	//if (m_bicycleModel->m_modelIsValid)
+	//{
+	//	ApplyBicycleModelLateralStability(timestep);
+	//}
 
 	// integrate tires, and internal drive train components
 	// apply reaction impulses to other bodies

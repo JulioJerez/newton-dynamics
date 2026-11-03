@@ -77,7 +77,7 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	ndInt32 m_sleepCounter;
 
 	// bicycle model parameters
-	ndSharedPtr<ndBicycleModelStability> m_bicycleModel;
+	ndSharedPtr<ndBicycleModelStability> m_bicycleModel____;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif
