@@ -64,9 +64,11 @@ class ndSkeletonContainer
 	class ndNodePair
 	{
 		public:
+		const ndConstraint* m_joint;
 		ndInt32 m_m0;
 		ndInt32 m_m1;
-		const ndConstraint* m_joint;
+		ndInt16 m_index0;
+		ndInt16 m_index1;
 	};
 
 	D_MSV_NEWTON_CLASS_ALIGN_32
@@ -215,6 +217,7 @@ class ndSkeletonContainer
 	void AddExtraContacts();
 	void RegularizeLcp() const;
 	void ClearCloseLoopJoints();
+	ndInt32 RamapPairArray() const;
 	void CalculateBufferSizeInBytes();
 	void AddCloseLoopJoint(ndConstraint* const joint);
 	void CalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp);
