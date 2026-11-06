@@ -513,8 +513,8 @@ void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndConstraint* 
 		if (!m_sentinel)
 		{
 			// add a sentinel body
-			ndSharedPtr<ndBodyDynamic> sentinel(ndSharedPtr<ndBodyDynamic>(new ndBodyDynamic()));
-			m_surrogateBodies.Add(sentinel);
+			m_sentinel = ndSharedPtr<ndBodyDynamic>(new ndBodyDynamic());
+			m_surrogateBodies.Add(m_sentinel);
 			m_surrogateBodies[0]->m_uniqueId = 0;
 		}
 
