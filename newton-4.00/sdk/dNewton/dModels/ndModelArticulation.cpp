@@ -546,8 +546,6 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 		m_rootNode = nullptr;
 	}
 
-	//ndFixSizeArray<ndMesh*, 256> sorrugatesNodes;
-	//auto BuildHiearchy = [this, &sorrugatesNodes](ndMesh* const meshNode)
 	auto BuildHiearchy = [this](ndMesh* const meshNode)
 	{
 		if (meshNode->GetRigidBody())
@@ -561,7 +559,6 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 			else 
 			{
 				const ndSharedPtr<ndMeshJoint>& meshJoint = meshNode->GetJoint();
-				//if (*meshJoint && !meshJoint->GetSurrogateParent())
 				if (*meshJoint)
 				{
 					ndSharedPtr<ndBody> body(meshNode->GetRigidBody()->CreateObject());
@@ -578,38 +575,10 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 					ndModelArticulation::ndNode* const limbNode = AddLimb(parentNode, body, joint);
 					limbNode->m_name = meshNode->GetName();
 				}
-				//else
-				//{
-				//	sorrugatesNodes.PushBack(meshNode);
-				//}
 			}
 		}
 	};
-	((ndMesh*)rootNode)->NodeIterator(BuildHiearchy);
-
-	{
-		//for (ndInt32 i = sorrugatesNodes.GetCount() - 1; i >= 0; --i)
-		//{
-		//	const ndMesh* const surrogateMeshNode = sorrugatesNodes[i]->GetJoint() ? sorrugatesNodes[i]->GetJoint()->GetSurrogateParent() : nullptr;
-		//	if (surrogateMeshNode)
-		//	{
-		//		ndModelArticulation::ndNode* parentNode = FindByName(surrogateMeshNode->GetName().GetStr());
-		//		if (parentNode)
-		//		{
-		//			ndSharedPtr<ndBody> body(sorrugatesNodes[i]->GetRigidBody()->CreateObject());
-		//			ndBodyKinematic* const childBody = body->GetAsBodyKinematic();
-		//			ndBodyKinematic* const parentBody = parentNode->m_body->GetAsBodyKinematic();
-		//			ndSharedPtr<ndJointBilateralConstraint> joint(sorrugatesNodes[i]->GetJoint()->CreateObject(childBody, parentBody));
-		//			ndModelArticulation::ndNode* const limbNode = AddLimb(parentNode, body, joint);
-		//			limbNode->m_name = sorrugatesNodes[i]->GetName();
-		//
-		//			sorrugatesNodes[i] = sorrugatesNodes[sorrugatesNodes.GetCount() - 1];
-		//			sorrugatesNodes.SetCount(sorrugatesNodes.GetCount() - 1);
-		//			break;
-		//		}
-		//	}
-		//}
-	}
+	const_cast<ndMesh*>(rootNode)->NodeIterator(BuildHiearchy);
 
 	const ndCloseLoopConstraints* const loops = rootNode->GetLoopJoints();
 	if (loops)
@@ -670,7 +639,7 @@ ndMesh* ndModelArticulation::CreateDefaultMesh() const
 		}
 	};
 	// generate the ndMesh
-	((ndModelArticulation*)this)->NodeIterator(BuildDefaultMesh);
+	const_cast<ndModelArticulation*>(this)->NodeIterator(BuildDefaultMesh);
 	Serialize(rootMesh);
 
 	return rootMesh;
