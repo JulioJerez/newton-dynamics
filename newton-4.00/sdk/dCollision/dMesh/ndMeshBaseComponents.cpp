@@ -739,6 +739,10 @@ ndMeshShapeInstance::ndMeshShapeInstance(const ndShapeInstance& instance)
 {
 }
 
+ndMeshShapeInstance::~ndMeshShapeInstance()
+{
+}
+
 ndMeshShapeInstance::ndMeshShapeInstance(const ndMeshShapeInstance& other)
 	:ndClassAlloc()
 	,m_localMatrix(other.m_localMatrix)
