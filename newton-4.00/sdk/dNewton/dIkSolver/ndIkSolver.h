@@ -95,6 +95,7 @@ class ndIkSolver: public ndClassAlloc
 	ndSurrogateList<ndBodyDynamic> m_surrogateBodies;
 
 	ndWeakPtr<ndWorld> m_world;
+	ndSharedPtr<ndBodyDynamic> m_sentinel;
 	ndWeakPtr<ndSkeletonContainer> m_skeleton;
 	ndFloat32 m_timestep;
 	ndFloat32 m_invTimestep;

@@ -38,16 +38,13 @@ ndIkSolver::ndIkSolver()
 	,m_surrogateContact()
 	,m_surrogateBodies()
 	,m_world(nullptr)
+	,m_sentinel(nullptr)
 	,m_skeleton(nullptr)
 	,m_timestep(ndFloat32(0.0f))
 	,m_invTimestep(ndFloat32(0.0f))
 	,m_maxAccel(ndFloat32(1.0e3f))
 	,m_maxAlpha(ndFloat32(1.0e4f))
 {
-	// add a sentinel body
-	ndSharedPtr<ndBodyDynamic> sentinel(ndSharedPtr<ndBodyDynamic>(new ndBodyDynamic()));
-	m_surrogateBodies.Add(sentinel);
-	m_surrogateBodies[0]->m_uniqueId = 0;
 }
 
 ndIkSolver::~ndIkSolver()
@@ -512,6 +509,14 @@ void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndConstraint* 
 		ND_PROFILE_ZONE();
 		m_timestep = timestep;
 		m_invTimestep = ndFloat32(1.0f) / m_timestep;
+
+		if (!m_sentinel)
+		{
+			// add a sentinel body
+			ndSharedPtr<ndBodyDynamic> sentinel(ndSharedPtr<ndBodyDynamic>(new ndBodyDynamic()));
+			m_surrogateBodies.Add(sentinel);
+			m_surrogateBodies[0]->m_uniqueId = 0;
+		}
 
 		m_skeleton->ClearCloseLoopJoints();
 		for (ndInt32 i = loopsCount - 1; i >= 0; --i)
