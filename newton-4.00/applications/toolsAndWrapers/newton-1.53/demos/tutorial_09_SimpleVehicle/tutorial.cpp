@@ -871,8 +871,8 @@ void InitScene()
 	//
 	// load a height field mesh
 	//LevelPrimitive* level = new LevelPrimitive (nGrapphicWorld, "level1.dg", nWorld, NULL);
-	//LevelPrimitive* level = new LevelPrimitive(nGrapphicWorld, "newtontrack.dg", nWorld, NULL);
-	LevelPrimitive* level = new LevelPrimitive(nGrapphicWorld, "newtontrack_flat.dg", nWorld, NULL);
+	LevelPrimitive* level = new LevelPrimitive(nGrapphicWorld, "newtontrack.dg", nWorld, NULL);
+	//LevelPrimitive* level = new LevelPrimitive(nGrapphicWorld, "newtontrack_flat.dg", nWorld, NULL);
 
 	// set the material group id to the terrain
 	NewtonBodySetMaterialGroupID (level->GetRigidBody(), levelID);
