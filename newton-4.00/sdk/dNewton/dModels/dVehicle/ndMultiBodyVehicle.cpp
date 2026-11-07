@@ -1445,6 +1445,11 @@ void ndMultiBodyVehicle::ApplyTireModel()
 	}
 }
 
+void ndMultiBodyVehicle::PostUpdate(ndFloat32, ndInt32)
+{
+	ApplyAlignmentAndBalancing();
+}
+
 void ndMultiBodyVehicle::Update(ndFloat32 timestep, ndInt32)
 {
 	if (!m_initialized)
@@ -1476,9 +1481,4 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep, ndInt32)
 
 	// apply tire model
 	ApplyTireModel();
-}
-
-void ndMultiBodyVehicle::PostUpdate(ndFloat32, ndInt32)
-{
-	ApplyAlignmentAndBalancing();
 }

@@ -463,13 +463,13 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	// solve using immediate solver.
 	m_solver.SolverBegin(*m_skeleton, nullptr, 0, world, timestep, threadId);
 
-	//m_solver.FactorizationUpdate();
-
-static int xxxxxx;
-xxxxxx++;
-//ndTrace(("%d ", xxxxxx))
-if (xxxxxx > 223)
-xxxxxx *= 1;
+//static int xxxxxx;
+//xxxxxx++;
+//int xxxxxxxxx = xxxxxx;
+//
+////ndTrace(("%d ", xxxxxx))
+//if (xxxxxx >= 253)
+//xxxxxx *= 1;
 
 	// calculate forces
 	m_solver.Solve();
