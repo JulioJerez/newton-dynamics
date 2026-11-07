@@ -1270,14 +1270,23 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 	const ndFloat32 tol2 = accelTol * accelTol;
 	ndFloat32* const residual = ndAlloca(ndFloat32, stride);
 
+	const ndFloat32* const invDiagonalPreconditioner = &m_diagonalPreconditioner[size];
+
+	ndFloat32* const lowOverride = const_cast<ndFloat32*>(low);
+	ndFloat32* const highOverride = const_cast<ndFloat32*>(high);
+
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		const ndInt32 index = normalIndex[i] + i;
-		x[i] /= m_diagonalPreconditioner[i];
+
+		//x[i] /= m_diagonalPreconditioner[i];
+		const ndFloat32 invDiagPrec = invDiagonalPreconditioner[i];
+		x[i] *= invDiagPrec;
+		lowOverride[i] *= invDiagPrec;
+		highOverride[i] *= invDiagPrec;
 		residual[i] = b[i] * m_diagonalPreconditioner[i];
 
 		const ndFloat32 coefficient = x[index];
-
 		const ndFloat32 l = low[i] * coefficient;
 		const ndFloat32 h = high[i] * coefficient;
 
@@ -1750,7 +1759,7 @@ void ndSkeletonContainer::InitLoopMassMatrix()
 
 	m_pairs = ndAlignPtr(ndNodePair, &m_bodyForceRemap1.m_indexSpan[m_rowCount]);
 	m_diagonalPreconditioner = ndAlignPtr(ndFloat32, &m_pairs[m_rowCount]);
-	m_massMatrix11 = ndAlignPtr(ndFloat32, &m_diagonalPreconditioner[m_rowCount]);
+	m_massMatrix11 = ndAlignPtr(ndFloat32, &m_diagonalPreconditioner[m_rowCount * 2]);
 	m_massMatrix10 = ndAlignPtr(ndFloat32, &m_massMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount]);
 	m_sparseMatrix = ndAlignPtr(ndUnsigned16, &m_massMatrix10[m_auxiliaryRowCount * primaryCount]);
 	m_deltaForce = ndAlignPtr(ndFloat32, &m_sparseMatrix[m_auxiliaryRowCount * (m_auxiliaryRowCount + 1)]);
@@ -2273,21 +2282,22 @@ void ndSkeletonContainer::InitMassMatrix(const ndLeftHandSide* const leftHandSid
 		{
 			const ndInt32 stride = m_auxiliaryRowCount;
 			ndFloat32* const matrix = &m_massMatrix11[m_blockSize * stride + m_blockSize];
-
+			ndFloat32* const invDiagonalPreconditioner = &m_diagonalPreconditioner[size];
 			for (ndInt32 i = 0; i < size; ++i)
 			{
 				ndFloat32 diagSqrt = ndSqrt(matrix[i * stride + i]);
+				invDiagonalPreconditioner[i] = diagSqrt;
 				m_diagonalPreconditioner[i] = ndFloat32(1.0f) / diagSqrt;
 			}
 
 			auto Precondition = [this, stride, size, matrix](ndInt32 groupId)
 			{
 				ndFloat32* const row = &matrix[groupId * stride];
-				const ndFloat32 diagonal = m_diagonalPreconditioner[groupId];
+				const ndFloat32 diagonalPreconditioner = m_diagonalPreconditioner[groupId];
 				row[groupId] = ndFloat32(1.0f);
 				for (ndInt32 j = groupId + 1; j < size; ++j)
 				{
-					const ndFloat32 offDiagonal = diagonal * row[j] * m_diagonalPreconditioner[j];
+					const ndFloat32 offDiagonal = diagonalPreconditioner * row[j] * m_diagonalPreconditioner[j];
 					row[j] = offDiagonal;
 					matrix[j * stride + groupId] = offDiagonal;
 				}

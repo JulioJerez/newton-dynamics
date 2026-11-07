@@ -88,21 +88,22 @@ void ndSkeletonContainer::ParallelInitMassMatrix(const ndLeftHandSide* const mat
 			const ndInt32 stride = m_auxiliaryRowCount;
 
 			ndFloat32* const matrix = &m_massMatrix11[m_blockSize * stride + m_blockSize];
-
+			ndFloat32* const invDiagonalPreconditioner = &m_diagonalPreconditioner[size];
 			for (ndInt32 i = 0; i < size; ++i)
 			{
 				ndFloat32 diagSqrt = ndSqrt(matrix[i * stride + i]);
+				invDiagonalPreconditioner[i] = diagSqrt;
 				m_diagonalPreconditioner[i] = ndFloat32(1.0f) / diagSqrt;
 			}
 
 			auto Precondition = ndMakeObject::ndFunction([this, stride, size, matrix](ndInt32 groupId, ndInt32, ndInt32)
 			{
 				ndFloat32* const row = &matrix[groupId * stride];
-				const ndFloat32 diagonal = m_diagonalPreconditioner[groupId];
+				const ndFloat32 diagonalPreconditioner = m_diagonalPreconditioner[groupId];
 				row[groupId] = ndFloat32(1.0f);
 				for (ndInt32 j = groupId + 1; j < size; ++j)
 				{
-					const ndFloat32 offDiagonal = diagonal * row[j] * m_diagonalPreconditioner[j];
+					const ndFloat32 offDiagonal = diagonalPreconditioner * row[j] * m_diagonalPreconditioner[j];
 					row[j] = offDiagonal;
 					matrix[j * stride + groupId] = offDiagonal;
 				}
