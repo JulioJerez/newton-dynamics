@@ -1645,28 +1645,33 @@ void ndSkeletonContainer::SolveAuxiliaryImmediate(ndFixSizeArray<ndBodyKinematic
 		const ndLeftHandSide* const row = &m_leftHandSide[index];
 		const ndRightHandSide* const rhs = &m_rightHandSide[index];
 
-		const ndVector jointForce(f[i]);
+		const ndVector8 jointForce(f[i]);
 		rhs->m_jointFeebackForce->Push(f[i]);
 
-		const ndVector force0(row->m_Jt.m_jacobianM0.m_linear * jointForce);
-		const ndVector torque0(row->m_Jt.m_jacobianM0.m_angular * jointForce);
-		const ndVector force1(row->m_Jt.m_jacobianM1.m_linear * jointForce);
-		const ndVector torque1(row->m_Jt.m_jacobianM1.m_angular * jointForce);
+		//const ndVector force0(row->m_Jt.m_jacobianM0.m_linear * jointForce);
+		//const ndVector torque0(row->m_Jt.m_jacobianM0.m_angular * jointForce);
+		//const ndVector force1(row->m_Jt.m_jacobianM1.m_linear * jointForce);
+		//const ndVector torque1(row->m_Jt.m_jacobianM1.m_angular * jointForce);
+		const ndVector8& forceM0 = reinterpret_cast<ndVector8&>(*const_cast<ndJacobian*>(&row->m_Jt.m_jacobianM0));
+		const ndVector8& forceM1 = reinterpret_cast<ndVector8&>(*const_cast<ndJacobian*>(&row->m_Jt.m_jacobianM1));
+
+		const ndVector8 force0(forceM0 * jointForce);
+		const ndVector8 force1(forceM1 * jointForce);
 
 		const ndInt32 m0 = (joint->GetBody0()->GetInvMass() > ndFloat32(0.0f)) ? joint->GetBody0()->m_index : 0;
 		const ndInt32 m1 = (joint->GetBody1()->GetInvMass() > ndFloat32(0.0f)) ? joint->GetBody1()->m_index : 0;
 		ndBodyKinematic* const body0 = bodyArray[m0];
 		ndBodyKinematic* const body1 = bodyArray[m1];
 
-		joint->m_forceBody0 += force0;
-		joint->m_forceBody1 += force1;
-		joint->m_torqueBody0 += torque0;
-		joint->m_torqueBody1 += torque1;
+		joint->m_forceBody0 += force0.GetLow();
+		joint->m_forceBody1 += force1.GetLow();
+		joint->m_torqueBody0 += force0.GetHigh();
+		joint->m_torqueBody1 += force1.GetHigh();
 
-		body0->m_accel += force0;
-		body0->m_alpha += torque0;
-		body1->m_accel += force1;
-		body1->m_alpha += torque1;
+		body0->m_accel += force0.GetLow();
+		body0->m_alpha += force0.GetHigh();
+		body1->m_accel += force1.GetLow();
+		body1->m_alpha += force1.GetHigh();
 	}
 
 	for (ndInt32 i = ndInt32(bodyArray.GetCount()) - 1; i >= 0; --i)
