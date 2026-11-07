@@ -1255,24 +1255,9 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	// ground. In a real-time simulation, this assumption does not always hold.
 	// Using the Pacejka D coefficient when the tire is barely touching the
 	// ground can produce unrealistic tire forces.
-	//
-	// For this simulation, I instead use the average normal force from the
-	// previous time step together with the nominal sprung force. This provides
-	// more stable and plausible realistic results when tire contact varies.
-	// 
-	// Note: The tire stiffness model can produce friction coefficients greater
-	// than 1.0. Therefore, the computed values are clamped to the range
-	// [0, maxFrictionCoefficient].	
-	//const ndFloat32 maxFrictionCoeficient = ndFloat32(1.2f);
-	//ndFloat32 lateralFrictionCoefficient = ndClamp(ndAbs(fz) / sprungWeight, ndFloat32 (0.0f), maxFrictionCoeficient);
-	//ndFloat32 longitudinalFrictionCoefficient = ndClamp(ndAbs(fx) / sprungWeight, ndFloat32(0.0f), maxFrictionCoeficient);
-	//contactPoint.m_material.m_staticFriction0 = longitudinalFrictionCoefficient;
-	//contactPoint.m_material.m_kineticFriction0 = longitudinalFrictionCoefficient;
-	//contactPoint.m_material.m_staticFriction1 = lateralFrictionCoefficient;
-	//contactPoint.m_material.m_kineticFriction1 = lateralFrictionCoefficient;
 
-	contactPoint.m_material.m_staticFriction0 *= ndFloat32(1.2f);
-	contactPoint.m_material.m_staticFriction1 *= ndFloat32(1.2f);
+	//contactPoint.m_material.m_staticFriction0 *= ndFloat32(1.2f);
+	//contactPoint.m_material.m_staticFriction1 *= ndFloat32(1.2f);
 	contactPoint.m_material.m_kineticFriction0 = contactPoint.m_material.m_staticFriction0;
 	contactPoint.m_material.m_kineticFriction1 = contactPoint.m_material.m_staticFriction1;
 
