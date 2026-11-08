@@ -649,10 +649,10 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit + normalForce.Scale(tireGravityScale), forceColor);
 
 		const ndVector longitudinalForce(tireMatrix.m_right * tireMatrix.m_right.DotProduct(tireForce));
-		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit - longitudinalForce.Scale(tireGravityScale), longitudinalColor);
+		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit + longitudinalForce.Scale(tireGravityScale), longitudinalColor);
 
 		const ndVector lateralForce(tireMatrix.m_front * tireMatrix.m_front.DotProduct(tireForce));
-		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit - lateralForce.Scale(tireGravityScale), lateralColor);
+		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit + lateralForce.Scale(tireGravityScale), lateralColor);
 
 		// draw tire normal forces
 		const ndBodyKinematic::ndContactMap& contactMap = tireBody->GetContactMap();
@@ -1137,48 +1137,36 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	const ndBodyKinematic* const tireBody = tire->GetBody0()->GetAsBodyKinematic();
 	const ndBodyKinematic* const otherBody = (contactPoint.m_body0 == tireBody) ? contactPoint.m_body1 : contactPoint.m_body0;
 
-	const ndVector longitudDir(contactPoint.m_dir0);
-	const ndVector contactVeloc0(tireBody->GetVelocity());
-	const ndVector contactVeloc1(otherBody->GetVelocityAtPoint(contactPoint.m_point));
-	const ndVector wheelComVeloc(contactVeloc0 - contactVeloc1);
-	const ndFloat32 wheelComSpeed_x = wheelComVeloc.DotProduct(longitudDir).GetScalar();
-	if (ndAbs(wheelComSpeed_x) < D_MAX_CONTACT_SPEED_TRESHOLD)
+	const ndVector otherBodyContactVeloc(otherBody->GetVelocityAtPoint(contactPoint.m_point));
+
+	const ndVector longitudinalDir(contactPoint.m_dir0);
+	const ndVector tireComVeloc(tireBody->GetVelocity() - otherBodyContactVeloc);
+	const ndFloat32 wheelComSpeed_x = tireComVeloc.DotProduct(longitudinalDir).GetScalar();
+	const ndFloat32 wheelComAbsSpeed_x = ndAbs(wheelComSpeed_x);
+	if (wheelComAbsSpeed_x < D_MAX_CONTACT_SPEED_TRESHOLD)
 	{
 		// handle vehicle is at rest by just doing normal rigid body dynamics.
 		return CoulombFrictionCircleTireModel(tire, contactPoint);
 	}
 
-	// calculate lateral slip angle
-	const ndVector lateralDir(contactPoint.m_dir1);
-	// use a dead zone and them use Sv for nonzero lateral force
-	const ndFloat32 speed_z = wheelComVeloc.DotProduct(lateralDir).GetScalar();
-	const ndFloat32 wheelComSpeed_z = (speed_z > ndFloat32(1.0e-3f) || (speed_z < ndFloat32(-1.0e-3f))) ? speed_z : ndFloat32(0.0f);
-	const ndFloat32 sideSlipAngleInRadians = ndAtan2(wheelComSpeed_z, ndAbs(wheelComSpeed_x));
-	tire->m_lateralSlip = ndMax(tire->m_lateralSlip, ndAbs(sideSlipAngleInRadians));
+	// calculate contact velocity
+	const ndVector tireContactVeloc(tireBody->GetVelocityAtPoint(contactPoint.m_point));
+	const ndVector contactVeloc(tireContactVeloc - otherBodyContactVeloc);
 
-		// calculate longitudinal slip
-	const ndVector contactVeloc(tireBody->GetVelocityAtPoint(contactPoint.m_point) - contactVeloc1);
-	const ndFloat32 vr_x = contactVeloc.DotProduct(longitudDir).GetScalar();
-	const ndFloat32 longitudialSlip = ndClamp(vr_x / wheelComSpeed_x, ndFloat32(-100.0f), ndFloat32(100.0f));
+	// calculate longitudinal slip, 
+	// clamped between[-100, 100] since it becomes meaninless outside that range
+	const ndFloat32 vr_x = contactVeloc.DotProduct(longitudinalDir).GetScalar();
+	const ndFloat32 longitudialSlip = ndClamp(vr_x / wheelComAbsSpeed_x, ndFloat32(-100.0f), ndFloat32(100.0f));
 	tire->m_longitudinalSlip = ndMax(tire->m_longitudinalSlip, longitudialSlip);
 
-	//I am now using the direct coeficients B, C, E, D as explained in 
-	//The multibody system approach to vehicle dynamics page 300 to 306
-	auto LongitudinalForce = [](const ndTireFrictionModel::ndPacejkaTireModel& model, ndFloat32 phi, ndFloat32 sprungWeight)
-	{
-		return model.Evaluate(phi, sprungWeight);
-	};
-
-	auto LateralForce = [](const ndTireFrictionModel::ndPacejkaTireModel& model, ndFloat32 phi, ndFloat32 sprungWeight)
-	{
-		// phi should be in degress
-		phi = ndAbs(ndRadToDegree * phi);
-		return model.Evaluate(phi, sprungWeight);
-	};
+	// calculate lateral slip angle
+	const ndVector lateralDir(contactPoint.m_dir1);
+	const ndFloat32 speed_z = tireComVeloc.DotProduct(lateralDir).GetScalar();
+	const ndFloat32 wheelComSpeed_z = (speed_z > ndFloat32(1.0e-3f) || (speed_z < ndFloat32(-1.0e-3f))) ? speed_z : ndFloat32(0.0f);
+	const ndFloat32 sideSlipAngleInRadians = ndAtan2(wheelComSpeed_z, wheelComAbsSpeed_x);
+	tire->m_lateralSlip = ndMax(tire->m_lateralSlip, ndAbs(sideSlipAngleInRadians));
 
 	//now apply the combine effect, according to Genta book page 76
-	const ndTireFrictionModel& frictionModel = tire->m_frictionModel;
-
 	// ----- Combined‑force calculation notes -----
 	//
 	// The derivation below isn’t documented in either Pacejka or Genta books.
@@ -1198,24 +1186,45 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	// option I’ve found stable in practice, if not theoretically satisfying, therefore I am going with that. 
 	// I still find the lateral force some what too strong.
 
-	//I am assuming sv and sv to be zero.
+	//I am assuming sv and sv to be zero, threfore deal;t alpha and delta phi are both zero.
 	//under these conditions u and v become
 	ndFloat32 den = ndFloat32(1.0f) + ndAbs(longitudialSlip);
 	ndFloat32 phi_x = -longitudialSlip / den;
 	ndFloat32 phi_z = ndTan(sideSlipAngleInRadians) / den;
+
 	ndFloat32 phi2 = phi_x * phi_x + phi_z * phi_z;
 	if (phi2 < ndFloat32(1.0e-6f))
 	{
 		// this is the vanishing phi
 		return CoulombFrictionCircleTireModel(tire, contactPoint);
 	}
+	const ndFloat32 invPhi = ndFloat32(1.0f) / ndSqrt(phi2);
+	phi_x *= invPhi;
+	phi_z *= invPhi;
 
-	const ndFloat32 phi = ndSqrt(phi2);
-	const ndFloat32 isotropicMaterialFriction = contactPoint.m_material.m_staticFriction0;
-	//const ndFloat32 sprungWeight = contactPoint.m_normal_Force.GetInitialGuess();
+
+	// we now carculate the projected longidudinal and lateral force, 
+	// first we need the sprung normal force
 	const ndFloat32 sprungWeight = tire->m_frictionModel.m_sprungWeight;
+	const ndFloat32 isotropicMaterialFriction = contactPoint.m_material.m_staticFriction0;
 	const ndFloat32 pacejkaAmplitud = sprungWeight * isotropicMaterialFriction;
 
+	//I am now using the direct coeficients B, C, E, D as explained in 
+	//The multibody system approach to vehicle dynamics page 300 to 306
+	auto LongitudinalForce = [](const ndTireFrictionModel::ndPacejkaTireModel& model, ndFloat32 phi, ndFloat32 sprungWeight)
+	{
+		return model.Evaluate(phi, sprungWeight);
+	};
+
+	auto LateralForce = [](const ndTireFrictionModel::ndPacejkaTireModel& model, ndFloat32 phi, ndFloat32 sprungWeight)
+	{
+		// phi should be in degress
+		phi = ndAbs(ndRadToDegree * phi);
+		return model.Evaluate(phi, sprungWeight);
+	};
+
+	// whe can now get the actual tire forces.
+	const ndTireFrictionModel& frictionModel = tire->m_frictionModel;
 	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, tire->m_lateralStiffness * pacejkaAmplitud);
 	const ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, tire->m_longitudinalStiffness * pacejkaAmplitud);
 
@@ -1223,9 +1232,16 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	ndJacobianPair longitudicalJacobian;
 	tire->GetJacobian(lateralJacobian, longitudicalJacobian);
 
-	const ndFloat32 absFz = ndAbs(pure_fz * phi_z / phi);
-	const ndFloat32 fx = -pure_fx * phi_x / phi;
-	const ndFloat32 fz = ndSign(speed_z) * ((lateralDir.DotProduct(lateralJacobian.m_jacobianM0.m_linear.Scale(absFz)).GetScalar()  > ndFloat32 (0.0)) ? absFz : -absFz);
+	const ndFloat32 absFz = ndAbs(pure_fz * phi_z);
+	const ndFloat32 absFx = ndAbs(pure_fx * phi_x);
+	const ndFloat32 fz = ndSign(speed_z) * ((lateralDir.DotProduct(lateralJacobian.m_jacobianM0.m_linear).GetScalar() > ndFloat32 (0.0)) ? absFz : -absFz);
+	//const ndFloat32 fx = ndSign(vr_x) * ((longitudinalDir.DotProduct(longitudicalJacobian.m_jacobianM0.m_linear).GetScalar() > ndFloat32(0.0)) ? absFx : -absFx);
+	const ndFloat32 fx = 0.0f;
+
+	const ndVector tireLongitudinalForce(longitudicalJacobian.m_jacobianM0.m_linear.Scale(-fx));
+	const ndVector tireLongitudinalTorque(longitudicalJacobian.m_jacobianM0.m_angular.Scale(-fx));
+	const ndVector chassisLongitudinalForce(longitudicalJacobian.m_jacobianM1.m_linear.Scale(fx));
+	const ndVector chassisLongitudinalTorque(longitudicalJacobian.m_jacobianM1.m_angular.Scale(fx));
 
 	const ndVector tireLaterForce(lateralJacobian.m_jacobianM0.m_linear.Scale(-fz));
 	const ndVector tireLateralTorque(lateralJacobian.m_jacobianM0.m_angular.Scale(-fz));
@@ -1234,33 +1250,15 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 
 	ndBodyDynamic* const wheelBody = tire->GetBody0()->GetAsBodyDynamic();
 	ndBodyDynamic* const chassisBody = tire->GetBody1()->GetAsBodyDynamic();
-	wheelBody->SetForce(wheelBody->GetForce() + tireLaterForce);
-	wheelBody->SetTorque(wheelBody->GetTorque() + tireLateralTorque);
+	wheelBody->SetForce(wheelBody->GetForce() + tireLongitudinalForce + tireLaterForce);
+	wheelBody->SetTorque(wheelBody->GetTorque() + tireLongitudinalTorque + tireLateralTorque);
+	chassisBody->SetForce(chassisBody->GetForce() + chassisLongitudinalForce + chassisLateralForce);
+	chassisBody->SetTorque(chassisBody->GetTorque() + chassisLongitudinalTorque + chassisLateralTorque);
 
-	chassisBody->SetForce(chassisBody->GetForce() + chassisLateralForce);
-	chassisBody->SetTorque(chassisBody->GetTorque() + chassisLateralTorque);
-
-	// Convert the longitudinal and lateral forces computed by the tire model
-	// into friction coefficients. These coefficients are then used by the
-	// linear solver to compute the correct tire force distribution for the
-	// current simulation step.
-	//
-	// This is done by computing the ratio between the estimated tire force
-	// and the tire normal force.
-	//
-	// Note: For the sprung normal force, the textbook uses the D coefficient
-	// of the Pacejka equation. This is more accurate because it accounts for
-	// load sensitivity under steady-state conditions.
-	//
-	// However, this assumes the tire remains in continuous contact with the
-	// ground. In a real-time simulation, this assumption does not always hold.
-	// Using the Pacejka D coefficient when the tire is barely touching the
-	// ground can produce unrealistic tire forces.
-
-	//contactPoint.m_material.m_staticFriction0 *= ndFloat32(1.2f);
-	//contactPoint.m_material.m_staticFriction1 *= ndFloat32(1.2f);
 	contactPoint.m_material.m_kineticFriction0 = contactPoint.m_material.m_staticFriction0;
 	contactPoint.m_material.m_kineticFriction1 = contactPoint.m_material.m_staticFriction1;
+	contactPoint.m_material.m_staticFriction0 = ndFloat32(1.0f);
+	contactPoint.m_material.m_staticFriction1 = ndFloat32(1.0f);
 
 	const ndFloat32 maxSideAngle = ndMax(tire->m_maxSideAngle, ND_TIRE_MIN_STATIC_SLEEP);
 	const ndFloat32 sideSlipAngle = ndMin(ndAbs(sideSlipAngleInRadians), maxSideAngle);
@@ -1271,7 +1269,6 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 //{
 //	ndTrace(("f=%f a=%f a1=%f s=%f\n", fz, sideSlipAngle * ndRadToDegree, sideSlipAngleInRadians * ndRadToDegree, sideSlipSpeed));
 //}
-
 	return true;
 }
 
