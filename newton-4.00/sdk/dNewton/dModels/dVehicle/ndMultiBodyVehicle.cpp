@@ -903,7 +903,8 @@ void ndMultiBodyVehicle::CalculateRestSprungWeight()
 	}
 	tireArray.SetCount(count);
 
-	ndFloat32 downGravity = -(m_gravityMagnitud + m_gravityMagnitud * m_downForce.GetMaxDownforceFactor());
+	//const ndFloat32 downGravity = m_gravityMagnitud;
+	ndFloat32 downGravity = m_gravityMagnitud * (ndFloat32 (1.0f) + m_downForce.GetMaxDownforceFactor());
 	const ndVector upDir(m_localFrame.m_up.Scale(ndFloat32(1.0f)));
 	for (ndInt32 i = 0; i < tireArray.GetCount(); ++i)
 	{
@@ -932,7 +933,7 @@ void ndMultiBodyVehicle::CalculateRestSprungWeight()
 
 		pairM0.PushBack(m0);
 		pairM1.PushBack(m1);
-		rhsAccel.PushBack(downGravity);
+		rhsAccel.PushBack(-downGravity);
 		jacobianArray.PushBack(jacobianPair);
 	}
 
