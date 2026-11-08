@@ -482,7 +482,7 @@ void ndMesh::SetModifier(const ndSharedPtr<ndMeshTransformModifier>& modifier)
 
 ndCloseLoopConstraints* ndMesh::GetLoopJoints()
 {
-	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_CONSTRAINT_LOOPS);
+	ndMesh* mesh = GetRoot()->FindByName(ndCloseLoopConstraints::StaticClassName());
 	if (!mesh)
 	{
 		ndMesh* const rootNode = GetRoot();
@@ -497,7 +497,7 @@ ndCloseLoopConstraints* ndMesh::GetLoopJoints()
 
 const ndCloseLoopConstraints* ndMesh::GetLoopJoints() const 
 {
-	const ndMesh* mesh = GetRoot()->FindByName(ND_MESH_CONSTRAINT_LOOPS);
+	const ndMesh* mesh = GetRoot()->FindByName(ndCloseLoopConstraints::StaticClassName());
 	if (!mesh)
 	{
 		ndMesh* const rootNode = ((ndMesh*)this)->GetRoot();
@@ -518,7 +518,7 @@ void ndMesh::AddLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint)
 
 ndCollidingPairs* ndMesh::GetCollingPairs()
 {
-	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_COLLIDING_PAIRS);
+	ndMesh* mesh = GetRoot()->FindByName(ndCollidingPairs::StaticClassName());
 	if (!mesh)
 	{
 		ndMesh* const rootNode = GetRoot();
@@ -533,7 +533,7 @@ ndCollidingPairs* ndMesh::GetCollingPairs()
 
 const ndCollidingPairs* ndMesh::GetCollingPairs() const
 {
-	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_COLLIDING_PAIRS);
+	ndMesh* mesh = GetRoot()->FindByName(ndCollidingPairs::StaticClassName());
 	if (!mesh)
 	{
 		ndMesh* const rootNode = ((ndMesh*)this)->GetRoot();
@@ -1640,7 +1640,7 @@ ndCloseLoopConstraints::ndCloseLoopConstraints()
 	:ndMesh()
 	,m_loopJoints()
 {
-	SetName(ND_MESH_CONSTRAINT_LOOPS);
+	SetName(ndCloseLoopConstraints::StaticClassName());
 }
 
 ndCloseLoopConstraints::ndCloseLoopConstraints(const ndCloseLoopConstraints& src)
@@ -1727,7 +1727,8 @@ ndCollidingPairs::ndCollidingPairs()
 	:ndMesh()
 	,m_collidingPairs()
 {
-	SetName(ND_MESH_COLLIDING_PAIRS);
+	//SetName(ND_MESH_COLLIDING_PAIRS);
+	SetName(ndCollidingPairs::StaticClassName());
 }
 
 ndCollidingPairs::ndCollidingPairs(const ndCollidingPairs& src)

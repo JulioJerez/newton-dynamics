@@ -903,8 +903,8 @@ void ndMultiBodyVehicle::CalculateRestSprungWeight()
 	}
 	tireArray.SetCount(count);
 
-	//const ndFloat32 downGravity = m_gravityMagnitud;
-	ndFloat32 downGravity = m_gravityMagnitud * (ndFloat32 (1.0f) + m_downForce.GetMaxDownforceFactor());
+	const ndFloat32 downGravity = ndAbs(m_gravityMagnitud);
+	//const ndFloat32 downGravity = ndAbs (m_gravityMagnitud * (ndFloat32 (1.0f) + m_downForce.GetMaxDownforceFactor()));
 	const ndVector upDir(m_localFrame.m_up.Scale(ndFloat32(1.0f)));
 	for (ndInt32 i = 0; i < tireArray.GetCount(); ++i)
 	{
@@ -1225,8 +1225,10 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 
 	// whe can now get the actual tire forces.
 	const ndTireFrictionModel& frictionModel = tire->m_frictionModel;
-	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, tire->m_lateralStiffness * pacejkaAmplitud);
-	const ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, tire->m_longitudinalStiffness * pacejkaAmplitud);
+	ndFloat32 lateralStiffness = ndFloat32 (2.0f) * tire->m_lateralStiffness;
+	ndFloat32 longitudinalStiffness = ndFloat32(1.0f) * tire->m_longitudinalStiffness;
+	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, lateralStiffness * pacejkaAmplitud);
+	const ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, longitudinalStiffness * pacejkaAmplitud);
 
 	ndJacobianPair lateralJacobian;
 	ndJacobianPair longitudicalJacobian;
