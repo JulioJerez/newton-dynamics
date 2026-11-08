@@ -403,11 +403,6 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 		return;
 	}
 
-	ndWorld* const world = GetWorld();
-	ndAssert(world);
-	m_savedBody.SetCount(0);
-	m_savedForceTorque.SetCount(0);
-
 	// check for equilibrium state here
 	if (IsSleeping())
 	{
@@ -424,10 +419,16 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 
 	// update tire contacts 
 	ND_PROFILE_ZONE();
+
+	ndAssert(GetWorld());
+	ndWorld* const world = GetWorld();
+	m_savedBody.SetCount(0);
+	m_savedForceTorque.SetCount(0);
+
 	m_skeleton->m_owner = world;
 	CalculateConvexCastTireContacts(threadId);
 
-	// apply all external forces to intenal bodies
+	// apply all external forces to internal bodies
 	m_originaSkeleton = GetRoot()->m_body->GetAsBodyKinematic()->GetSkeleton();
 	auto ApplyExternalForces = [this, timestep, threadId](ndNode* const node)
 	{
@@ -463,14 +464,6 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	// solve using immediate solver.
 	m_solver.SolverBegin(*m_skeleton, nullptr, 0, world, timestep, threadId);
 
-//static int xxxxxx;
-//xxxxxx++;
-//int xxxxxxxxx = xxxxxx;
-//
-////ndTrace(("%d ", xxxxxx))
-//if (xxxxxx >= 253)
-//xxxxxx *= 1;
-
 	// calculate forces
 	m_solver.Solve();
 
@@ -489,8 +482,8 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 			{
 				// for model bodies we just set the net force
 				const ndMatrix inertia(body->CalculateInertiaMatrix());
-				const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
 				const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
+				const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
 
 				ndUnsigned8 equilibrium = body->m_equilibrium;
 				ndJacobian forceTorque;
