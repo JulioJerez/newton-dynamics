@@ -887,13 +887,11 @@ ndMeshBody::ndMeshBody(const ndMesh* const owner)
 	,m_localCentreOfMass(ndVector::m_wOne)
 	,m_owner(owner)
 {
-	m_classConstructor = ndString("ndBody");
 }
 
 ndMeshBody::ndMeshBody(const ndMeshBody& other)
 	:ndClassAlloc()
 	,m_localCentreOfMass(other.m_localCentreOfMass)
-	,m_classConstructor(other.m_classConstructor)
 	,m_owner(other.m_owner)
 {
 }
@@ -912,7 +910,7 @@ void ndMeshBody::DuplicateFixDependencies(const ndMesh* const root)
 
 bool ndMeshBody::operator==(const ndMeshBody& other) const
 {
-	bool test = (m_classConstructor == other.m_classConstructor);
+	bool test = (ClassName() == other.ClassName());
 
 	ndVector diff(m_localCentreOfMass - other.m_localCentreOfMass);
 	test = test && diff.DotProduct(diff & ndVector::m_triplexMask).GetScalar() < ndFloat32(1.0e-6f);
@@ -949,7 +947,6 @@ ndMeshBodyKinematic::ndMeshBodyKinematic(const ndMesh* const owner)
 	,m_maxLinearStep(ndFloat32(2.0f))
 	,m_massVolumeWeigh(ndFloat32(1.0f))
 {
-	m_classConstructor = ndString("ndBodyKinematic");
 }
 
 ndMeshBodyKinematic::ndMeshBodyKinematic(const ndMeshBodyKinematic& other)

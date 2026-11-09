@@ -1162,7 +1162,6 @@ void ndBodyKinematic::Serialize(ndMesh* const node) const
 	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyKinematic(node));
 	node->SetRigidBody(meshBody);
 	Serialize(meshBody);
-	meshBody->m_classConstructor = ndString(ClassName());
 }
 
 void ndBodyKinematic::SaveNdMesh(const char* const path) const

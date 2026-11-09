@@ -62,7 +62,7 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 	if (ImGui::CollapsingHeader("Rigid body"))
 	{
 		ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
-		ndAssert(body->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndAssert(body->IsType(ndMeshBodyDynamic::StaticClassName()));
 		ndMeshBodyDynamic* const rigidBody = (ndMeshBodyDynamic*)*body;
 
 		// body mass

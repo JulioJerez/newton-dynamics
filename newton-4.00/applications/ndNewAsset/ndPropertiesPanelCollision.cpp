@@ -48,7 +48,7 @@ class ndUndoRedoShape : public ndUndoRedoCommand
 
 	virtual void Undo() override
 	{
-		ndAssert(m_selectedNode->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndAssert(m_selectedNode->GetRigidBody()->IsType(ndMeshBodyDynamic::StaticClassName()));
 		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_selectedNode->GetRigidBody());
 		body->m_shapeInstance = m_shapeInstance;
 		m_editor->GetDebugDisplay()->RebuildDebugCollision();
@@ -534,7 +534,7 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 void ndAssetEditor::MakeVisualGeometry()
 {
 	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
-	ndAssert(body->m_classConstructor == ndBodyDynamic::StaticClassName());
+	ndAssert(body->IsType(ndMeshBodyDynamic::StaticClassName()));
 	ndMeshBodyDynamic* const rigidBody = (ndMeshBodyDynamic*)*body;
 	const ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
 	if (shapeInstance.m_shape->IsType(ndShapeNull::StaticClassName()))

@@ -221,7 +221,6 @@ void ndBody::Serialize(ndMesh* const node) const
 	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBody(node));
 	node->SetRigidBody(meshBody);
 	Serialize(meshBody);
-	meshBody->m_classConstructor = ndString(ClassName());
 }
 
 void ndBody::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const

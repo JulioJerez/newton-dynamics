@@ -346,7 +346,6 @@ class ndMeshBody : public ndClassAlloc
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
 	ndVector m_localCentreOfMass;
-	ndString m_classConstructor;
 	ndWeakPtr<const ndMesh> m_owner;
 };
 

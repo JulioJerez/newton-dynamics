@@ -46,7 +46,6 @@ ndMeshBodyDynamic::ndMeshBodyDynamic(const ndMesh* const owner)
 	:ndMeshBodyKinematic(owner)
 	,m_intrinsicDamping(ndVector::m_zero)
 {
-	m_classConstructor = ndString("ndBodyDynamic");
 }
 
 ndMeshBodyDynamic::ndMeshBodyDynamic(const ndMeshBodyDynamic& other)

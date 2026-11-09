@@ -39,7 +39,7 @@
         </faces>
     </geometry>
     <rigidbody>
-        <constructor string="ndBodyDynamic" />
+        <constructor string="ndMeshBodyDynamic" />
         <veloc float3="0 0 0" />
         <omega float3="0 0 0" />
         <com float3="4.89731e-11 8.95508e-10 -7.34596e-10" />
@@ -179,7 +179,7 @@
             </faces>
         </geometry>
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
             <com float3="0.25 4.92806e-10 -3.96178e-10" />
@@ -266,7 +266,7 @@
                 </faces>
             </geometry>
             <rigidbody>
-                <constructor string="ndBodyDynamic" />
+                <constructor string="ndMeshBodyDynamic" />
                 <veloc float3="0 0 0" />
                 <omega float3="0 0 0" />
                 <com float3="0.5 -6.30543e-10 -5.83938e-09" />
@@ -363,7 +363,7 @@
                     </faces>
                 </geometry>
                 <rigidbody>
-                    <constructor string="ndBodyDynamic" />
+                    <constructor string="ndMeshBodyDynamic" />
                     <veloc float3="0 0 0" />
                     <omega float3="0 0 0" />
                     <com float3="0.5 -6.30543e-10 -5.83938e-09" />
@@ -450,7 +450,7 @@
                         </faces>
                     </geometry>
                     <rigidbody>
-                        <constructor string="ndBodyDynamic" />
+                        <constructor string="ndMeshBodyDynamic" />
                         <veloc float3="0 0 0" />
                         <omega float3="0 0 0" />
                         <com float3="0 0 0" />
@@ -551,7 +551,7 @@
             </faces>
         </geometry>
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
             <com float3="0.25 4.92806e-10 -3.96178e-10" />
@@ -638,7 +638,7 @@
                 </faces>
             </geometry>
             <rigidbody>
-                <constructor string="ndBodyDynamic" />
+                <constructor string="ndMeshBodyDynamic" />
                 <veloc float3="0 0 0" />
                 <omega float3="0 0 0" />
                 <com float3="0.5 -6.30543e-10 -5.83938e-09" />
@@ -735,7 +735,7 @@
                     </faces>
                 </geometry>
                 <rigidbody>
-                    <constructor string="ndBodyDynamic" />
+                    <constructor string="ndMeshBodyDynamic" />
                     <veloc float3="0 0 0" />
                     <omega float3="0 0 0" />
                     <com float3="0.5 -6.30543e-10 -5.83938e-09" />
@@ -822,7 +822,7 @@
                         </faces>
                     </geometry>
                     <rigidbody>
-                        <constructor string="ndBodyDynamic" />
+                        <constructor string="ndMeshBodyDynamic" />
                         <veloc float3="0 0 0" />
                         <omega float3="0 0 0" />
                         <com float3="0 0 0" />
@@ -923,7 +923,7 @@
             </faces>
         </geometry>
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
             <com float3="0.625 -2.29907e-10 2.47939e-10" />
@@ -1010,7 +1010,7 @@
                 </faces>
             </geometry>
             <rigidbody>
-                <constructor string="ndBodyDynamic" />
+                <constructor string="ndMeshBodyDynamic" />
                 <veloc float3="0 0 0" />
                 <omega float3="0 0 0" />
                 <com float3="0.375 -3.14827e-10 -6.29654e-11" />
@@ -1097,7 +1097,7 @@
                     </faces>
                 </geometry>
                 <rigidbody>
-                    <constructor string="ndBodyDynamic" />
+                    <constructor string="ndMeshBodyDynamic" />
                     <veloc float3="0 0 0" />
                     <omega float3="0 0 0" />
                     <com float3="0.5 -6.30543e-10 -5.83938e-09" />
@@ -1194,7 +1194,7 @@
                         </faces>
                     </geometry>
                     <rigidbody>
-                        <constructor string="ndBodyDynamic" />
+                        <constructor string="ndMeshBodyDynamic" />
                         <veloc float3="0 0 0" />
                         <omega float3="0 0 0" />
                         <com float3="0.4 -1.92276e-10 -1.96917e-09" />
@@ -1281,7 +1281,7 @@
                             </faces>
                         </geometry>
                         <rigidbody>
-                            <constructor string="ndBodyDynamic" />
+                            <constructor string="ndMeshBodyDynamic" />
                             <veloc float3="0 0 0" />
                             <omega float3="0 0 0" />
                             <com float3="0 0 0" />
@@ -1372,7 +1372,7 @@
                 </faces>
             </geometry>
             <rigidbody>
-                <constructor string="ndBodyDynamic" />
+                <constructor string="ndMeshBodyDynamic" />
                 <veloc float3="0 0 0" />
                 <omega float3="0 0 0" />
                 <com float3="0.375 -3.14827e-10 -6.29654e-11" />
@@ -1459,7 +1459,7 @@
                     </faces>
                 </geometry>
                 <rigidbody>
-                    <constructor string="ndBodyDynamic" />
+                    <constructor string="ndMeshBodyDynamic" />
                     <veloc float3="0 0 0" />
                     <omega float3="0 0 0" />
                     <com float3="0.5 -6.30543e-10 -5.83938e-09" />
@@ -1556,7 +1556,7 @@
                         </faces>
                     </geometry>
                     <rigidbody>
-                        <constructor string="ndBodyDynamic" />
+                        <constructor string="ndMeshBodyDynamic" />
                         <veloc float3="0 0 0" />
                         <omega float3="0 0 0" />
                         <com float3="0.4 -1.92276e-10 -1.96917e-09" />
@@ -1643,7 +1643,7 @@
                             </faces>
                         </geometry>
                         <rigidbody>
-                            <constructor string="ndBodyDynamic" />
+                            <constructor string="ndMeshBodyDynamic" />
                             <veloc float3="0 0 0" />
                             <omega float3="0 0 0" />
                             <com float3="0 0 0" />
@@ -1734,7 +1734,7 @@
                 </faces>
             </geometry>
             <rigidbody>
-                <constructor string="ndBodyDynamic" />
+                <constructor string="ndMeshBodyDynamic" />
                 <veloc float3="0 0 0" />
                 <omega float3="0 0 0" />
                 <com float3="0.25 4.92806e-10 -3.96178e-10" />

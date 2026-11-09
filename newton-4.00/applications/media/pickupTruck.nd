@@ -64,7 +64,7 @@
         </faces>
     </geometry>
     <rigidbody>
-        <constructor string="ndBodyDynamic" />
+        <constructor string="ndMeshBodyDynamic" />
         <com float3="0.82 0.656 0.000196289" />
         <inverseMass float="0.000737761" />
         <inverseDiagonalInertia float3="0.000642358 0.000315942 0.000260338" />
@@ -831,7 +831,7 @@
             </faces>
         </geometry>
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <com float3="-9.22779e-08 0.00112689 7.76371e-08" />
             <inverseMass float="0.031293" />
             <inverseDiagonalInertia float3="1.95086 0.487727 0.487717" />
@@ -937,7 +937,7 @@
             </faces>
         </geometry>
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <com float3="-9.22779e-08 0.00112689 7.76371e-08" />
             <inverseMass float="0.031293" />
             <inverseDiagonalInertia float3="1.95086 0.487727 0.487717" />
@@ -1175,7 +1175,7 @@
             </faces>
         </geometry>
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <com float3="-9.22779e-08 0.00112689 7.76371e-08" />
             <inverseMass float="0.031293" />
             <inverseDiagonalInertia float3="1.95086 0.487727 0.487717" />
@@ -1281,7 +1281,7 @@
             </faces>
         </geometry>
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <com float3="-9.22779e-08 0.00112689 7.76371e-08" />
             <inverseMass float="0.031293" />
             <inverseDiagonalInertia float3="1.95086 0.487727 0.487717" />
@@ -1393,7 +1393,7 @@
         </geometryMatrix>
         <type nodeType="node" target="0 0 0 " />
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <com float3="0 0 0" />
             <inverseMass float="0.153232" />
             <inverseDiagonalInertia float3="0.227889 0.227889 0.227889" />
@@ -1449,7 +1449,7 @@
         </geometryMatrix>
         <type nodeType="node" target="0 0 0 " />
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <com float3="0 0 0" />
             <inverseMass float="0.0980687" />
             <inverseDiagonalInertia float3="0.145849 0.145849 0.145849" />

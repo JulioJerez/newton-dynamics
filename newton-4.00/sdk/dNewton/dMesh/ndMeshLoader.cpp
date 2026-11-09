@@ -170,7 +170,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		if (xmlRigidBody)
 		{
 			const char* const constructor = xmlGetString(xmlRigidBody, "constructor");
-			if (strcmp(constructor, ndBodyDynamic::StaticClassName()) == 0)
+			if (strcmp(constructor, ndMeshBodyDynamic::StaticClassName()) == 0)
 			{
 				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyDynamic(mesh));
 				rigidBody->DeserializeFromXml(xmlRigidBody);
@@ -179,7 +179,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			else
 			{
 				ndAssert(0);
-				ndAssert(strcmp(constructor, ndBodyKinematic::StaticClassName()) == 0);
+				ndAssert(strcmp(constructor, ndMeshBodyKinematic::StaticClassName()) == 0);
 				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyKinematic(mesh));
 				rigidBody->DeserializeFromXml(xmlRigidBody);
 				mesh->SetRigidBody(rigidBody);
@@ -374,7 +374,7 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 			entry.m_parentXml->LinkEndChild(rigidBodyNode);
 
 			const ndMeshBody* const rigidBody = *entry.m_meshNode->m_rigidBody;
-			xmlSaveParam(rigidBodyNode, "constructor", rigidBody->m_classConstructor.GetStr());
+			xmlSaveParam(rigidBodyNode, "constructor", rigidBody->ClassName());
 			rigidBody->SerializeToXml(rigidBodyNode);
 		}
 
