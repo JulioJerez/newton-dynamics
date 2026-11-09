@@ -124,7 +124,7 @@ void ndDebugDisplayRenderPass::RebuildVisualDebugMesh()
 		if (debugMesh.m_parent->m_name == selected)
 		{
 			const ndMeshShapeInstance shapeInstance = kinematicBody->m_shapeInstance;
-			if (strcmp(shapeInstance.m_shape->m_constructor.GetStr(), ndShapeNull::StaticClassName()) == 0)
+			if (shapeInstance.m_shape->IsType(ndShapeNull::StaticClassName()))
 			{
 				debugMesh.m_zBufferShape = ndSharedPtr<ndRenderPrimitive>(nullptr);
 				debugMesh.m_wireFrameShape = ndSharedPtr<ndRenderPrimitive>(nullptr);
@@ -161,7 +161,7 @@ void ndDebugDisplayRenderPass::RebuildDebugCollision()
 			if (debugMesh.m_parent->m_name == selected)
 			{
 				const ndMeshShapeInstance shapeInstance = kinematicBody->m_shapeInstance;
-				if (strcmp(shapeInstance.m_shape->m_constructor.GetStr(), ndShapeNull::StaticClassName()) == 0)
+				if (shapeInstance.m_shape->IsType(ndShapeNull::StaticClassName()))
 				{
 					debugMesh.m_zBufferShape = ndSharedPtr<ndRenderPrimitive>(nullptr);
 					debugMesh.m_wireFrameShape = ndSharedPtr<ndRenderPrimitive>(nullptr);
