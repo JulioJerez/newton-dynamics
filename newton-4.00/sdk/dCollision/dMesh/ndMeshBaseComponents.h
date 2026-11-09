@@ -432,9 +432,6 @@ class ndMeshJoint : public ndClassAlloc
 	D_COLLISION_API virtual ndMeshJoint* Duplicate() const;
 	D_COLLISION_API virtual void DuplicateFixDependencies(const ndMesh* const otherRoot);
 
-	//D_COLLISION_API const ndMesh* GetSurrogateParent() const;
-	//D_COLLISION_API void SetSurrogateParent(const ndMesh* const surrodateParent);
-
 	D_COLLISION_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
@@ -445,9 +442,7 @@ class ndMeshJoint : public ndClassAlloc
 
 	ndMatrix m_localFrame0;
 	ndMatrix m_localFrame1;
-	ndString m_constructor;
 	ndWeakPtr<const ndMesh> m_owner;
-	//ndWeakPtr<const ndMesh> m_surrogateParent;
 };
 
 class ndMeshTransformModifier : public ndClassAlloc

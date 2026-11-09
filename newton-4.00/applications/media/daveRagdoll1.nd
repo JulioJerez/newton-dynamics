@@ -140,7 +140,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndJointHinge" />
+            <constructor string="ndMeshJointHinge" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="9.33815e-07 -1.06722e-07 0" />
@@ -227,7 +227,7 @@
                 <intrinsicAngularDamping float3="0 0 0" />
             </rigidbody>
             <joint>
-                <constructor string="ndJointDoubleHinge" />
+                <constructor string="ndMeshJointDoubleHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="-90 6.42415e-07 1.06722e-07" />
@@ -324,7 +324,7 @@
                     <intrinsicAngularDamping float3="0 0 0" />
                 </rigidbody>
                 <joint>
-                    <constructor string="ndJointHinge" />
+                    <constructor string="ndMeshJointHinge" />
                     <localFrame0>
                         <posit float3="0 0 0" />
                         <angles float3="-180 -0 90" />
@@ -411,7 +411,7 @@
                         <intrinsicAngularDamping float3="0 0 0" />
                     </rigidbody>
                     <joint>
-                        <constructor string="ndJointDoubleHinge" />
+                        <constructor string="ndMeshJointDoubleHinge" />
                         <localFrame0>
                             <posit float3="0 0 0" />
                             <angles float3="-0 -90 0" />
@@ -512,7 +512,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndJointHinge" />
+            <constructor string="ndMeshJointHinge" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="-9.33815e-07 1.06722e-07 0" />
@@ -599,7 +599,7 @@
                 <intrinsicAngularDamping float3="0 0 0" />
             </rigidbody>
             <joint>
-                <constructor string="ndJointDoubleHinge" />
+                <constructor string="ndMeshJointDoubleHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="90 -6.42415e-07 1.06722e-07" />
@@ -696,7 +696,7 @@
                     <intrinsicAngularDamping float3="0 0 0" />
                 </rigidbody>
                 <joint>
-                    <constructor string="ndJointHinge" />
+                    <constructor string="ndMeshJointHinge" />
                     <localFrame0>
                         <posit float3="0 0 0" />
                         <angles float3="180 -0 90" />
@@ -783,7 +783,7 @@
                         <intrinsicAngularDamping float3="0 0 0" />
                     </rigidbody>
                     <joint>
-                        <constructor string="ndJointDoubleHinge" />
+                        <constructor string="ndMeshJointDoubleHinge" />
                         <localFrame0>
                             <posit float3="0 0 0" />
                             <angles float3="-0 -90 0" />
@@ -884,7 +884,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndJointHinge" />
+            <constructor string="ndMeshJointHinge" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="-0 -90 0" />
@@ -971,7 +971,7 @@
                 <intrinsicAngularDamping float3="0 0 0" />
             </rigidbody>
             <joint>
-                <constructor string="ndJointHinge" />
+                <constructor string="ndMeshJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="0 -0 0" />
@@ -1058,7 +1058,7 @@
                     <intrinsicAngularDamping float3="0 0 0" />
                 </rigidbody>
                 <joint>
-                    <constructor string="ndJointDoubleHinge" />
+                    <constructor string="ndMeshJointDoubleHinge" />
                     <localFrame0>
                         <posit float3="0 0 0" />
                         <angles float3="4.07111e-13 -0 0" />
@@ -1155,7 +1155,7 @@
                         <intrinsicAngularDamping float3="0 0 0" />
                     </rigidbody>
                     <joint>
-                        <constructor string="ndJointHinge" />
+                        <constructor string="ndMeshJointHinge" />
                         <localFrame0>
                             <posit float3="0 0 0" />
                             <angles float3="5.33609e-07 90 0" />
@@ -1242,7 +1242,7 @@
                             <intrinsicAngularDamping float3="0 0 0" />
                         </rigidbody>
                         <joint>
-                            <constructor string="ndJointHinge" />
+                            <constructor string="ndMeshJointHinge" />
                             <localFrame0>
                                 <posit float3="-0.0532 -1.09002e-09 0" />
                                 <angles float3="-2.68014e-13 8.53774e-07 90" />
@@ -1333,7 +1333,7 @@
                 <intrinsicAngularDamping float3="0 0 0" />
             </rigidbody>
             <joint>
-                <constructor string="ndJointHinge" />
+                <constructor string="ndMeshJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="0 -0 0" />
@@ -1420,7 +1420,7 @@
                     <intrinsicAngularDamping float3="0 0 0" />
                 </rigidbody>
                 <joint>
-                    <constructor string="ndJointDoubleHinge" />
+                    <constructor string="ndMeshJointDoubleHinge" />
                     <localFrame0>
                         <posit float3="0 0 0" />
                         <angles float3="-4.07111e-13 -0 0" />
@@ -1517,7 +1517,7 @@
                         <intrinsicAngularDamping float3="0 0 0" />
                     </rigidbody>
                     <joint>
-                        <constructor string="ndJointHinge" />
+                        <constructor string="ndMeshJointHinge" />
                         <localFrame0>
                             <posit float3="0 0 0" />
                             <angles float3="-5.33609e-07 -90 0" />
@@ -1604,7 +1604,7 @@
                             <intrinsicAngularDamping float3="0 0 0" />
                         </rigidbody>
                         <joint>
-                            <constructor string="ndJointHinge" />
+                            <constructor string="ndMeshJointHinge" />
                             <localFrame0>
                                 <posit float3="-0.0532 -1.09002e-09 0" />
                                 <angles float3="2.68014e-13 -8.53774e-07 90" />
@@ -1695,7 +1695,7 @@
                 <intrinsicAngularDamping float3="0 0 0" />
             </rigidbody>
             <joint>
-                <constructor string="ndJointHinge" />
+                <constructor string="ndMeshJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="-0 -90 0" />

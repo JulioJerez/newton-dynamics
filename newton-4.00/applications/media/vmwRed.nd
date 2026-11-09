@@ -192,7 +192,7 @@
             <childReference string="motor" />
             <parentReference string="rl-tire-rb-wheel" />
             <joint>
-                <constructor string="ndMultiBodyVehicleDifferentialAxle" />
+                <constructor string="ndMeshJointVehicleDifferentialAxle" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="180 -0 0" />
@@ -208,7 +208,7 @@
             <childReference string="motor" />
             <parentReference string="rr-tire-rb-wheel" />
             <joint>
-                <constructor string="ndMultiBodyVehicleDifferentialAxle" />
+                <constructor string="ndMeshJointVehicleDifferentialAxle" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="0 -0 0" />
@@ -370,7 +370,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndJointWheel" />
+            <constructor string="ndMeshJointWheel" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="0 -0 0" />
@@ -469,7 +469,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndJointWheel" />
+            <constructor string="ndMeshJointWheel" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="0 -0 0" />
@@ -568,7 +568,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndJointWheel" />
+            <constructor string="ndMeshJointWheel" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="0 -0 0" />
@@ -667,7 +667,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndJointWheel" />
+            <constructor string="ndMeshJointWheel" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="0 -0 0" />
@@ -729,7 +729,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndJointDoubleHinge" />
+            <constructor string="ndMeshJointDoubleHinge" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="0 -0 0" />

@@ -272,7 +272,7 @@
             <childReference string="differential" />
             <parentReference string="rrTire-rb-tire-wheel" />
             <joint>
-                <constructor string="ndMultiBodyVehicleDifferentialAxle" />
+                <constructor string="ndMeshJointVehicleDifferentialAxle" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="0 -0 0" />
@@ -289,7 +289,7 @@
             <childReference string="differential" />
             <parentReference string="rlTire-rb-tire-wheel" />
             <joint>
-                <constructor string="ndMultiBodyVehicleDifferentialAxle" />
+                <constructor string="ndMeshJointVehicleDifferentialAxle" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="180 -0 0" />
@@ -306,7 +306,7 @@
             <childReference string="engine" />
             <parentReference string="differential" />
             <joint>
-                <constructor string="ndMultiBodyVehicleGearBox" />
+                <constructor string="ndMeshJointVehicleGearBox" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="0 -0 0" />
@@ -860,7 +860,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndMultiBodyVehicleTireJoint" />
+            <constructor string="ndMeshJointVehicleTireJoint" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="180 3.59722e-05 180" />
@@ -966,7 +966,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndMultiBodyVehicleTireJoint" />
+            <constructor string="ndMeshJointVehicleTireJoint" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="0 -0 0" />
@@ -1204,7 +1204,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndMultiBodyVehicleTireJoint" />
+            <constructor string="ndMeshJointVehicleTireJoint" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="180 3.59722e-05 180" />
@@ -1310,7 +1310,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndMultiBodyVehicleTireJoint" />
+            <constructor string="ndMeshJointVehicleTireJoint" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="0 -0 0" />
@@ -1421,7 +1421,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndMultiBodyVehicleDifferential" />
+            <constructor string="ndMeshJointVehicleDifferential" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="0 -0 0" />
@@ -1477,7 +1477,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndMultiBodyVehicleMotor" />
+            <constructor string="ndMeshJointVehicleMotor" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="0 -0 0" />

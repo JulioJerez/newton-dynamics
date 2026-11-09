@@ -818,48 +818,49 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 
 	const nd::TiXmlElement* const xmlShape = (nd::TiXmlElement*)parent->FirstChild("shape");
 	ndAssert(xmlShape);
+
 	const char* const constructor = xmlGetString(xmlShape, "constructor");
-	if (strcmp(constructor, ndShapeBox::StaticClassName()) == 0)
+	if (strcmp(constructor, ndMeshCollisionShapeBox::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeBox());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeSphere::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeSphere::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeSphere());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeCapsule::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeCapsule::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCapsule());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeCylinder::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeCylinder::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCylinder());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeWheel::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeWheel::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeWheel());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeChamferCylinder::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeChamferCylinder::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeChamferCylinder());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeConvexHull::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeConvexHull::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeConvexHull());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeStatic_bvh::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeTree::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeTree());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeCompound::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeCompound::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCompound());
 		m_shape->DeserializeFromXml(xmlShape);
@@ -1032,9 +1033,7 @@ ndMeshJoint::ndMeshJoint(const ndMesh* const owner)
 	:ndClassAlloc()
 	,m_localFrame0(ndGetIdentityMatrix())
 	,m_localFrame1(ndGetIdentityMatrix())
-	,m_constructor("ndJointFix6dof")
 	,m_owner(ndWeakPtr<const ndMesh>(owner))
-	//,m_surrogateParent(ndWeakPtr<const ndMesh>(nullptr))
 {
 }
 
@@ -1042,9 +1041,7 @@ ndMeshJoint::ndMeshJoint(const ndMesh* const owner, const ndJointBilateralConstr
 	:ndClassAlloc()
 	,m_localFrame0(joint->GetLocalMatrix0())
 	,m_localFrame1(joint->GetLocalMatrix1())
-	,m_constructor(joint->ClassName())
 	,m_owner(ndWeakPtr<const ndMesh>(owner))
-	//,m_surrogateParent(ndWeakPtr<const ndMesh>(nullptr))
 {
 }
 
@@ -1052,9 +1049,7 @@ ndMeshJoint::ndMeshJoint(const ndMeshJoint& other)
 	:ndClassAlloc()
 	,m_localFrame0(other.m_localFrame0)
 	,m_localFrame1(other.m_localFrame1)
-	,m_constructor(other.m_constructor)
 	,m_owner(ndWeakPtr<const ndMesh>(other.m_owner))
-	//,m_surrogateParent(ndWeakPtr<const ndMesh>(other.m_surrogateParent))
 {
 }
 
@@ -1072,20 +1067,12 @@ void ndMeshJoint::DuplicateFixDependencies(const ndMesh* const root)
 {
 	m_owner = root->FindByName(m_owner->GetName());
 	ndAssert(m_owner);
-
-	//if (m_surrogateParent)
-	//{
-	//	//const ndMesh* const root = m_owner->GetRoot();
-	//	ndMesh* const surrogateParent = root->FindByName(m_surrogateParent->GetName());
-	//	ndAssert(surrogateParent);
-	//	m_surrogateParent = ndWeakPtr<const ndMesh>(surrogateParent);
-	//}
 }
 
 bool ndMeshJoint::operator==(const ndMeshJoint& other) const
 {
 	bool test = true;
-	test = test && (m_constructor == other.m_constructor);
+	test = test && (ClassName() == other.ClassName());
 	test = test && (m_localFrame0 * other.m_localFrame0.OrthoInverse()).TestIdentity(ndFloat32(1.0e-6f));
 	test = test && (m_localFrame1 * other.m_localFrame1.OrthoInverse()).TestIdentity(ndFloat32(1.0e-6f));
 
@@ -1108,44 +1095,23 @@ void ndMeshJoint::ApplyTransform(const ndMatrix& transform)
 	m_localFrame1 = transformMatrix;
 }
 
-//const ndMesh* ndMeshJoint::GetSurrogateParent() const
-//{
-//	return *m_surrogateParent;
-//}
-//
-//void ndMeshJoint::SetSurrogateParent(const ndMesh* const surrodateParent)
-//{
-//	m_surrogateParent = ndWeakPtr<const ndMesh>(surrodateParent);
-//}
-
 void ndMeshJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", m_constructor.GetStr());
+	xmlSaveParam(parent, "constructor", ClassName());
 	xmlSaveParam(parent, "localFrame0", m_localFrame0);
 	xmlSaveParam(parent, "localFrame1", m_localFrame1);
-
-	//if (m_surrogateParent)
-	//{
-	//	xmlSaveParam(parent, "surrogateParent", m_surrogateParent->GetName().GetStr());
-	//}
 }
 
 void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	m_constructor = ndString(xmlGetString(parent, "constructor"));
+	// do not need to parse the construct name.
 	m_localFrame0 = xmlGetMatrix(parent, "localFrame0");
 	m_localFrame1 = xmlGetMatrix(parent, "localFrame1");
-
-	//if (xmlHasParam(parent, "surrogateParent"))
-	//{
-	//	const char* const name = xmlGetString(parent, "surrogateParent");
-	//	m_surrogateParent = ndWeakPtr<const ndMesh> (m_owner->GetRoot()->FindByName(name));
-	//}
 }
 
 ndJointBilateralConstraint* ndMeshJoint::CreateObject(ndBodyKinematic* const, ndBodyKinematic* const) const
 {
-	ndExpandTraceMessage("ndMesh joint: %s serialization not Implemented", m_constructor.GetStr());
+	ndExpandTraceMessage("ndMesh joint: %s serialization not Implemented", ClassName());
 	ndAssert(0);
 	return nullptr;
 }

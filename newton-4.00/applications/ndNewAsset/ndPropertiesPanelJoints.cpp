@@ -112,11 +112,12 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 	if (ImGui::CollapsingHeader("Constraint joint"))
 	{
 		ndSharedPtr<ndMeshJoint> joint (m_currentSelection->GetJoint());
-		if (ImGui::BeginCombo("joint type", joint->m_constructor.GetStr()))
+		if (ImGui::BeginCombo("joint type", joint->ClassName()))
 		{
 			auto SetDropdownList = [this, &joint](const char* const name)
 			{
-				bool selected = strcmp(name, joint->m_constructor.GetStr()) ? false : true;
+				//bool selected = strcmp(name, joint->m_constructor.GetStr()) ? false : true;
+				bool selected = joint->IsType(name);
 				if (ImGui::Selectable(name, selected))
 				{
 					auto InitNewGlobalJoint = [this, &joint](ndSharedPtr<ndJointBilateralConstraint>& newJoint)
@@ -124,82 +125,82 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 						const ndMatrix localFrame0(joint->m_localFrame0);
 						const ndMatrix globalMatrix(localFrame0 * m_currentSelection->CalculateGlobalMatrix());
 						const ndMatrix localFrame1(globalMatrix * m_currentSelection->GetParent()->CalculateGlobalMatrix().OrthoInverse());
-
+				
 						newJoint->SetLocalMatrix0(localFrame0);
 						newJoint->SetLocalMatrix1(localFrame1);
-
+				
 						m_currentSelection->SetJoint(ndSharedPtr<ndMeshJoint>(newJoint->GetMeshJoint(*joint->m_owner)));
 						joint = m_currentSelection->GetJoint();
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 					};
-
-					if (strcmp(name, ndJointFix6dof::StaticClassName()) == 0)
+				
+					if (strcmp(name, ndMeshJointFix6dof::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointFix6dof());
 						InitNewGlobalJoint(newJoint);
 					}
-					else if (strcmp(name, ndJointHinge::StaticClassName()) == 0)
+					else if (strcmp(name, ndMeshJointHinge::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointHinge());
 						InitNewGlobalJoint(newJoint);
 					}
-					else if (strcmp(name, ndJointSlider::StaticClassName()) == 0)
+					else if (strcmp(name, ndMeshJointSlider::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSlider());
 						InitNewGlobalJoint(newJoint);
 					}
-					else if (strcmp(name, ndJointPlane::StaticClassName()) == 0)
+					else if (strcmp(name, ndMeshJointPlane::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointPlane());
 						InitNewGlobalJoint(newJoint);
 					}
-					else if (strcmp(name, ndJointRoller::StaticClassName()) == 0)
+					else if (strcmp(name, ndMeshJointRoller::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointRoller());
 						InitNewGlobalJoint(newJoint);
 					}
-					else if (strcmp(name, ndJointCylinder::StaticClassName()) == 0)
+					else if (strcmp(name, ndMeshJointCylinder::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointCylinder());
 						InitNewGlobalJoint(newJoint);
 					}
-					else if (strcmp(name, ndJointDoubleHinge::StaticClassName()) == 0)
+					else if (strcmp(name, ndMeshJointDoubleHinge::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointDoubleHinge());
 						InitNewGlobalJoint(newJoint);
 					}
-					else if (strcmp(name, ndMultiBodyVehicleMotor::StaticClassName()) == 0)
+					else if (strcmp(name, ndMeshJointVehicleMotor::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndMultiBodyVehicleMotor());
 						InitNewGlobalJoint(newJoint);
 					}
-					else if (strcmp(name, ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
+					else if (strcmp(name, ndMeshJointVehicleDifferential::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndMultiBodyVehicleDifferential());
 						InitNewGlobalJoint(newJoint);
 					}
-					else if (strcmp(name, ndJointWheel::StaticClassName()) == 0)
+					else if (strcmp(name, ndMeshJointWheel::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointWheel());
 						InitNewGlobalJoint(newJoint);
 					}
-					else if (strcmp(name, ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
+					else if (strcmp(name, ndMeshJointVehicleTireJoint::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndMultiBodyVehicleTireJoint());
 						InitNewGlobalJoint(newJoint);
 					}
-					else if (strcmp(name, ndJointSpherical::StaticClassName()) == 0)
+					else if (strcmp(name, ndMeshJointSpherical::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSpherical());
@@ -211,67 +212,68 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 					}
 				}
 			};
-			SetDropdownList(ndJointFix6dof::StaticClassName());
-			SetDropdownList(ndJointPlane::StaticClassName());
-			SetDropdownList(ndJointHinge::StaticClassName());
-			SetDropdownList(ndJointSlider::StaticClassName());
-			SetDropdownList(ndJointRoller::StaticClassName());
-			SetDropdownList(ndJointCylinder::StaticClassName());
-			SetDropdownList(ndJointDoubleHinge::StaticClassName());
-			SetDropdownList(ndJointWheel::StaticClassName());
-			SetDropdownList(ndJointSpherical::StaticClassName());
-			SetDropdownList(ndMultiBodyVehicleMotor::StaticClassName());
-			SetDropdownList(ndMultiBodyVehicleTireJoint::StaticClassName());
-			SetDropdownList(ndMultiBodyVehicleDifferential::StaticClassName());
+			
+			SetDropdownList(ndMeshJointFix6dof::StaticClassName());
+			SetDropdownList(ndMeshJointPlane::StaticClassName());
+			SetDropdownList(ndMeshJointHinge::StaticClassName());
+			SetDropdownList(ndMeshJointSlider::StaticClassName());
+			SetDropdownList(ndMeshJointRoller::StaticClassName());
+			SetDropdownList(ndMeshJointCylinder::StaticClassName());
+			SetDropdownList(ndMeshJointDoubleHinge::StaticClassName());
+			SetDropdownList(ndMeshJointWheel::StaticClassName());
+			SetDropdownList(ndMeshJointSpherical::StaticClassName());
+			SetDropdownList(ndMeshJointVehicleMotor::StaticClassName());
+			SetDropdownList(ndMeshJointVehicleTireJoint::StaticClassName());
+			SetDropdownList(ndMeshJointVehicleDifferential::StaticClassName());
 
 			ImGui::EndCombo();
 		}
 
-		if (strcmp(joint->m_constructor.GetStr(), ndJointFix6dof::StaticClassName()) == 0)
+		if (joint->IsType(ndMeshJointFix6dof::StaticClassName()))
 		{
 			EditFix6dofJoint();
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndJointHinge::StaticClassName()) == 0)
+		else if (joint->IsType(ndMeshJointHinge::StaticClassName()))
 		{
 			EditHingeJoint();
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndJointSlider::StaticClassName()) == 0)
+		else if (joint->IsType(ndMeshJointSlider::StaticClassName()))
 		{
 			EditSliderJoint();
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndJointPlane::StaticClassName()) == 0)
+		else if (joint->IsType(ndMeshJointPlane::StaticClassName()))
 		{
 			EditPlaneJoint();
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndJointRoller::StaticClassName()) == 0)
+		else if (joint->IsType(ndMeshJointRoller::StaticClassName()))
 		{
 			EditRollerJoint();
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndJointCylinder::StaticClassName()) == 0)
+		else if (joint->IsType(ndMeshJointCylinder::StaticClassName()))
 		{
 			EditCylinderJoint();
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndJointDoubleHinge::StaticClassName()) == 0)
+		else if (joint->IsType( ndMeshJointDoubleHinge::StaticClassName()))
 		{
 			EditDoubleHingeJoint();
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
+		else if (joint->IsType(ndMeshJointVehicleDifferential::StaticClassName()))
 		{
 			EditDifferentialJoint();
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleMotor::StaticClassName()) == 0)
+		else if (joint->IsType(ndMeshJointVehicleMotor::StaticClassName()))
 		{
 			EditMotorJoint();
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndJointWheel::StaticClassName()) == 0)
-		{
-			EditWheelJoint();
-		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
+		else if (joint->IsType(ndMeshJointVehicleTireJoint::StaticClassName()))
 		{
 			EditMotorWheelJoint();
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndJointSpherical::StaticClassName()) == 0)
+		else if (joint->IsType(ndMeshJointWheel::StaticClassName()))
+		{
+			EditWheelJoint();
+		}
+		else if (joint->IsType(ndMeshJointSpherical::StaticClassName()))
 		{
 			EditSphericalJoint();
 		}
