@@ -34,15 +34,13 @@
 #include "ndShapeChamferCylinder.h"
 #include "ndJointBilateralConstraint.h"
 
-ndMeshCollisionShape::ndMeshCollisionShape(const char* const constructor)
+ndMeshCollisionShape::ndMeshCollisionShape()
 	:ndClassAlloc()
-	,m_constructor(constructor)
 {
 }
 
-ndMeshCollisionShape::ndMeshCollisionShape(const ndMeshCollisionShape& other)
+ndMeshCollisionShape::ndMeshCollisionShape(const ndMeshCollisionShape&)
 	:ndClassAlloc()
-	,m_constructor(other.m_constructor)
 {
 }
 
@@ -58,13 +56,14 @@ ndMeshCollisionShape* ndMeshCollisionShape::Duplicate() const
 
 bool ndMeshCollisionShape::operator==(const ndMeshCollisionShape& other) const
 {
-	bool test = m_constructor == other.m_constructor;
+	bool test = (strcmp (ClassName(), other.ClassName()) == 0);
 	return test;
 }
 
 void ndMeshCollisionShape::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", m_constructor.GetStr());
+	//xmlSaveParam(parent, "constructor", m_constructor.GetStr());
+	xmlSaveParam(parent, "constructor", ClassName());
 }
 
 void ndMeshCollisionShape::DeserializeFromXml(const nd::TiXmlElement* const)
@@ -73,15 +72,13 @@ void ndMeshCollisionShape::DeserializeFromXml(const nd::TiXmlElement* const)
 }
 
 ndMeshCollisionShapeNull::ndMeshCollisionShapeNull()
-	:ndMeshCollisionShape(ndShapeNull::StaticClassName())
+	:ndMeshCollisionShape()
 {
-	m_constructor = ndShapeNull::StaticClassName();
 }
 
 ndMeshCollisionShapeNull::ndMeshCollisionShapeNull(const ndMeshCollisionShapeNull& other)
 	:ndMeshCollisionShape(other)
 {
-	m_constructor = ndShapeNull::StaticClassName();
 }
 
 ndMeshCollisionShape* ndMeshCollisionShapeNull::Duplicate() const
@@ -115,7 +112,7 @@ ndShape* ndMeshCollisionShapeNull::CreateObject() const
 }
 
 ndMeshCollisionShapeSphere::ndMeshCollisionShapeSphere()
-	:ndMeshCollisionShape(ndShapeSphere::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -164,7 +161,7 @@ ndShape* ndMeshCollisionShapeSphere::CreateObject() const
 }
 
 ndMeshCollisionShapeBox::ndMeshCollisionShapeBox()
-	:ndMeshCollisionShape(ndShapeBox::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -223,7 +220,7 @@ ndShape* ndMeshCollisionShapeBox::CreateObject() const
 }
 
 ndMeshCollisionShapeCapsule::ndMeshCollisionShapeCapsule()
-	:ndMeshCollisionShape(ndShapeCapsule::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -282,7 +279,7 @@ ndShape* ndMeshCollisionShapeCapsule::CreateObject() const
 }
 
 ndMeshCollisionShapeCylinder::ndMeshCollisionShapeCylinder()
-	:ndMeshCollisionShape(ndShapeCylinder::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -341,7 +338,7 @@ ndShape* ndMeshCollisionShapeCylinder::CreateObject() const
 }
 
 ndMeshCollisionShapeChamferCylinder::ndMeshCollisionShapeChamferCylinder()
-	:ndMeshCollisionShape(ndShapeChamferCylinder::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -395,7 +392,7 @@ ndShape* ndMeshCollisionShapeChamferCylinder::CreateObject() const
 }
 
 ndMeshCollisionShapeWheel::ndMeshCollisionShapeWheel()
-	:ndMeshCollisionShape(ndShapeWheel::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -435,7 +432,7 @@ ndShape* ndMeshCollisionShapeWheel::CreateObject() const
 }
 
 ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull()
-	:ndMeshCollisionShape(ndShapeConvexHull::StaticClassName())
+	:ndMeshCollisionShape()
 	,m_points()
 	,m_tolarence(ndFloat32 (0.0f))
 	,m_maxPointCount(256)
@@ -518,7 +515,7 @@ ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
 
 //
 ndMeshCollisionShapeTree::ndMeshCollisionShapeTree()
-	:ndMeshCollisionShape(ndShapeStatic_bvh::StaticClassName())
+	:ndMeshCollisionShape()
 	,m_points()
 	,m_indices()
 	,m_nodes()
@@ -624,7 +621,7 @@ ndShape* ndMeshCollisionShapeTree::CreateObject() const
 }
 
 ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound()
-	:ndMeshCollisionShape(ndShapeCompound::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 

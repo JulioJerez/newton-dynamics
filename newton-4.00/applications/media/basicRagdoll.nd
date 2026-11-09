@@ -70,7 +70,7 @@
         <intrinsicAngularDamping float3="0 0 0" />
     </rigidbody>
     <ndMesh>
-        <name string="__collidingPairs__" />
+        <name string="ndCollidingPairs" />
         <matrix>
             <posit float3="0 0 0" />
             <angles float3="0 -0 0" />
@@ -130,7 +130,7 @@
         </collindPair>
     </ndMesh>
     <ndMesh>
-        <name string="__constraintLoops__" />
+        <name string="ndCloseLoopConstraints" />
         <matrix>
             <posit float3="0 0 0" />
             <angles float3="0 -0 0" />

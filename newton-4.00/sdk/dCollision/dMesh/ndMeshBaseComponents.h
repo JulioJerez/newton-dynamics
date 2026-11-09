@@ -102,7 +102,7 @@ class ndMeshCollisionShape : public ndClassAlloc
 {
 	public:
 	D_BASE_CLASS_REFLECTION(ndMeshCollisionShape)
-	D_COLLISION_API ndMeshCollisionShape(const char* const constructor);
+	D_COLLISION_API ndMeshCollisionShape();
 	D_COLLISION_API ndMeshCollisionShape(const ndMeshCollisionShape& other);
 
 	D_COLLISION_API virtual ndMeshCollisionShape* Duplicate() const;
@@ -113,8 +113,6 @@ class ndMeshCollisionShape : public ndClassAlloc
 	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) = 0;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
-
-	ndString m_constructor;
 };
 
 class ndMeshCollisionShapeNull : public ndMeshCollisionShape

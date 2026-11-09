@@ -83,11 +83,11 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 
 			ndSharedPtr<ndMesh> child(new ndMesh());
 			const char* const linkName = xmlGetString(linkNode, "name");
-			if ((strcmp(linkName, ndCloseLoopConstraints::StaticClassName()) == 0) || (strcmp(linkName, "__constraintLoops__") == 0))
+			if (strcmp(linkName, ndCloseLoopConstraints::StaticClassName()) == 0)
 			{
 				child = ndSharedPtr<ndMesh>(new ndCloseLoopConstraints);
 			}
-			else if ((strcmp(linkName, ndCollidingPairs::StaticClassName()) == 0) || (strcmp(linkName, "__collidingPairs__") == 0))
+			else if (strcmp(linkName, ndCollidingPairs::StaticClassName()) == 0)
 			{
 				child = ndSharedPtr<ndMesh>(new ndCollidingPairs);
 			}
