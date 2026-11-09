@@ -62,7 +62,7 @@
             </alignmentMatrix>
             <scale float3="1 1 1" />
             <shape>
-                <constructor string="ndShapeBox" />
+                <constructor string="ndMeshCollisionShapeBox" />
                 <x float="1.5" />
                 <y float="0.375" />
                 <z float="1.125" />
@@ -198,7 +198,7 @@
                 </alignmentMatrix>
                 <scale float3="0.375 0.3 0.3" />
                 <shape>
-                    <constructor string="ndShapeWheel" />
+                    <constructor string="ndMeshCollisionShapeWheel" />
                 </shape>
             </collisionInstance>
             <intrinsicLinearDamping float="0" />
@@ -287,7 +287,7 @@
                 </alignmentMatrix>
                 <scale float3="0.375 0.3 0.3" />
                 <shape>
-                    <constructor string="ndShapeWheel" />
+                    <constructor string="ndMeshCollisionShapeWheel" />
                 </shape>
             </collisionInstance>
             <intrinsicLinearDamping float="0" />
@@ -384,7 +384,7 @@
                 </alignmentMatrix>
                 <scale float3="0.375 0.3 0.3" />
                 <shape>
-                    <constructor string="ndShapeWheel" />
+                    <constructor string="ndMeshCollisionShapeWheel" />
                 </shape>
             </collisionInstance>
             <intrinsicLinearDamping float="0" />
@@ -453,7 +453,7 @@
                 </alignmentMatrix>
                 <scale float3="1 1 1" />
                 <shape>
-                    <constructor string="ndShapeCylinder" />
+                    <constructor string="ndMeshCollisionShapeCylinder" />
                     <radio0 float="0.1" />
                     <radio1 float="0.1" />
                     <heigh float="0.3" />

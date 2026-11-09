@@ -60,7 +60,7 @@
             </alignmentMatrix>
             <scale float3="1 1 1" />
             <shape>
-                <constructor string="ndShapeCapsule" />
+                <constructor string="ndMeshCollisionShapeCapsule" />
                 <radio0 float="0.125" />
                 <radio1 float="0.125" />
                 <heigh float="0.75" />
@@ -200,7 +200,7 @@
                 </alignmentMatrix>
                 <scale float3="1 1 1" />
                 <shape>
-                    <constructor string="ndShapeCapsule" />
+                    <constructor string="ndMeshCollisionShapeCapsule" />
                     <radio0 float="0.125" />
                     <radio1 float="0.125" />
                     <heigh float="0.5" />
@@ -287,7 +287,7 @@
                     </alignmentMatrix>
                     <scale float3="1 1 1" />
                     <shape>
-                        <constructor string="ndShapeCapsule" />
+                        <constructor string="ndMeshCollisionShapeCapsule" />
                         <radio0 float="0.125" />
                         <radio1 float="0.125" />
                         <heigh float="1" />
@@ -384,7 +384,7 @@
                         </alignmentMatrix>
                         <scale float3="1 1 1" />
                         <shape>
-                            <constructor string="ndShapeCapsule" />
+                            <constructor string="ndMeshCollisionShapeCapsule" />
                             <radio0 float="0.125" />
                             <radio1 float="0.125" />
                             <heigh float="1" />
@@ -471,7 +471,7 @@
                             </alignmentMatrix>
                             <scale float3="1 1 1" />
                             <shape>
-                                <constructor string="ndShapeBox" />
+                                <constructor string="ndMeshCollisionShapeBox" />
                                 <x float="0.13" />
                                 <y float="0.4" />
                                 <z float="0.75" />
@@ -572,7 +572,7 @@
                 </alignmentMatrix>
                 <scale float3="1 1 1" />
                 <shape>
-                    <constructor string="ndShapeCapsule" />
+                    <constructor string="ndMeshCollisionShapeCapsule" />
                     <radio0 float="0.125" />
                     <radio1 float="0.125" />
                     <heigh float="0.5" />
@@ -659,7 +659,7 @@
                     </alignmentMatrix>
                     <scale float3="1 1 1" />
                     <shape>
-                        <constructor string="ndShapeCapsule" />
+                        <constructor string="ndMeshCollisionShapeCapsule" />
                         <radio0 float="0.125" />
                         <radio1 float="0.125" />
                         <heigh float="1" />
@@ -756,7 +756,7 @@
                         </alignmentMatrix>
                         <scale float3="1 1 1" />
                         <shape>
-                            <constructor string="ndShapeCapsule" />
+                            <constructor string="ndMeshCollisionShapeCapsule" />
                             <radio0 float="0.125" />
                             <radio1 float="0.125" />
                             <heigh float="1" />
@@ -843,7 +843,7 @@
                             </alignmentMatrix>
                             <scale float3="1 1 1" />
                             <shape>
-                                <constructor string="ndShapeBox" />
+                                <constructor string="ndMeshCollisionShapeBox" />
                                 <x float="0.13" />
                                 <y float="0.4" />
                                 <z float="0.75" />
@@ -944,7 +944,7 @@
                 </alignmentMatrix>
                 <scale float3="1 1 1" />
                 <shape>
-                    <constructor string="ndShapeCapsule" />
+                    <constructor string="ndMeshCollisionShapeCapsule" />
                     <radio0 float="0.125" />
                     <radio1 float="0.125" />
                     <heigh float="1.25" />
@@ -1031,7 +1031,7 @@
                     </alignmentMatrix>
                     <scale float3="1 1 1" />
                     <shape>
-                        <constructor string="ndShapeCapsule" />
+                        <constructor string="ndMeshCollisionShapeCapsule" />
                         <radio0 float="0.125" />
                         <radio1 float="0.125" />
                         <heigh float="0.75" />
@@ -1118,7 +1118,7 @@
                         </alignmentMatrix>
                         <scale float3="1 1 1" />
                         <shape>
-                            <constructor string="ndShapeCapsule" />
+                            <constructor string="ndMeshCollisionShapeCapsule" />
                             <radio0 float="0.125" />
                             <radio1 float="0.125" />
                             <heigh float="1" />
@@ -1215,7 +1215,7 @@
                             </alignmentMatrix>
                             <scale float3="1 1 1" />
                             <shape>
-                                <constructor string="ndShapeCapsule" />
+                                <constructor string="ndMeshCollisionShapeCapsule" />
                                 <radio0 float="0.125" />
                                 <radio1 float="0.125" />
                                 <heigh float="0.8" />
@@ -1302,7 +1302,7 @@
                                 </alignmentMatrix>
                                 <scale float3="1 1 1" />
                                 <shape>
-                                    <constructor string="ndShapeBox" />
+                                    <constructor string="ndMeshCollisionShapeBox" />
                                     <x float="0.25" />
                                     <y float="0.25" />
                                     <z float="0.125" />
@@ -1393,7 +1393,7 @@
                     </alignmentMatrix>
                     <scale float3="1 1 1" />
                     <shape>
-                        <constructor string="ndShapeCapsule" />
+                        <constructor string="ndMeshCollisionShapeCapsule" />
                         <radio0 float="0.125" />
                         <radio1 float="0.125" />
                         <heigh float="0.75" />
@@ -1480,7 +1480,7 @@
                         </alignmentMatrix>
                         <scale float3="1 1 1" />
                         <shape>
-                            <constructor string="ndShapeCapsule" />
+                            <constructor string="ndMeshCollisionShapeCapsule" />
                             <radio0 float="0.125" />
                             <radio1 float="0.125" />
                             <heigh float="1" />
@@ -1577,7 +1577,7 @@
                             </alignmentMatrix>
                             <scale float3="1 1 1" />
                             <shape>
-                                <constructor string="ndShapeCapsule" />
+                                <constructor string="ndMeshCollisionShapeCapsule" />
                                 <radio0 float="0.125" />
                                 <radio1 float="0.125" />
                                 <heigh float="0.8" />
@@ -1664,7 +1664,7 @@
                                 </alignmentMatrix>
                                 <scale float3="1 1 1" />
                                 <shape>
-                                    <constructor string="ndShapeBox" />
+                                    <constructor string="ndMeshCollisionShapeBox" />
                                     <x float="0.25" />
                                     <y float="0.25" />
                                     <z float="0.125" />
@@ -1755,7 +1755,7 @@
                     </alignmentMatrix>
                     <scale float3="1 1 1" />
                     <shape>
-                        <constructor string="ndShapeCapsule" />
+                        <constructor string="ndMeshCollisionShapeCapsule" />
                         <radio0 float="0.125" />
                         <radio1 float="0.125" />
                         <heigh float="0.5" />
