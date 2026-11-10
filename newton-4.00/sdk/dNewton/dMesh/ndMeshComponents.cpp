@@ -1433,7 +1433,7 @@ ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const own
 	,m_frictionModel(m_pacejkaUtility)
 	,m_lateralStiffness(ndReal (1.0f))
 	,m_longitudinalStiffness(ndReal(1.0f))
-	,m_maxSideSlipAngle(ndReal(ndFloat32(0.5f) * ND_TIRE_MAX_STATIC_SLEEP * ndRadToDegree))
+	,m_maxSideSlipAngle(ndReal(ndFloat32(0.5f) * ND_TIRE_MAX_STATIC_SLIP_ANGLE* ndRadToDegree))
 {
 }
 
@@ -1442,7 +1442,7 @@ ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const own
 	,m_frictionModel(m_pacejkaUtility)
 	,m_lateralStiffness(ndReal(1.0f))
 	,m_longitudinalStiffness(ndReal(1.0f))
-	,m_maxSideSlipAngle(ndReal(ndFloat32(0.5f)* ND_TIRE_MAX_STATIC_SLEEP* ndRadToDegree))
+	,m_maxSideSlipAngle(ndReal(ndFloat32(0.5f)* ND_TIRE_MAX_STATIC_SLIP_ANGLE * ndRadToDegree))
 {
 	ndAssert(strcmp(joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0);
 	//const ndMultiBodyVehicleTireJoint* const tire = static_cast<const ndMultiBodyVehicleTireJoint*>(joint);

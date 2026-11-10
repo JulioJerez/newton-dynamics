@@ -15,8 +15,10 @@
 #include "ndNewtonStdafx.h"
 #include "ndJointWheel.h"
 
-#define ND_TIRE_MIN_STATIC_SLEEP (ndFloat32(1.0f) * ndDegreeToRad)
-#define ND_TIRE_MAX_STATIC_SLEEP (ndFloat32(10.0f) * ndDegreeToRad)
+#define ND_DEFAULT_LATERAL_STIFFNESS		ndFloat32 (2.5f)
+#define ND_DEFAULT_LONGITUDINAL_STIFFNESS	ndFloat32 (2.5f)
+#define ND_TIRE_MIN_STATIC_SLIP_ANGLE		(ndFloat32(1.0f) * ndDegreeToRad)
+#define ND_TIRE_MAX_STATIC_SLIP_ANGLE		(ndFloat32(10.0f) * ndDegreeToRad)
 
 class ndTireFrictionModel
 {

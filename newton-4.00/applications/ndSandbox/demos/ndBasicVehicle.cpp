@@ -738,7 +738,7 @@ using namespace ndMotorVehicle;
 #if 1
 void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
-	LoadMap(scene);
+	//LoadMap(scene);
 	//BuildPlayground(scene);
 	BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
 
