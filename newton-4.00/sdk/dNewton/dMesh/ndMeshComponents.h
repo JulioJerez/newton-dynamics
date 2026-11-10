@@ -373,8 +373,6 @@ class ndMeshJointVehicleTireJoint : public ndMeshJointWheel
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 	ndFrictionModel m_frictionModel;
-	ndReal m_lateralStiffness;
-	ndReal m_longitudinalStiffness;
 	ndReal m_maxSideSlipAngle;
 };
 

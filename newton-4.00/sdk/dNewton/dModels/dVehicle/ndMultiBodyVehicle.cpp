@@ -1225,10 +1225,8 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 
 	// whe can now get the actual tire forces.
 	const ndTireFrictionModel& frictionModel = tire->m_frictionModel;
-	ndFloat32 lateralStiffness = ndFloat32 (2.0f) * tire->m_lateralStiffness;
-	ndFloat32 longitudinalStiffness = ndFloat32(1.0f) * tire->m_longitudinalStiffness;
-	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, lateralStiffness * pacejkaAmplitud);
-	const ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, longitudinalStiffness * pacejkaAmplitud);
+	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, pacejkaAmplitud);
+	const ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, pacejkaAmplitud);
 
 	ndJacobianPair lateralJacobian;
 	ndJacobianPair longitudicalJacobian;
