@@ -1146,7 +1146,8 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 				ndSharedPtr<ndMesh> childMesh (m_mesh->GetChildren().GetFirst()->GetInfo());
 				ndAssert(childMesh->GetJoint());
 				ndSharedPtr<ndMeshJoint>& joint = childMesh->GetJoint();
-				if (joint->m_constructor == ndJointFix6dof::StaticClassName())
+				//if (joint->m_constructor == ndJointFix6dof::StaticClassName())
+				if (joint->IsType(ndMeshJointFix6dof::StaticClassName()))
 				{
 					ndMatrix matrix(childMesh->CalculateGlobalMatrix());
 					m_mesh->RemoveChild(childMesh);

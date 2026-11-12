@@ -38,16 +38,13 @@ ndIkSolver::ndIkSolver()
 	,m_surrogateContact()
 	,m_surrogateBodies()
 	,m_world(nullptr)
+	,m_sentinel(nullptr)
 	,m_skeleton(nullptr)
 	,m_timestep(ndFloat32(0.0f))
 	,m_invTimestep(ndFloat32(0.0f))
 	,m_maxAccel(ndFloat32(1.0e3f))
 	,m_maxAlpha(ndFloat32(1.0e4f))
 {
-	// add a sentinel body
-	ndSharedPtr<ndBodyDynamic> sentinel(ndSharedPtr<ndBodyDynamic>(new ndBodyDynamic()));
-	m_surrogateBodies.Add(sentinel);
-	m_surrogateBodies[0]->m_uniqueId = 0;
 }
 
 ndIkSolver::~ndIkSolver()
@@ -137,6 +134,8 @@ void ndIkSolver::GetJacobianDerivatives(ndConstraint* const joint)
 	const ndInt32 baseIndex = joint->m_rowStart;
 	ndAssert(baseIndex == ndInt32(m_leftHandSide.GetCount()));
 	ndAssert(baseIndex == ndInt32(m_leftHandSide.GetCount()));
+	const bool isBilateral = joint->IsBilateral();
+
 	for (ndInt32 i = 0; i < dof; ++i)
 	{
 		ndAssert(constraintParam.m_forceBounds[i].m_jointForce);
@@ -160,6 +159,10 @@ void ndIkSolver::GetJacobianDerivatives(ndConstraint* const joint)
 		rhs->m_lowerBoundFrictionCoefficent = constraintParam.m_forceBounds[i].m_low;
 		rhs->m_upperBoundFrictionCoefficent = constraintParam.m_forceBounds[i].m_upper;
 		rhs->m_jointFeebackForce = constraintParam.m_forceBounds[i].m_jointForce;
+		ndAssert(rhs->m_jointFeebackForce);
+		const ndFloat32 force = rhs->m_jointFeebackForce->GetInitialGuess();
+		rhs->m_force = isBilateral ? ndClamp(force, rhs->m_lowerBoundFrictionCoefficent, rhs->m_upperBoundFrictionCoefficent) : force;
+		
 		ndAssert(constraintParam.m_forceBounds[i].m_normalIndex >= -1);
 		const ndInt32 frictionIndex = constraintParam.m_forceBounds[i].m_normalIndex;
 		const ndInt32 mask = frictionIndex >> 31;
@@ -222,11 +225,6 @@ void ndIkSolver::BuildJacobianMatrix (ndConstraint* const joint)
 	const ndVector invMass1(body1->m_invMass[3]);
 	const ndFloat32 diagDampScale = joint->GetAsContact() ? ndFloat32(0.1f) : ndFloat32(1.0f);
 
-	//const ndVector force0(body0->GetForce());
-	//const ndVector torque0(body0->GetTorque());
-	//const ndVector force1(body1->GetForce());
-	//const ndVector torque1(body1->GetTorque());
-
 	for (ndInt32 i = 0; i < count; ++i)
 	{
 		ndLeftHandSide* const row = &m_leftHandSide[index + i];
@@ -242,7 +240,7 @@ void ndIkSolver::BuildJacobianMatrix (ndConstraint* const joint)
 		const ndJacobian& JMinvM0 = row->m_JMinv.m_jacobianM0;
 		const ndJacobian& JMinvM1 = row->m_JMinv.m_jacobianM1;
 
-		rhs->m_force = ndFloat32(0.0f);
+		//rhs->m_force = ndFloat32(0.0f);
 		const ndVector tmpDiag(
 			JMinvM0.m_linear * JtM0.m_linear + JMinvM0.m_angular * JtM0.m_angular +
 			JMinvM1.m_linear * JtM1.m_linear + JMinvM1.m_angular * JtM1.m_angular);
@@ -511,6 +509,14 @@ void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndConstraint* 
 		ND_PROFILE_ZONE();
 		m_timestep = timestep;
 		m_invTimestep = ndFloat32(1.0f) / m_timestep;
+
+		if (!m_sentinel)
+		{
+			// add a sentinel body
+			m_sentinel = ndSharedPtr<ndBodyDynamic>(new ndBodyDynamic());
+			m_surrogateBodies.Add(m_sentinel);
+			m_surrogateBodies[0]->m_uniqueId = 0;
+		}
 
 		m_skeleton->ClearCloseLoopJoints();
 		for (ndInt32 i = loopsCount - 1; i >= 0; --i)

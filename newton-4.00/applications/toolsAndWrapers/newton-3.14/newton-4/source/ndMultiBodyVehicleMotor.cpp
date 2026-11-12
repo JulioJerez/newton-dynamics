@@ -269,6 +269,7 @@ void ndMultiBodyVehicleMotor::SetCurve(const ndEngineTorqueCurve& curve)
 
 void ndMultiBodyVehicleMotor::SetTorqueAndRpm(ndFloat32 newtonMeters, ndFloat32 rpm)
 {
+	ndTrace(("%f %f\n", newtonMeters, rpm));
 	m_engineTorque = ndMax(newtonMeters, ndFloat32(0.0f));
 	m_targetOmega = ndRpmToRadPerSec * ndClamp(rpm, ndFloat32(0.0f), GetMaxRpm()) ;
 }

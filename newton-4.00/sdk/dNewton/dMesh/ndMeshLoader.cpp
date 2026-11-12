@@ -71,7 +71,10 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		MeshXmlNodePair entry(stack.Pop());
 
 		ndMesh* const mesh = entry.m_mesh;
-		mesh->m_name = ndString(xmlGetString(entry.m_xmlNode, "name"));
+		if (!(mesh->IsType(ndCollidingPairs::StaticClassName()) || mesh->IsType(ndCloseLoopConstraints::StaticClassName())))
+		{
+			mesh->m_name = ndString(xmlGetString(entry.m_xmlNode, "name"));
+		}
 
 		for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("ndMesh"); node; node = node->NextSibling("ndMesh"))
 		{
@@ -80,11 +83,11 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 
 			ndSharedPtr<ndMesh> child(new ndMesh());
 			const char* const linkName = xmlGetString(linkNode, "name");
-			if (strcmp(linkName, ND_MESH_CONSTRAINT_LOOPS) == 0)
+			if (strcmp(linkName, ndCloseLoopConstraints::StaticClassName()) == 0)
 			{
 				child = ndSharedPtr<ndMesh>(new ndCloseLoopConstraints);
 			}
-			else if (strcmp(linkName, ND_MESH_COLLIDING_PAIRS) == 0)
+			else if (strcmp(linkName, ndCollidingPairs::StaticClassName()) == 0)
 			{
 				child = ndSharedPtr<ndMesh>(new ndCollidingPairs);
 			}
@@ -106,7 +109,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		MeshXmlNodePair entry(stack.Pop());
 	
 		ndMesh* const mesh = entry.m_mesh;
-		ndAssert (mesh->m_name == ndString(xmlGetString(entry.m_xmlNode, "name")));
+		ndAssert (mesh->IsType(ndCloseLoopConstraints::StaticClassName()) || mesh->IsType(ndCollidingPairs::StaticClassName()) || mesh->m_name == ndString(xmlGetString(entry.m_xmlNode, "name")));
 		mesh->m_matrix = xmlGetMatrix(entry.m_xmlNode, "matrix");
 		mesh->m_geometryMatrix = xmlGetMatrix(entry.m_xmlNode, "geometryMatrix");
 		mesh->m_basePoseMatrix = mesh->m_matrix;
@@ -167,7 +170,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		if (xmlRigidBody)
 		{
 			const char* const constructor = xmlGetString(xmlRigidBody, "constructor");
-			if (strcmp(constructor, ndBodyDynamic::StaticClassName()) == 0)
+			if (strcmp(constructor, ndMeshBodyDynamic::StaticClassName()) == 0)
 			{
 				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyDynamic(mesh));
 				rigidBody->DeserializeFromXml(xmlRigidBody);
@@ -176,7 +179,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			else
 			{
 				ndAssert(0);
-				ndAssert(strcmp(constructor, ndBodyKinematic::StaticClassName()) == 0);
+				ndAssert(strcmp(constructor, ndMeshBodyKinematic::StaticClassName()) == 0);
 				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyKinematic(mesh));
 				rigidBody->DeserializeFromXml(xmlRigidBody);
 				mesh->SetRigidBody(rigidBody);
@@ -225,14 +228,13 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			}
 		}
 
-		if (mesh->m_name == ND_MESH_CONSTRAINT_LOOPS)
-		{
-			m_xmlLoops = entry.m_xmlNode;
-		}
-
-		if (mesh->m_name == ND_MESH_COLLIDING_PAIRS)
+		if (mesh->IsType(ndCollidingPairs::StaticClassName()))
 		{
 			m_xmlPair = entry.m_xmlNode;
+		} 
+		else if (mesh->IsType(ndCloseLoopConstraints::StaticClassName()))
+		{
+			m_xmlLoops = entry.m_xmlNode;
 		}
 	
 		ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = mesh->GetChildren().GetLast();
@@ -372,7 +374,7 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 			entry.m_parentXml->LinkEndChild(rigidBodyNode);
 
 			const ndMeshBody* const rigidBody = *entry.m_meshNode->m_rigidBody;
-			xmlSaveParam(rigidBodyNode, "constructor", rigidBody->m_classConstructor.GetStr());
+			xmlSaveParam(rigidBodyNode, "constructor", rigidBody->ClassName());
 			rigidBody->SerializeToXml(rigidBodyNode);
 		}
 

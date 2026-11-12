@@ -482,7 +482,7 @@ void ndMesh::SetModifier(const ndSharedPtr<ndMeshTransformModifier>& modifier)
 
 ndCloseLoopConstraints* ndMesh::GetLoopJoints()
 {
-	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_CONSTRAINT_LOOPS);
+	ndMesh* mesh = GetRoot()->FindByName(ndCloseLoopConstraints::StaticClassName());
 	if (!mesh)
 	{
 		ndMesh* const rootNode = GetRoot();
@@ -497,7 +497,7 @@ ndCloseLoopConstraints* ndMesh::GetLoopJoints()
 
 const ndCloseLoopConstraints* ndMesh::GetLoopJoints() const 
 {
-	const ndMesh* mesh = GetRoot()->FindByName(ND_MESH_CONSTRAINT_LOOPS);
+	const ndMesh* mesh = GetRoot()->FindByName(ndCloseLoopConstraints::StaticClassName());
 	if (!mesh)
 	{
 		ndMesh* const rootNode = ((ndMesh*)this)->GetRoot();
@@ -518,7 +518,7 @@ void ndMesh::AddLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint)
 
 ndCollidingPairs* ndMesh::GetCollingPairs()
 {
-	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_COLLIDING_PAIRS);
+	ndMesh* mesh = GetRoot()->FindByName(ndCollidingPairs::StaticClassName());
 	if (!mesh)
 	{
 		ndMesh* const rootNode = GetRoot();
@@ -533,7 +533,7 @@ ndCollidingPairs* ndMesh::GetCollingPairs()
 
 const ndCollidingPairs* ndMesh::GetCollingPairs() const
 {
-	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_COLLIDING_PAIRS);
+	ndMesh* mesh = GetRoot()->FindByName(ndCollidingPairs::StaticClassName());
 	if (!mesh)
 	{
 		ndMesh* const rootNode = ((ndMesh*)this)->GetRoot();
@@ -1640,7 +1640,7 @@ ndCloseLoopConstraints::ndCloseLoopConstraints()
 	:ndMesh()
 	,m_loopJoints()
 {
-	SetName(ND_MESH_CONSTRAINT_LOOPS);
+	SetName(ndCloseLoopConstraints::StaticClassName());
 }
 
 ndCloseLoopConstraints::ndCloseLoopConstraints(const ndCloseLoopConstraints& src)
@@ -1727,7 +1727,8 @@ ndCollidingPairs::ndCollidingPairs()
 	:ndMesh()
 	,m_collidingPairs()
 {
-	SetName(ND_MESH_COLLIDING_PAIRS);
+	//SetName(ND_MESH_COLLIDING_PAIRS);
+	SetName(ndCollidingPairs::StaticClassName());
 }
 
 ndCollidingPairs::ndCollidingPairs(const ndCollidingPairs& src)
@@ -1811,71 +1812,72 @@ ndSharedPtr<ndMeshJoint> ndMesh::LoadJoint(const nd::TiXmlElement* const xmlJoin
 	const ndMesh* mesh = this;
 	const char* const constructor = xmlGetString(xmlJoint, "constructor");
 	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointFix6dof(mesh));
-	if (strcmp(constructor, ndJointHinge::StaticClassName()) == 0)
+
+	if (strcmp(constructor, ndMeshJointHinge::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointHinge(mesh));
 	}
-	else if (strcmp(constructor, ndJointCylinder::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointCylinder::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointCylinder(mesh));
 	}
-	else if (strcmp(constructor, ndJointRoller::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointRoller::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointRoller(mesh));
 	}
-	else if (strcmp(constructor, ndJointDoubleHinge::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointDoubleHinge::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointDoubleHinge(mesh));
 	}
-	else if (strcmp(constructor, ndJointSpherical::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointSpherical::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSpherical(mesh));
 	}
-	else if (strcmp(constructor, ndJointWheel::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointWheel::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointWheel(mesh));
 	}
-	else if (strcmp(constructor, ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointVehicleTireJoint::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleTireJoint(mesh));
 	}
-	else if (strcmp(constructor, ndJointSlider::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointSlider::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSlider(mesh));
 	}
-	else if (strcmp(constructor, ndJointFix6dof::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointFix6dof::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointFix6dof(mesh));
 	}
-	else if (strcmp(constructor, ndIkSwivelPositionEffector::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointIkSwivelPositionEffector::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointIkSwivelPositionEffector(mesh));
 	}
-	else if (strcmp(constructor, ndJointPlane::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointPlane::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointPlane(mesh));
 	}
-	else if (strcmp(constructor, ndJointGear::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointGear::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointGear(mesh));
 	}
-	else if (strcmp(constructor, ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointVehicleDifferentialAxle::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleDifferentialAxle(mesh));
 	}
-	else if (strcmp(constructor, ndMultiBodyVehicleTorsionBar::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointVehicleTorsionBar::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleTorsionBar(mesh));
 	}
-	else if (strcmp(constructor, ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointVehicleDifferential::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleDifferential(mesh));
 	}
-	else if (strcmp(constructor, ndMultiBodyVehicleMotor::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointVehicleMotor::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleMotor(mesh));
 	}
-	else if (strcmp(constructor, ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshJointVehicleGearBox::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleGearBox(mesh));
 	}

@@ -34,15 +34,13 @@
 #include "ndShapeChamferCylinder.h"
 #include "ndJointBilateralConstraint.h"
 
-ndMeshCollisionShape::ndMeshCollisionShape(const char* const constructor)
+ndMeshCollisionShape::ndMeshCollisionShape()
 	:ndClassAlloc()
-	,m_constructor(constructor)
 {
 }
 
-ndMeshCollisionShape::ndMeshCollisionShape(const ndMeshCollisionShape& other)
+ndMeshCollisionShape::ndMeshCollisionShape(const ndMeshCollisionShape&)
 	:ndClassAlloc()
-	,m_constructor(other.m_constructor)
 {
 }
 
@@ -58,13 +56,14 @@ ndMeshCollisionShape* ndMeshCollisionShape::Duplicate() const
 
 bool ndMeshCollisionShape::operator==(const ndMeshCollisionShape& other) const
 {
-	bool test = m_constructor == other.m_constructor;
+	bool test = (strcmp (ClassName(), other.ClassName()) == 0);
 	return test;
 }
 
 void ndMeshCollisionShape::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", m_constructor.GetStr());
+	//xmlSaveParam(parent, "constructor", m_constructor.GetStr());
+	xmlSaveParam(parent, "constructor", ClassName());
 }
 
 void ndMeshCollisionShape::DeserializeFromXml(const nd::TiXmlElement* const)
@@ -73,15 +72,13 @@ void ndMeshCollisionShape::DeserializeFromXml(const nd::TiXmlElement* const)
 }
 
 ndMeshCollisionShapeNull::ndMeshCollisionShapeNull()
-	:ndMeshCollisionShape(ndShapeNull::StaticClassName())
+	:ndMeshCollisionShape()
 {
-	m_constructor = ndShapeNull::StaticClassName();
 }
 
 ndMeshCollisionShapeNull::ndMeshCollisionShapeNull(const ndMeshCollisionShapeNull& other)
 	:ndMeshCollisionShape(other)
 {
-	m_constructor = ndShapeNull::StaticClassName();
 }
 
 ndMeshCollisionShape* ndMeshCollisionShapeNull::Duplicate() const
@@ -115,7 +112,7 @@ ndShape* ndMeshCollisionShapeNull::CreateObject() const
 }
 
 ndMeshCollisionShapeSphere::ndMeshCollisionShapeSphere()
-	:ndMeshCollisionShape(ndShapeSphere::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -138,7 +135,7 @@ bool ndMeshCollisionShapeSphere::operator==(const ndMeshCollisionShape& other) c
 		const ndMeshCollisionShapeSphere* const otherShape = (ndMeshCollisionShapeSphere*)&other;
 		test = test && (m_radius == otherShape->m_radius);
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeSphere::ApplyScale(ndFloat32 scale)
@@ -164,7 +161,7 @@ ndShape* ndMeshCollisionShapeSphere::CreateObject() const
 }
 
 ndMeshCollisionShapeBox::ndMeshCollisionShapeBox()
-	:ndMeshCollisionShape(ndShapeBox::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -191,7 +188,7 @@ bool ndMeshCollisionShapeBox::operator==(const ndMeshCollisionShape& other) cons
 		test = test && (m_y == otherShape->m_y);
 		test = test && (m_z == otherShape->m_z);
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeBox::ApplyScale(ndFloat32 scale)
@@ -223,7 +220,7 @@ ndShape* ndMeshCollisionShapeBox::CreateObject() const
 }
 
 ndMeshCollisionShapeCapsule::ndMeshCollisionShapeCapsule()
-	:ndMeshCollisionShape(ndShapeCapsule::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -250,7 +247,7 @@ bool ndMeshCollisionShapeCapsule::operator==(const ndMeshCollisionShape& other) 
 		test = test && (m_radius0 == otherShape->m_radius0);
 		test = test && (m_radius1 == otherShape->m_radius1);
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeCapsule::ApplyScale(ndFloat32 scale)
@@ -282,7 +279,7 @@ ndShape* ndMeshCollisionShapeCapsule::CreateObject() const
 }
 
 ndMeshCollisionShapeCylinder::ndMeshCollisionShapeCylinder()
-	:ndMeshCollisionShape(ndShapeCylinder::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -309,7 +306,7 @@ bool ndMeshCollisionShapeCylinder::operator==(const ndMeshCollisionShape& other)
 		test = test && (m_radius0 == otherShape->m_radius0);
 		test = test && (m_radius1 == otherShape->m_radius1);
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeCylinder::ApplyScale(ndFloat32 scale)
@@ -341,7 +338,7 @@ ndShape* ndMeshCollisionShapeCylinder::CreateObject() const
 }
 
 ndMeshCollisionShapeChamferCylinder::ndMeshCollisionShapeChamferCylinder()
-	:ndMeshCollisionShape(ndShapeChamferCylinder::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -366,7 +363,7 @@ bool ndMeshCollisionShapeChamferCylinder::operator==(const ndMeshCollisionShape&
 		test = test && (m_height == otherShape->m_height);
 		test = test && (m_radius == otherShape->m_radius);
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeChamferCylinder::ApplyScale(ndFloat32 scale)
@@ -395,7 +392,7 @@ ndShape* ndMeshCollisionShapeChamferCylinder::CreateObject() const
 }
 
 ndMeshCollisionShapeWheel::ndMeshCollisionShapeWheel()
-	:ndMeshCollisionShape(ndShapeWheel::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -435,7 +432,7 @@ ndShape* ndMeshCollisionShapeWheel::CreateObject() const
 }
 
 ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull()
-	:ndMeshCollisionShape(ndShapeConvexHull::StaticClassName())
+	:ndMeshCollisionShape()
 	,m_points()
 	,m_tolarence(ndFloat32 (0.0f))
 	,m_maxPointCount(256)
@@ -473,7 +470,7 @@ bool ndMeshCollisionShapeConvexHull::operator==(const ndMeshCollisionShape& othe
 			test = test && (err2 < ndFloat32 (1.0e-6f));
 		}
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeConvexHull::ApplyScale(ndFloat32 scale)
@@ -518,7 +515,7 @@ ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
 
 //
 ndMeshCollisionShapeTree::ndMeshCollisionShapeTree()
-	:ndMeshCollisionShape(ndShapeStatic_bvh::StaticClassName())
+	:ndMeshCollisionShape()
 	,m_points()
 	,m_indices()
 	,m_nodes()
@@ -554,7 +551,7 @@ bool ndMeshCollisionShapeTree::operator==(const ndMeshCollisionShape& other) con
 		//	test = test && (err2 < ndFloat32(1.0e-6f));
 		//}
 	}
-	return false;
+	return test;
 }
 
 //void ndMeshCollisionShapeTree::ApplyScale(ndFloat32 scale)
@@ -624,7 +621,7 @@ ndShape* ndMeshCollisionShapeTree::CreateObject() const
 }
 
 ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound()
-	:ndMeshCollisionShape(ndShapeCompound::StaticClassName())
+	:ndMeshCollisionShape()
 {
 }
 
@@ -660,7 +657,7 @@ bool ndMeshCollisionShapeCompound::operator==(const ndMeshCollisionShape& other)
 			selftNode = selftNode->GetNext();
 		}
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeCompound::ApplyScale(ndFloat32 scale)
@@ -736,6 +733,10 @@ ndMeshShapeInstance::ndMeshShapeInstance(const ndShapeInstance& instance)
 	,m_scale(instance.GetScale())
 	,m_shape(instance.GetShape()->GetMeshShape())
 	,m_collidable(instance.GetCollisionMode())
+{
+}
+
+ndMeshShapeInstance::~ndMeshShapeInstance()
 {
 }
 
@@ -817,48 +818,49 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 
 	const nd::TiXmlElement* const xmlShape = (nd::TiXmlElement*)parent->FirstChild("shape");
 	ndAssert(xmlShape);
+
 	const char* const constructor = xmlGetString(xmlShape, "constructor");
-	if (strcmp(constructor, ndShapeBox::StaticClassName()) == 0)
+	if (strcmp(constructor, ndMeshCollisionShapeBox::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeBox());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeSphere::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeSphere::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeSphere());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeCapsule::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeCapsule::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCapsule());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeCylinder::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeCylinder::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCylinder());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeWheel::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeWheel::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeWheel());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeChamferCylinder::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeChamferCylinder::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeChamferCylinder());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeConvexHull::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeConvexHull::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeConvexHull());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeStatic_bvh::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeTree::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeTree());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, ndShapeCompound::StaticClassName()) == 0)
+	else if (strcmp(constructor, ndMeshCollisionShapeCompound::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCompound());
 		m_shape->DeserializeFromXml(xmlShape);
@@ -886,13 +888,11 @@ ndMeshBody::ndMeshBody(const ndMesh* const owner)
 	,m_localCentreOfMass(ndVector::m_wOne)
 	,m_owner(owner)
 {
-	m_classConstructor = ndString("ndBody");
 }
 
 ndMeshBody::ndMeshBody(const ndMeshBody& other)
 	:ndClassAlloc()
 	,m_localCentreOfMass(other.m_localCentreOfMass)
-	,m_classConstructor(other.m_classConstructor)
 	,m_owner(other.m_owner)
 {
 }
@@ -911,7 +911,7 @@ void ndMeshBody::DuplicateFixDependencies(const ndMesh* const root)
 
 bool ndMeshBody::operator==(const ndMeshBody& other) const
 {
-	bool test = (m_classConstructor == other.m_classConstructor);
+	bool test = (ClassName() == other.ClassName());
 
 	ndVector diff(m_localCentreOfMass - other.m_localCentreOfMass);
 	test = test && diff.DotProduct(diff & ndVector::m_triplexMask).GetScalar() < ndFloat32(1.0e-6f);
@@ -948,7 +948,6 @@ ndMeshBodyKinematic::ndMeshBodyKinematic(const ndMesh* const owner)
 	,m_maxLinearStep(ndFloat32(2.0f))
 	,m_massVolumeWeigh(ndFloat32(1.0f))
 {
-	m_classConstructor = ndString("ndBodyKinematic");
 }
 
 ndMeshBodyKinematic::ndMeshBodyKinematic(const ndMeshBodyKinematic& other)
@@ -1034,9 +1033,7 @@ ndMeshJoint::ndMeshJoint(const ndMesh* const owner)
 	:ndClassAlloc()
 	,m_localFrame0(ndGetIdentityMatrix())
 	,m_localFrame1(ndGetIdentityMatrix())
-	,m_constructor("ndJointFix6dof")
 	,m_owner(ndWeakPtr<const ndMesh>(owner))
-	//,m_surrogateParent(ndWeakPtr<const ndMesh>(nullptr))
 {
 }
 
@@ -1044,9 +1041,7 @@ ndMeshJoint::ndMeshJoint(const ndMesh* const owner, const ndJointBilateralConstr
 	:ndClassAlloc()
 	,m_localFrame0(joint->GetLocalMatrix0())
 	,m_localFrame1(joint->GetLocalMatrix1())
-	,m_constructor(joint->ClassName())
 	,m_owner(ndWeakPtr<const ndMesh>(owner))
-	//,m_surrogateParent(ndWeakPtr<const ndMesh>(nullptr))
 {
 }
 
@@ -1054,9 +1049,7 @@ ndMeshJoint::ndMeshJoint(const ndMeshJoint& other)
 	:ndClassAlloc()
 	,m_localFrame0(other.m_localFrame0)
 	,m_localFrame1(other.m_localFrame1)
-	,m_constructor(other.m_constructor)
 	,m_owner(ndWeakPtr<const ndMesh>(other.m_owner))
-	//,m_surrogateParent(ndWeakPtr<const ndMesh>(other.m_surrogateParent))
 {
 }
 
@@ -1074,20 +1067,12 @@ void ndMeshJoint::DuplicateFixDependencies(const ndMesh* const root)
 {
 	m_owner = root->FindByName(m_owner->GetName());
 	ndAssert(m_owner);
-
-	//if (m_surrogateParent)
-	//{
-	//	//const ndMesh* const root = m_owner->GetRoot();
-	//	ndMesh* const surrogateParent = root->FindByName(m_surrogateParent->GetName());
-	//	ndAssert(surrogateParent);
-	//	m_surrogateParent = ndWeakPtr<const ndMesh>(surrogateParent);
-	//}
 }
 
 bool ndMeshJoint::operator==(const ndMeshJoint& other) const
 {
 	bool test = true;
-	test = test && (m_constructor == other.m_constructor);
+	test = test && (ClassName() == other.ClassName());
 	test = test && (m_localFrame0 * other.m_localFrame0.OrthoInverse()).TestIdentity(ndFloat32(1.0e-6f));
 	test = test && (m_localFrame1 * other.m_localFrame1.OrthoInverse()).TestIdentity(ndFloat32(1.0e-6f));
 
@@ -1110,44 +1095,23 @@ void ndMeshJoint::ApplyTransform(const ndMatrix& transform)
 	m_localFrame1 = transformMatrix;
 }
 
-//const ndMesh* ndMeshJoint::GetSurrogateParent() const
-//{
-//	return *m_surrogateParent;
-//}
-//
-//void ndMeshJoint::SetSurrogateParent(const ndMesh* const surrodateParent)
-//{
-//	m_surrogateParent = ndWeakPtr<const ndMesh>(surrodateParent);
-//}
-
 void ndMeshJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", m_constructor.GetStr());
+	xmlSaveParam(parent, "constructor", ClassName());
 	xmlSaveParam(parent, "localFrame0", m_localFrame0);
 	xmlSaveParam(parent, "localFrame1", m_localFrame1);
-
-	//if (m_surrogateParent)
-	//{
-	//	xmlSaveParam(parent, "surrogateParent", m_surrogateParent->GetName().GetStr());
-	//}
 }
 
 void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	m_constructor = ndString(xmlGetString(parent, "constructor"));
+	// do not need to parse the construct name.
 	m_localFrame0 = xmlGetMatrix(parent, "localFrame0");
 	m_localFrame1 = xmlGetMatrix(parent, "localFrame1");
-
-	//if (xmlHasParam(parent, "surrogateParent"))
-	//{
-	//	const char* const name = xmlGetString(parent, "surrogateParent");
-	//	m_surrogateParent = ndWeakPtr<const ndMesh> (m_owner->GetRoot()->FindByName(name));
-	//}
 }
 
 ndJointBilateralConstraint* ndMeshJoint::CreateObject(ndBodyKinematic* const, ndBodyKinematic* const) const
 {
-	ndExpandTraceMessage("ndMesh joint: %s serialization not Implemented", m_constructor.GetStr());
+	ndExpandTraceMessage("ndMesh joint: %s serialization not Implemented", ClassName());
 	ndAssert(0);
 	return nullptr;
 }

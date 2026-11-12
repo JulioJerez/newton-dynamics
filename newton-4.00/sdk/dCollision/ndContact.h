@@ -126,10 +126,10 @@ class ndContact: public ndConstraint
 	D_COLLISION_API bool IsTestOnly() const;
 	D_COLLISION_API bool IsInTrigger() const;
 	D_COLLISION_API void InvalicatdeCache();
-	D_COLLISION_API virtual ndContact* GetAsContact() override;
 	D_COLLISION_API const ndMaterial* GetMaterial() const;
 	D_COLLISION_API bool IsSkeletonSelftCollision() const;
 	D_COLLISION_API ndContactPointList& GetContactPoints();
+	D_COLLISION_API virtual ndContact* GetAsContact() override;
 	D_COLLISION_API const ndContactPointList& GetContactPoints() const;
 	D_COLLISION_API virtual void JacobianDerivative(ndConstraintDescritor& desc) override;
 	D_COLLISION_API virtual void JointAccelerations(ndJointAccelerationDecriptor* const desc) override;

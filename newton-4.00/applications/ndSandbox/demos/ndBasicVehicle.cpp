@@ -748,13 +748,13 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	// add a vehicle material
 	AddMaterial(scene);
 	
-	ndMatrix matrix(ndYawMatrix (ndFloat32 (90.0f) * ndDegreeToRad));
-	//ndMatrix matrix(ndYawMatrix(ndFloat32(0.0f) * ndDegreeToRad));
+	//ndMatrix matrix(ndYawMatrix (ndFloat32 (90.0f) * ndDegreeToRad));
+	ndMatrix matrix(ndYawMatrix(ndFloat32(0.0f) * ndDegreeToRad));
 	ndVector floor(FindFloor(*world, location, 100.0f));
 	matrix.m_posit = floor;
 	matrix.m_posit.m_y += 0.5f;
 	
-	CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)), true);
+	CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)), false);
 	//CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f)), true);
 	//CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))); 
 	//CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));

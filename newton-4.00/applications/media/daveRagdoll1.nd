@@ -39,7 +39,7 @@
         </faces>
     </geometry>
     <rigidbody>
-        <constructor string="ndBodyDynamic" />
+        <constructor string="ndMeshBodyDynamic" />
         <veloc float3="0 0 0" />
         <omega float3="0 0 0" />
         <com float3="1.86098e-11 3.40293e-10 -2.79146e-10" />
@@ -60,7 +60,7 @@
             </alignmentMatrix>
             <scale float3="1 1 1" />
             <shape>
-                <constructor string="ndShapeCapsule" />
+                <constructor string="ndMeshCollisionShapeCapsule" />
                 <radio0 float="0.0475" />
                 <radio1 float="0.0475" />
                 <heigh float="0.285" />
@@ -109,7 +109,7 @@
             </faces>
         </geometry>
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
             <com float3="0.095 1.87266e-10 -1.50548e-10" />
@@ -130,7 +130,7 @@
                 </alignmentMatrix>
                 <scale float3="1 1 1" />
                 <shape>
-                    <constructor string="ndShapeCapsule" />
+                    <constructor string="ndMeshCollisionShapeCapsule" />
                     <radio0 float="0.0475" />
                     <radio1 float="0.0475" />
                     <heigh float="0.19" />
@@ -140,7 +140,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndJointHinge" />
+            <constructor string="ndMeshJointHinge" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="9.33815e-07 -1.06722e-07 0" />
@@ -196,7 +196,7 @@
                 </faces>
             </geometry>
             <rigidbody>
-                <constructor string="ndBodyDynamic" />
+                <constructor string="ndMeshBodyDynamic" />
                 <veloc float3="0 0 0" />
                 <omega float3="0 0 0" />
                 <com float3="0.19 -2.39606e-10 -2.21896e-09" />
@@ -217,7 +217,7 @@
                     </alignmentMatrix>
                     <scale float3="1 1 1" />
                     <shape>
-                        <constructor string="ndShapeCapsule" />
+                        <constructor string="ndMeshCollisionShapeCapsule" />
                         <radio0 float="0.0475" />
                         <radio1 float="0.0475" />
                         <heigh float="0.38" />
@@ -227,7 +227,7 @@
                 <intrinsicAngularDamping float3="0 0 0" />
             </rigidbody>
             <joint>
-                <constructor string="ndJointDoubleHinge" />
+                <constructor string="ndMeshJointDoubleHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="-90 6.42415e-07 1.06722e-07" />
@@ -293,7 +293,7 @@
                     </faces>
                 </geometry>
                 <rigidbody>
-                    <constructor string="ndBodyDynamic" />
+                    <constructor string="ndMeshBodyDynamic" />
                     <veloc float3="0 0 0" />
                     <omega float3="0 0 0" />
                     <com float3="0.19 -2.39606e-10 -2.21896e-09" />
@@ -314,7 +314,7 @@
                         </alignmentMatrix>
                         <scale float3="1 1 1" />
                         <shape>
-                            <constructor string="ndShapeCapsule" />
+                            <constructor string="ndMeshCollisionShapeCapsule" />
                             <radio0 float="0.0475" />
                             <radio1 float="0.0475" />
                             <heigh float="0.38" />
@@ -324,7 +324,7 @@
                     <intrinsicAngularDamping float3="0 0 0" />
                 </rigidbody>
                 <joint>
-                    <constructor string="ndJointHinge" />
+                    <constructor string="ndMeshJointHinge" />
                     <localFrame0>
                         <posit float3="0 0 0" />
                         <angles float3="-180 -0 90" />
@@ -380,7 +380,7 @@
                         </faces>
                     </geometry>
                     <rigidbody>
-                        <constructor string="ndBodyDynamic" />
+                        <constructor string="ndMeshBodyDynamic" />
                         <veloc float3="0 0 0" />
                         <omega float3="0 0 0" />
                         <com float3="0 0 0" />
@@ -401,7 +401,7 @@
                             </alignmentMatrix>
                             <scale float3="1 1 1" />
                             <shape>
-                                <constructor string="ndShapeBox" />
+                                <constructor string="ndMeshCollisionShapeBox" />
                                 <x float="0.0494" />
                                 <y float="0.152" />
                                 <z float="0.285" />
@@ -411,7 +411,7 @@
                         <intrinsicAngularDamping float3="0 0 0" />
                     </rigidbody>
                     <joint>
-                        <constructor string="ndJointDoubleHinge" />
+                        <constructor string="ndMeshJointDoubleHinge" />
                         <localFrame0>
                             <posit float3="0 0 0" />
                             <angles float3="-0 -90 0" />
@@ -481,7 +481,7 @@
             </faces>
         </geometry>
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
             <com float3="0.095 1.87266e-10 -1.50548e-10" />
@@ -502,7 +502,7 @@
                 </alignmentMatrix>
                 <scale float3="1 1 1" />
                 <shape>
-                    <constructor string="ndShapeCapsule" />
+                    <constructor string="ndMeshCollisionShapeCapsule" />
                     <radio0 float="0.0475" />
                     <radio1 float="0.0475" />
                     <heigh float="0.19" />
@@ -512,7 +512,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndJointHinge" />
+            <constructor string="ndMeshJointHinge" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="-9.33815e-07 1.06722e-07 0" />
@@ -568,7 +568,7 @@
                 </faces>
             </geometry>
             <rigidbody>
-                <constructor string="ndBodyDynamic" />
+                <constructor string="ndMeshBodyDynamic" />
                 <veloc float3="0 0 0" />
                 <omega float3="0 0 0" />
                 <com float3="0.19 -2.39606e-10 -2.21896e-09" />
@@ -589,7 +589,7 @@
                     </alignmentMatrix>
                     <scale float3="1 1 1" />
                     <shape>
-                        <constructor string="ndShapeCapsule" />
+                        <constructor string="ndMeshCollisionShapeCapsule" />
                         <radio0 float="0.0475" />
                         <radio1 float="0.0475" />
                         <heigh float="0.38" />
@@ -599,7 +599,7 @@
                 <intrinsicAngularDamping float3="0 0 0" />
             </rigidbody>
             <joint>
-                <constructor string="ndJointDoubleHinge" />
+                <constructor string="ndMeshJointDoubleHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="90 -6.42415e-07 1.06722e-07" />
@@ -665,7 +665,7 @@
                     </faces>
                 </geometry>
                 <rigidbody>
-                    <constructor string="ndBodyDynamic" />
+                    <constructor string="ndMeshBodyDynamic" />
                     <veloc float3="0 0 0" />
                     <omega float3="0 0 0" />
                     <com float3="0.19 -2.39606e-10 -2.21896e-09" />
@@ -686,7 +686,7 @@
                         </alignmentMatrix>
                         <scale float3="1 1 1" />
                         <shape>
-                            <constructor string="ndShapeCapsule" />
+                            <constructor string="ndMeshCollisionShapeCapsule" />
                             <radio0 float="0.0475" />
                             <radio1 float="0.0475" />
                             <heigh float="0.38" />
@@ -696,7 +696,7 @@
                     <intrinsicAngularDamping float3="0 0 0" />
                 </rigidbody>
                 <joint>
-                    <constructor string="ndJointHinge" />
+                    <constructor string="ndMeshJointHinge" />
                     <localFrame0>
                         <posit float3="0 0 0" />
                         <angles float3="180 -0 90" />
@@ -752,7 +752,7 @@
                         </faces>
                     </geometry>
                     <rigidbody>
-                        <constructor string="ndBodyDynamic" />
+                        <constructor string="ndMeshBodyDynamic" />
                         <veloc float3="0 0 0" />
                         <omega float3="0 0 0" />
                         <com float3="0 0 0" />
@@ -773,7 +773,7 @@
                             </alignmentMatrix>
                             <scale float3="1 1 1" />
                             <shape>
-                                <constructor string="ndShapeBox" />
+                                <constructor string="ndMeshCollisionShapeBox" />
                                 <x float="0.0494" />
                                 <y float="0.152" />
                                 <z float="0.285" />
@@ -783,7 +783,7 @@
                         <intrinsicAngularDamping float3="0 0 0" />
                     </rigidbody>
                     <joint>
-                        <constructor string="ndJointDoubleHinge" />
+                        <constructor string="ndMeshJointDoubleHinge" />
                         <localFrame0>
                             <posit float3="0 0 0" />
                             <angles float3="-0 -90 0" />
@@ -853,7 +853,7 @@
             </faces>
         </geometry>
         <rigidbody>
-            <constructor string="ndBodyDynamic" />
+            <constructor string="ndMeshBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
             <com float3="0.2375 -8.73647e-11 9.42168e-11" />
@@ -874,7 +874,7 @@
                 </alignmentMatrix>
                 <scale float3="1 1 1" />
                 <shape>
-                    <constructor string="ndShapeCapsule" />
+                    <constructor string="ndMeshCollisionShapeCapsule" />
                     <radio0 float="0.0475" />
                     <radio1 float="0.0475" />
                     <heigh float="0.475" />
@@ -884,7 +884,7 @@
             <intrinsicAngularDamping float3="0 0 0" />
         </rigidbody>
         <joint>
-            <constructor string="ndJointHinge" />
+            <constructor string="ndMeshJointHinge" />
             <localFrame0>
                 <posit float3="0 0 0" />
                 <angles float3="-0 -90 0" />
@@ -940,7 +940,7 @@
                 </faces>
             </geometry>
             <rigidbody>
-                <constructor string="ndBodyDynamic" />
+                <constructor string="ndMeshBodyDynamic" />
                 <veloc float3="0 0 0" />
                 <omega float3="0 0 0" />
                 <com float3="0.1425 -1.19634e-10 -2.39269e-11" />
@@ -961,7 +961,7 @@
                     </alignmentMatrix>
                     <scale float3="1 1 1" />
                     <shape>
-                        <constructor string="ndShapeCapsule" />
+                        <constructor string="ndMeshCollisionShapeCapsule" />
                         <radio0 float="0.0475" />
                         <radio1 float="0.0475" />
                         <heigh float="0.285" />
@@ -971,7 +971,7 @@
                 <intrinsicAngularDamping float3="0 0 0" />
             </rigidbody>
             <joint>
-                <constructor string="ndJointHinge" />
+                <constructor string="ndMeshJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="0 -0 0" />
@@ -1027,7 +1027,7 @@
                     </faces>
                 </geometry>
                 <rigidbody>
-                    <constructor string="ndBodyDynamic" />
+                    <constructor string="ndMeshBodyDynamic" />
                     <veloc float3="0 0 0" />
                     <omega float3="0 0 0" />
                     <com float3="0.19 -2.39606e-10 -2.21896e-09" />
@@ -1048,7 +1048,7 @@
                         </alignmentMatrix>
                         <scale float3="1 1 1" />
                         <shape>
-                            <constructor string="ndShapeCapsule" />
+                            <constructor string="ndMeshCollisionShapeCapsule" />
                             <radio0 float="0.0475" />
                             <radio1 float="0.0475" />
                             <heigh float="0.38" />
@@ -1058,7 +1058,7 @@
                     <intrinsicAngularDamping float3="0 0 0" />
                 </rigidbody>
                 <joint>
-                    <constructor string="ndJointDoubleHinge" />
+                    <constructor string="ndMeshJointDoubleHinge" />
                     <localFrame0>
                         <posit float3="0 0 0" />
                         <angles float3="4.07111e-13 -0 0" />
@@ -1124,7 +1124,7 @@
                         </faces>
                     </geometry>
                     <rigidbody>
-                        <constructor string="ndBodyDynamic" />
+                        <constructor string="ndMeshBodyDynamic" />
                         <veloc float3="0 0 0" />
                         <omega float3="0 0 0" />
                         <com float3="0.152 -7.30649e-11 -7.48285e-10" />
@@ -1145,7 +1145,7 @@
                             </alignmentMatrix>
                             <scale float3="1 1 1" />
                             <shape>
-                                <constructor string="ndShapeCapsule" />
+                                <constructor string="ndMeshCollisionShapeCapsule" />
                                 <radio0 float="0.0475" />
                                 <radio1 float="0.0475" />
                                 <heigh float="0.304" />
@@ -1155,7 +1155,7 @@
                         <intrinsicAngularDamping float3="0 0 0" />
                     </rigidbody>
                     <joint>
-                        <constructor string="ndJointHinge" />
+                        <constructor string="ndMeshJointHinge" />
                         <localFrame0>
                             <posit float3="0 0 0" />
                             <angles float3="5.33609e-07 90 0" />
@@ -1211,7 +1211,7 @@
                             </faces>
                         </geometry>
                         <rigidbody>
-                            <constructor string="ndBodyDynamic" />
+                            <constructor string="ndMeshBodyDynamic" />
                             <veloc float3="0 0 0" />
                             <omega float3="0 0 0" />
                             <com float3="0 0 0" />
@@ -1232,7 +1232,7 @@
                                 </alignmentMatrix>
                                 <scale float3="1 1 1" />
                                 <shape>
-                                    <constructor string="ndShapeBox" />
+                                    <constructor string="ndMeshCollisionShapeBox" />
                                     <x float="0.095" />
                                     <y float="0.095" />
                                     <z float="0.0475" />
@@ -1242,7 +1242,7 @@
                             <intrinsicAngularDamping float3="0 0 0" />
                         </rigidbody>
                         <joint>
-                            <constructor string="ndJointHinge" />
+                            <constructor string="ndMeshJointHinge" />
                             <localFrame0>
                                 <posit float3="-0.0532 -1.09002e-09 0" />
                                 <angles float3="-2.68014e-13 8.53774e-07 90" />
@@ -1302,7 +1302,7 @@
                 </faces>
             </geometry>
             <rigidbody>
-                <constructor string="ndBodyDynamic" />
+                <constructor string="ndMeshBodyDynamic" />
                 <veloc float3="0 0 0" />
                 <omega float3="0 0 0" />
                 <com float3="0.1425 -1.19634e-10 -2.39269e-11" />
@@ -1323,7 +1323,7 @@
                     </alignmentMatrix>
                     <scale float3="1 1 1" />
                     <shape>
-                        <constructor string="ndShapeCapsule" />
+                        <constructor string="ndMeshCollisionShapeCapsule" />
                         <radio0 float="0.0475" />
                         <radio1 float="0.0475" />
                         <heigh float="0.285" />
@@ -1333,7 +1333,7 @@
                 <intrinsicAngularDamping float3="0 0 0" />
             </rigidbody>
             <joint>
-                <constructor string="ndJointHinge" />
+                <constructor string="ndMeshJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="0 -0 0" />
@@ -1389,7 +1389,7 @@
                     </faces>
                 </geometry>
                 <rigidbody>
-                    <constructor string="ndBodyDynamic" />
+                    <constructor string="ndMeshBodyDynamic" />
                     <veloc float3="0 0 0" />
                     <omega float3="0 0 0" />
                     <com float3="0.19 -2.39606e-10 -2.21896e-09" />
@@ -1410,7 +1410,7 @@
                         </alignmentMatrix>
                         <scale float3="1 1 1" />
                         <shape>
-                            <constructor string="ndShapeCapsule" />
+                            <constructor string="ndMeshCollisionShapeCapsule" />
                             <radio0 float="0.0475" />
                             <radio1 float="0.0475" />
                             <heigh float="0.38" />
@@ -1420,7 +1420,7 @@
                     <intrinsicAngularDamping float3="0 0 0" />
                 </rigidbody>
                 <joint>
-                    <constructor string="ndJointDoubleHinge" />
+                    <constructor string="ndMeshJointDoubleHinge" />
                     <localFrame0>
                         <posit float3="0 0 0" />
                         <angles float3="-4.07111e-13 -0 0" />
@@ -1486,7 +1486,7 @@
                         </faces>
                     </geometry>
                     <rigidbody>
-                        <constructor string="ndBodyDynamic" />
+                        <constructor string="ndMeshBodyDynamic" />
                         <veloc float3="0 0 0" />
                         <omega float3="0 0 0" />
                         <com float3="0.152 -7.30649e-11 -7.48285e-10" />
@@ -1507,7 +1507,7 @@
                             </alignmentMatrix>
                             <scale float3="1 1 1" />
                             <shape>
-                                <constructor string="ndShapeCapsule" />
+                                <constructor string="ndMeshCollisionShapeCapsule" />
                                 <radio0 float="0.0475" />
                                 <radio1 float="0.0475" />
                                 <heigh float="0.304" />
@@ -1517,7 +1517,7 @@
                         <intrinsicAngularDamping float3="0 0 0" />
                     </rigidbody>
                     <joint>
-                        <constructor string="ndJointHinge" />
+                        <constructor string="ndMeshJointHinge" />
                         <localFrame0>
                             <posit float3="0 0 0" />
                             <angles float3="-5.33609e-07 -90 0" />
@@ -1573,7 +1573,7 @@
                             </faces>
                         </geometry>
                         <rigidbody>
-                            <constructor string="ndBodyDynamic" />
+                            <constructor string="ndMeshBodyDynamic" />
                             <veloc float3="0 0 0" />
                             <omega float3="0 0 0" />
                             <com float3="0 0 0" />
@@ -1594,7 +1594,7 @@
                                 </alignmentMatrix>
                                 <scale float3="1 1 1" />
                                 <shape>
-                                    <constructor string="ndShapeBox" />
+                                    <constructor string="ndMeshCollisionShapeBox" />
                                     <x float="0.095" />
                                     <y float="0.095" />
                                     <z float="0.0475" />
@@ -1604,7 +1604,7 @@
                             <intrinsicAngularDamping float3="0 0 0" />
                         </rigidbody>
                         <joint>
-                            <constructor string="ndJointHinge" />
+                            <constructor string="ndMeshJointHinge" />
                             <localFrame0>
                                 <posit float3="-0.0532 -1.09002e-09 0" />
                                 <angles float3="2.68014e-13 -8.53774e-07 90" />
@@ -1664,7 +1664,7 @@
                 </faces>
             </geometry>
             <rigidbody>
-                <constructor string="ndBodyDynamic" />
+                <constructor string="ndMeshBodyDynamic" />
                 <veloc float3="0 0 0" />
                 <omega float3="0 0 0" />
                 <com float3="0.095 1.87266e-10 -1.50548e-10" />
@@ -1685,7 +1685,7 @@
                     </alignmentMatrix>
                     <scale float3="1 1 1" />
                     <shape>
-                        <constructor string="ndShapeCapsule" />
+                        <constructor string="ndMeshCollisionShapeCapsule" />
                         <radio0 float="0.0475" />
                         <radio1 float="0.0475" />
                         <heigh float="0.19" />
@@ -1695,7 +1695,7 @@
                 <intrinsicAngularDamping float3="0 0 0" />
             </rigidbody>
             <joint>
-                <constructor string="ndJointHinge" />
+                <constructor string="ndMeshJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
                     <angles float3="-0 -90 0" />

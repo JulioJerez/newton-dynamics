@@ -46,7 +46,6 @@ ndMeshBodyDynamic::ndMeshBodyDynamic(const ndMesh* const owner)
 	:ndMeshBodyKinematic(owner)
 	,m_intrinsicDamping(ndVector::m_zero)
 {
-	m_classConstructor = ndString("ndBodyDynamic");
 }
 
 ndMeshBodyDynamic::ndMeshBodyDynamic(const ndMeshBodyDynamic& other)
@@ -1432,18 +1431,14 @@ ndJointBilateralConstraint* ndMeshJointVehicleTorsionBar::CreateObject(ndBodyKin
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const owner)
 	:ndMeshJointWheel(owner)
 	,m_frictionModel(m_pacejkaUtility)
-	,m_lateralStiffness(ndReal (1.0f))
-	,m_longitudinalStiffness(ndReal(1.0f))
-	,m_maxSideSlipAngle(ndReal(ndFloat32(0.5f) * ND_TIRE_MAX_STATIC_SLEEP * ndRadToDegree))
+	,m_maxSideSlipAngle(ndReal(ndFloat32(0.5f) * ND_TIRE_MAX_STATIC_SLIP_ANGLE* ndRadToDegree))
 {
 }
 
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJointWheel(owner, joint)
 	,m_frictionModel(m_pacejkaUtility)
-	,m_lateralStiffness(ndReal(1.0f))
-	,m_longitudinalStiffness(ndReal(1.0f))
-	,m_maxSideSlipAngle(ndReal(ndFloat32(0.5f)* ND_TIRE_MAX_STATIC_SLEEP* ndRadToDegree))
+	,m_maxSideSlipAngle(ndReal(ndFloat32(0.5f)* ND_TIRE_MAX_STATIC_SLIP_ANGLE * ndRadToDegree))
 {
 	ndAssert(strcmp(joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0);
 	//const ndMultiBodyVehicleTireJoint* const tire = static_cast<const ndMultiBodyVehicleTireJoint*>(joint);
@@ -1456,8 +1451,6 @@ ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const own
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMeshJointVehicleTireJoint& other)
 	:ndMeshJointWheel(other)
 	,m_frictionModel(other.m_frictionModel)
-	,m_lateralStiffness(other.m_lateralStiffness)
-	,m_longitudinalStiffness(other.m_longitudinalStiffness)
 	,m_maxSideSlipAngle(other.m_maxSideSlipAngle)
 {
 }
@@ -1474,8 +1467,6 @@ bool ndMeshJointVehicleTireJoint::operator==(const ndMeshJoint& other) const
 	{
 		const ndMeshJointVehicleTireJoint* const otherJoint = (ndMeshJointVehicleTireJoint*)&other;
 		test = test && (m_frictionModel == otherJoint->m_frictionModel);
-		test = test && (m_lateralStiffness == otherJoint->m_lateralStiffness);
-		test = test && (m_longitudinalStiffness == otherJoint->m_longitudinalStiffness);
 		test = test && (m_maxSideSlipAngle == otherJoint->m_maxSideSlipAngle);
 	}
 	return test;
@@ -1485,8 +1476,6 @@ void ndMeshJointVehicleTireJoint::SerializeToXml(nd::TiXmlElement* const parent)
 {
 	ndMeshJointWheel::SerializeToXml(parent);
 	xmlSaveParam(parent, "frictionModel", ndTireFrictionModel::GetLabel(ndTireFrictionModel::ndFrictionModel(m_frictionModel)));
-	xmlSaveParam(parent, "lateralStiffness", m_lateralStiffness);
-	xmlSaveParam(parent, "longitudinalStiffness", m_longitudinalStiffness);
 	xmlSaveParam(parent, "maxSizeSlipAngle", m_maxSideSlipAngle);
 }
 
@@ -1496,8 +1485,6 @@ void ndMeshJointVehicleTireJoint::DeserializeFromXml(const nd::TiXmlElement* con
 	const char* const modelLabel = xmlGetString(parent, "frictionModel");
 	m_frictionModel = ndFrictionModel(ndTireFrictionModel::GetModel(modelLabel));
 
-	m_lateralStiffness = ndReal(xmlGetFloat(parent, "lateralStiffness"));
-	m_longitudinalStiffness = ndReal(xmlGetFloat(parent, "longitudinalStiffness"));
 	if (xmlHasAttribute(parent, "maxSizeSlipAngle"))
 	{
 		m_maxSideSlipAngle = ndReal(xmlGetFloat(parent, "maxSizeSlipAngle"));
@@ -1512,7 +1499,6 @@ ndJointBilateralConstraint* ndMeshJointVehicleTireJoint::CreateObject(ndBodyKine
 	ndTireFrictionModel frictionModel;
 	frictionModel.SetPacejkaCurves(ndTireFrictionModel::ndFrictionModel(m_frictionModel));
 	joint->SetFrictionModel(frictionModel);
-	joint->SetStiffness(m_lateralStiffness, m_longitudinalStiffness);
 	joint->SetMaxSlipAngle(m_maxSideSlipAngle * ndDegreeToRad);
 
 	return joint;

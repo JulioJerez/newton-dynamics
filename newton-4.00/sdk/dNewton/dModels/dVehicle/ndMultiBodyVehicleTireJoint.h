@@ -15,8 +15,8 @@
 #include "ndNewtonStdafx.h"
 #include "ndJointWheel.h"
 
-#define ND_TIRE_MIN_STATIC_SLEEP (ndFloat32(1.0f) * ndDegreeToRad)
-#define ND_TIRE_MAX_STATIC_SLEEP (ndFloat32(10.0f) * ndDegreeToRad)
+#define ND_TIRE_MIN_STATIC_SLIP_ANGLE		(ndFloat32(1.0f) * ndDegreeToRad)
+#define ND_TIRE_MAX_STATIC_SLIP_ANGLE		(ndFloat32(10.0f) * ndDegreeToRad)
 
 class ndTireFrictionModel
 {
@@ -25,7 +25,7 @@ class ndTireFrictionModel
 	{
 		public:
 		D_NEWTON_API ndPacejkaTireModel();
-		D_NEWTON_API ndPacejkaTireModel(ndFloat32 B, ndFloat32 C, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh);
+		D_NEWTON_API ndPacejkaTireModel(ndFloat32 D, ndFloat32 B, ndFloat32 C, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh);
 
 		private:
 		void CalculateMaxPhi();
@@ -84,9 +84,6 @@ class ndMultiBodyVehicleTireJoint: public ndJointWheel
 	D_NEWTON_API ndFloat32 GetSideSlip() const;
 	D_NEWTON_API ndFloat32 GetLongitudinalSlip() const;
 
-	D_NEWTON_API void SetStiffness(ndFloat32 lateral, ndFloat32 longitudinal);
-	D_NEWTON_API void GetStiffness(ndFloat32& lateral, ndFloat32& longitudinal) const;
-
 	D_NEWTON_API ndFloat32 GetMaxSlipAngle() const;
 	D_NEWTON_API void SetMaxSlipAngle(ndFloat32 angleInRadians);
 
@@ -103,8 +100,6 @@ class ndMultiBodyVehicleTireJoint: public ndJointWheel
 	ndFloat32 m_lateralSlip;
 	ndFloat32 m_longitudinalSlip;
 	ndFloat32 m_normalizedAligningTorque;
-	ndFloat32 m_lateralStiffness;
-	ndFloat32 m_longitudinalStiffness;
 	ndFloat32 m_maxSideAngle;
 
 	friend class ndMultiBodyVehicle;

@@ -55,19 +55,28 @@ class ndMultiBodyVehicle : public ndModelArticulation
 		class ndSpeedForcePair
 		{
 			public:
+			ndSpeedForcePair()
+			{
+			}
+
+			ndSpeedForcePair(ndFloat32 speed, ndFloat32 gravityFactor, ndFloat32 aerodynamicDownforceConstant)
+				:m_speed(speed)
+				,m_gravityFactor(gravityFactor)
+				,m_aerodynamicDownforceConstant(aerodynamicDownforceConstant)
+			{
+			}
 			ndFloat32 m_speed;
-			ndFloat32 m_forceFactor;
+			ndFloat32 m_gravityFactor;
 			ndFloat32 m_aerodynamicDownforceConstant;
 		};
 	
 		ndDownForce();
+		ndFloat32 GetMaxDownforceFactor() const;
 		ndFloat32 GetDownforceFactor(ndFloat32 speed) const;
 	
 		private:
-		ndFloat32 CalculateFactor(const ndSpeedForcePair* const entry) const;
-	
 		ndFloat32 m_suspensionStiffnessModifier;
-		ndSpeedForcePair m_downForceTable[5];
+		ndFixSizeArray<ndSpeedForcePair, 8> m_downForceTable;
 		friend class ndMultiBodyVehicle;
 		friend class ndMultiBodyVehicleTireJoint;
 	};
@@ -124,10 +133,13 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_NEWTON_API virtual void PostUpdate(ndFloat32 timestep, ndInt32 threadId);
 	D_NEWTON_API virtual void Debug(ndConstraintDebugCallback& context) const;
 
+	D_NEWTON_API void CalculateRestSprungWeight();
+	D_NEWTON_API ndFloat32 CalculateUndersteerGradient();
+
 	protected:
 	void ApplyTireModel();
 	void CalculateCrowndGear();
-	void CalculateRestSprungWeight();
+
 	void ApplyAlignmentAndBalancing();
 	void ApplyAerodynamics(ndFloat32 timestep);
 	void ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& tireContacts);

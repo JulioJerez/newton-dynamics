@@ -67,21 +67,13 @@ void ndConstraintDebugCallback::DrawArrow(const ndMatrix& origin, const ndVector
 #define D_WARM_START_LOW_PASS_FILTER ndFloat32 (0.01f)
 void ndForceImpactPair::Clear()
 {
+	m_initialGuessIndex = 0;
 	m_force = ndFloat32(ndFloat32(0.0f));
 	m_impact = ndFloat32(ndFloat32(0.0f));
 	for (ndInt32 i = 0; i < ndInt32(sizeof(m_initialGuess) / sizeof(m_initialGuess[0])); ++i)
 	{
 		m_initialGuess[i] = ndFloat32(ndFloat32(0.0f));
 	}
-}
-
-void ndForceImpactPair::Push(ndFloat32 val)
-{
-	for (ndInt32 i = 1; i < ndInt32(sizeof(m_initialGuess) / sizeof(m_initialGuess[0])); ++i)
-	{
-		m_initialGuess[i - 1] = m_initialGuess[i];
-	}
-	m_initialGuess[sizeof(m_initialGuess) / sizeof(m_initialGuess[0]) - 1] = val;
 }
 
 ndFloat32 ndForceImpactPair::GetInitialGuess() const

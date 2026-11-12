@@ -31,9 +31,6 @@ class ndShapeInstance;
 class ndBodyKinematic;
 class ndJointBilateralConstraint;
 
-#define ND_MESH_COLLIDING_PAIRS		"__collidingPairs__"
-#define ND_MESH_CONSTRAINT_LOOPS	"__constraintLoops__"
-
 class ndMeshCustomProperty : public ndClassAlloc
 {
 	public:
@@ -104,7 +101,8 @@ class ndMeshCustomPropertyNode : public ndMeshCustomProperty
 class ndMeshCollisionShape : public ndClassAlloc
 {
 	public:
-	D_COLLISION_API ndMeshCollisionShape(const char* const constructor);
+	D_BASE_CLASS_REFLECTION(ndMeshCollisionShape)
+	D_COLLISION_API ndMeshCollisionShape();
 	D_COLLISION_API ndMeshCollisionShape(const ndMeshCollisionShape& other);
 
 	D_COLLISION_API virtual ndMeshCollisionShape* Duplicate() const;
@@ -115,13 +113,12 @@ class ndMeshCollisionShape : public ndClassAlloc
 	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) = 0;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
-
-	ndString m_constructor;
 };
 
 class ndMeshCollisionShapeNull : public ndMeshCollisionShape
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshCollisionShapeNull, ndMeshCollisionShape)
 	D_COLLISION_API ndMeshCollisionShapeNull();
 
 	D_COLLISION_API ndMeshCollisionShapeNull(const ndMeshCollisionShapeNull& other);
@@ -137,6 +134,7 @@ class ndMeshCollisionShapeNull : public ndMeshCollisionShape
 class ndMeshCollisionShapeSphere : public ndMeshCollisionShape
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshCollisionShapeSphere, ndMeshCollisionShape)
 	D_COLLISION_API ndMeshCollisionShapeSphere();
 
 	D_COLLISION_API ndMeshCollisionShapeSphere(const ndMeshCollisionShapeSphere& other);
@@ -154,6 +152,7 @@ class ndMeshCollisionShapeSphere : public ndMeshCollisionShape
 class ndMeshCollisionShapeBox : public ndMeshCollisionShape
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshCollisionShapeBox, ndMeshCollisionShape)
 	D_COLLISION_API ndMeshCollisionShapeBox();
 
 	D_COLLISION_API ndMeshCollisionShapeBox(const ndMeshCollisionShapeBox& other);
@@ -173,6 +172,7 @@ class ndMeshCollisionShapeBox : public ndMeshCollisionShape
 class ndMeshCollisionShapeCapsule : public ndMeshCollisionShape
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshCollisionShapeCapsule, ndMeshCollisionShape)
 	D_COLLISION_API ndMeshCollisionShapeCapsule();
 
 	D_COLLISION_API ndMeshCollisionShapeCapsule(const ndMeshCollisionShapeCapsule& other);
@@ -192,6 +192,7 @@ class ndMeshCollisionShapeCapsule : public ndMeshCollisionShape
 class ndMeshCollisionShapeCylinder : public ndMeshCollisionShape
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshCollisionShapeCylinder, ndMeshCollisionShape)
 	D_COLLISION_API ndMeshCollisionShapeCylinder();
 
 	D_COLLISION_API ndMeshCollisionShapeCylinder(const ndMeshCollisionShapeCylinder& other);
@@ -211,6 +212,8 @@ class ndMeshCollisionShapeCylinder : public ndMeshCollisionShape
 class ndMeshCollisionShapeChamferCylinder : public ndMeshCollisionShape
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshCollisionShapeChamferCylinder, ndMeshCollisionShape)
+
 	D_COLLISION_API ndMeshCollisionShapeChamferCylinder();
 
 	D_COLLISION_API ndMeshCollisionShapeChamferCylinder(const ndMeshCollisionShapeChamferCylinder& other);
@@ -229,8 +232,9 @@ class ndMeshCollisionShapeChamferCylinder : public ndMeshCollisionShape
 class ndMeshCollisionShapeWheel : public ndMeshCollisionShape
 {
 	public:
-	D_COLLISION_API ndMeshCollisionShapeWheel();
+	D_CLASS_REFLECTION(ndMeshCollisionShapeWheel, ndMeshCollisionShape)
 
+	D_COLLISION_API ndMeshCollisionShapeWheel();
 	D_COLLISION_API ndMeshCollisionShapeWheel(const ndMeshCollisionShapeWheel& other);
 	D_COLLISION_API virtual ndMeshCollisionShape* Duplicate() const override;
 	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const override;
@@ -244,8 +248,9 @@ class ndMeshCollisionShapeWheel : public ndMeshCollisionShape
 class ndMeshCollisionShapeConvexHull : public ndMeshCollisionShape
 {
 	public:
-	D_COLLISION_API ndMeshCollisionShapeConvexHull();
+	D_CLASS_REFLECTION(ndMeshCollisionShapeConvexHull, ndMeshCollisionShape)
 
+	D_COLLISION_API ndMeshCollisionShapeConvexHull();
 	D_COLLISION_API ndMeshCollisionShapeConvexHull(const ndMeshCollisionShapeConvexHull& other);
 	D_COLLISION_API virtual ndMeshCollisionShape* Duplicate() const override;
 	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const override;
@@ -263,8 +268,9 @@ class ndMeshCollisionShapeConvexHull : public ndMeshCollisionShape
 class ndMeshCollisionShapeCompound : public ndMeshCollisionShape
 {
 	public:
-	D_COLLISION_API ndMeshCollisionShapeCompound();
+	D_CLASS_REFLECTION(ndMeshCollisionShapeCompound, ndMeshCollisionShape)
 
+	D_COLLISION_API ndMeshCollisionShapeCompound();
 	D_COLLISION_API ndMeshCollisionShapeCompound(const ndMeshCollisionShapeCompound& other);
 	D_COLLISION_API virtual ndMeshCollisionShape* Duplicate() const override;
 	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const override;
@@ -280,8 +286,9 @@ class ndMeshCollisionShapeCompound : public ndMeshCollisionShape
 class ndMeshCollisionShapeTree : public ndMeshCollisionShape
 {
 	public:
-	D_COLLISION_API ndMeshCollisionShapeTree();
+	D_CLASS_REFLECTION(ndMeshCollisionShapeTree, ndMeshCollisionShape)
 
+	D_COLLISION_API ndMeshCollisionShapeTree();
 	D_COLLISION_API ndMeshCollisionShapeTree(const ndMeshCollisionShapeTree& other);
 	D_COLLISION_API virtual ndMeshCollisionShape* Duplicate() const override;
 	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const override;
@@ -299,8 +306,10 @@ class ndMeshCollisionShapeTree : public ndMeshCollisionShape
 class ndMeshShapeInstance : public ndClassAlloc
 {
 	public:
+	D_BASE_CLASS_REFLECTION(ndMeshShapeInstance)
 	D_COLLISION_API ndMeshShapeInstance();
 	D_COLLISION_API ndMeshShapeInstance(const ndShapeInstance& instance);
+	D_COLLISION_API virtual ~ndMeshShapeInstance();
 
 	D_COLLISION_API ndMeshShapeInstance(const ndMeshShapeInstance& other);
 
@@ -322,6 +331,8 @@ class ndMeshShapeInstance : public ndClassAlloc
 class ndMeshBody : public ndClassAlloc
 {
 	public:
+	D_BASE_CLASS_REFLECTION(ndMeshBody)
+
 	D_COLLISION_API ndMeshBody(const ndMesh* const owner);
 	D_COLLISION_API ndMeshBody(const ndMeshBody& other);
 	D_COLLISION_API virtual ~ndMeshBody();
@@ -335,13 +346,14 @@ class ndMeshBody : public ndClassAlloc
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
 	ndVector m_localCentreOfMass;
-	ndString m_classConstructor;
 	ndWeakPtr<const ndMesh> m_owner;
 };
 
 class ndMeshBodyKinematic : public ndMeshBody
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshBodyKinematic, ndMeshBody)
+
 	D_COLLISION_API ndMeshBodyKinematic(const ndMesh* const owner);
 	D_COLLISION_API ndMeshBodyKinematic(const ndMeshBodyKinematic& other);
 
@@ -363,6 +375,8 @@ class ndMeshBodyKinematic : public ndMeshBody
 class ndMeshCollidingPair : public ndClassAlloc
 {
 	public:
+	D_BASE_CLASS_REFLECTION(ndMeshCollidingPair)
+
 	D_COLLISION_API ndMeshCollidingPair();
 	D_COLLISION_API ndMeshCollidingPair(const ndMesh* const node0, const ndMesh* const node1);
 	D_COLLISION_API virtual ~ndMeshCollidingPair();
@@ -409,6 +423,7 @@ class ndMeshJoint : public ndClassAlloc
 		bool m_limitState;
 	};
 
+	D_BASE_CLASS_REFLECTION(ndMeshJoint)
 	D_COLLISION_API ndMeshJoint(const ndMeshJoint& other);
 	D_COLLISION_API ndMeshJoint(const ndMesh* const owner);
 	D_COLLISION_API ndMeshJoint(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
@@ -416,9 +431,6 @@ class ndMeshJoint : public ndClassAlloc
 
 	D_COLLISION_API virtual ndMeshJoint* Duplicate() const;
 	D_COLLISION_API virtual void DuplicateFixDependencies(const ndMesh* const otherRoot);
-
-	//D_COLLISION_API const ndMesh* GetSurrogateParent() const;
-	//D_COLLISION_API void SetSurrogateParent(const ndMesh* const surrodateParent);
 
 	D_COLLISION_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
@@ -430,14 +442,14 @@ class ndMeshJoint : public ndClassAlloc
 
 	ndMatrix m_localFrame0;
 	ndMatrix m_localFrame1;
-	ndString m_constructor;
 	ndWeakPtr<const ndMesh> m_owner;
-	//ndWeakPtr<const ndMesh> m_surrogateParent;
 };
 
 class ndMeshTransformModifier : public ndClassAlloc
 {
 	public:
+	D_BASE_CLASS_REFLECTION(ndMeshTransformModifier)
+
 	D_COLLISION_API ndMeshTransformModifier(const ndMesh* const owner, const ndMesh* const target);
 	D_COLLISION_API ndMeshTransformModifier(const ndMeshTransformModifier& other);
 	D_COLLISION_API virtual ~ndMeshTransformModifier();
@@ -453,24 +465,24 @@ class ndMeshTransformModifier : public ndClassAlloc
 
 	ndWeakPtr<const ndMesh> m_owner;
 	ndWeakPtr<const ndMesh> m_target;
-
-	D_BASE_CLASS_REFLECTION(ndMeshTransformModifier)
 };
 
 class ndMeshTransformModifierLookAt : public ndMeshTransformModifier
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshTransformModifierLookAt, ndMeshTransformModifier)
+
 	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMesh* const owner, const ndMesh* const target);
 	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMeshTransformModifierLookAt& other);
 	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const override;
 	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const override;
-
-	D_CLASS_REFLECTION(ndMeshTransformModifierLookAt, ndMeshTransformModifier)
 };
 
 class ndMeshTransformModifierTwoLinksIK : public ndMeshTransformModifier
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshTransformModifierTwoLinksIK, ndMeshTransformModifier)
+
 	D_COLLISION_API ndMeshTransformModifierTwoLinksIK(const ndMesh* const owner, const ndMesh* const target);
 	D_COLLISION_API ndMeshTransformModifierTwoLinksIK(const ndMeshTransformModifierTwoLinksIK& other);
 	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const override;
@@ -482,8 +494,6 @@ class ndMeshTransformModifierTwoLinksIK : public ndMeshTransformModifier
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
-	D_CLASS_REFLECTION(ndMeshTransformModifierTwoLinksIK, ndMeshTransformModifier)
-
 	ndWeakPtr<const ndMesh> m_childLink;
 	ndFloat32 m_solutionSign;
 };
@@ -491,6 +501,8 @@ class ndMeshTransformModifierTwoLinksIK : public ndMeshTransformModifier
 class ndMeshTransformModifierUserDefined : public ndMeshTransformModifier
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshTransformModifierUserDefined, ndMeshTransformModifier)
+
 	D_COLLISION_API ndMeshTransformModifierUserDefined(const ndMesh* const owner);
 	D_COLLISION_API ndMeshTransformModifierUserDefined(const ndMeshTransformModifierUserDefined& other);
 	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const override;
@@ -498,8 +510,6 @@ class ndMeshTransformModifierUserDefined : public ndMeshTransformModifier
 	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
-
-	D_CLASS_REFLECTION(ndMeshTransformModifierUserDefined, ndMeshTransformModifier)
 
 	ndString m_userConstructor;
 };

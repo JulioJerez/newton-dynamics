@@ -100,12 +100,23 @@ class ndForceImpactPair
 	}
 
 	void Clear();
-	void Push(ndFloat32 val);
 	ndFloat32 GetInitialGuess() const;
+
+	inline void Push(ndFloat32 val)
+	{
+		//for (ndInt32 i = 1; i < ndInt32(sizeof(m_initialGuess) / sizeof(m_initialGuess[0])); ++i)
+		//{
+		//	m_initialGuess[i - 1] = m_initialGuess[i];
+		//}
+		//m_initialGuess[sizeof(m_initialGuess) / sizeof(m_initialGuess[0]) - 1] = val;
+		m_initialGuess[m_initialGuessIndex] = val;
+		m_initialGuessIndex = (m_initialGuessIndex  + 1) % ndInt32 (sizeof(m_initialGuess) / sizeof(m_initialGuess[0]));
+	}
 
 	ndFloat32 m_force;
 	ndFloat32 m_impact;
 	ndFloat32 m_initialGuess[8];
+	ndInt32 m_initialGuessIndex;
 };
 
 class ndJointAccelerationDecriptor

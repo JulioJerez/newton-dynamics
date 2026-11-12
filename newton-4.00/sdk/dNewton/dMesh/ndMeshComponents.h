@@ -37,6 +37,7 @@ class ndJointBilateralConstraint;
 class ndMeshBodyDynamic : public ndMeshBodyKinematic
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshBodyDynamic, ndMeshBodyKinematic)
 	D_NEWTON_API ndMeshBodyDynamic(const ndMesh* const owner);
 	D_NEWTON_API ndMeshBodyDynamic(const ndMeshBodyDynamic& other);
 
@@ -53,6 +54,7 @@ class ndMeshBodyDynamic : public ndMeshBodyKinematic
 class ndMeshLoopJoint : public ndClassAlloc
 {
 	public:
+	D_BASE_CLASS_REFLECTION(ndMeshLoopJoint)
 	D_NEWTON_API ndMeshLoopJoint(const ndMeshLoopJoint& other);
 	D_NEWTON_API ndMeshLoopJoint(const ndCloseLoopConstraints* const owner);
 	D_NEWTON_API ndMeshLoopJoint(const ndCloseLoopConstraints* const owner, const ndSharedPtr<ndMeshJoint>& joint, ndMesh* const childReference, ndMesh* const parentReference);
@@ -75,6 +77,7 @@ class ndMeshLoopJoint : public ndClassAlloc
 class ndMeshJointFix6dof : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointFix6dof, ndMeshJoint)
 	D_NEWTON_API ndMeshJointFix6dof(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointFix6dof(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -94,6 +97,7 @@ class ndMeshJointFix6dof : public ndMeshJoint
 class ndMeshJointDoubleHinge : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointDoubleHinge, ndMeshJoint)
 	D_NEWTON_API ndMeshJointDoubleHinge(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointDoubleHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -112,6 +116,7 @@ class ndMeshJointDoubleHinge : public ndMeshJoint
 class ndMeshJointRoller : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointRoller, ndMeshJoint)
 	D_NEWTON_API ndMeshJointRoller(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointRoller(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -130,6 +135,7 @@ class ndMeshJointRoller : public ndMeshJoint
 class ndMeshJointCylinder : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointCylinder, ndMeshJoint)
 	D_NEWTON_API ndMeshJointCylinder(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointCylinder(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -148,6 +154,7 @@ class ndMeshJointCylinder : public ndMeshJoint
 class ndMeshJointPlane : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointPlane, ndMeshJoint)
 	D_NEWTON_API ndMeshJointPlane(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointPlane(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -165,6 +172,7 @@ class ndMeshJointPlane : public ndMeshJoint
 class ndMeshJointIkSwivelPositionEffector : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointIkSwivelPositionEffector, ndMeshJoint)
 	D_NEWTON_API ndMeshJointIkSwivelPositionEffector(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointIkSwivelPositionEffector(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -196,6 +204,7 @@ class ndMeshJointIkSwivelPositionEffector : public ndMeshJoint
 class ndMeshJointGear : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointGear, ndMeshJoint)
 	D_NEWTON_API ndMeshJointGear(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointGear(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -213,6 +222,7 @@ class ndMeshJointGear : public ndMeshJoint
 class ndMeshJointHinge : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointHinge, ndMeshJoint)
 	D_NEWTON_API ndMeshJointHinge(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -230,6 +240,7 @@ class ndMeshJointHinge : public ndMeshJoint
 class ndMeshJointSlider : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointSlider, ndMeshJoint)
 	D_NEWTON_API ndMeshJointSlider(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointSlider(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -247,6 +258,7 @@ class ndMeshJointSlider : public ndMeshJoint
 class ndMeshJointWheel : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointWheel, ndMeshJoint)
 	D_NEWTON_API ndMeshJointWheel(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointWheel(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -264,6 +276,7 @@ class ndMeshJointWheel : public ndMeshJoint
 class ndMeshJointSpherical : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointSpherical, ndMeshJoint)
 	D_NEWTON_API ndMeshJointSpherical(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointSpherical(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -283,6 +296,7 @@ class ndMeshJointSpherical : public ndMeshJoint
 class ndMeshJointVehicleDifferential : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointVehicleDifferential, ndMeshJoint)
 	D_NEWTON_API ndMeshJointVehicleDifferential(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointVehicleDifferential(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 	D_NEWTON_API ndMeshJointVehicleDifferential(const ndMeshJointVehicleDifferential& other);
@@ -300,6 +314,7 @@ class ndMeshJointVehicleDifferential : public ndMeshJoint
 class ndMeshJointVehicleDifferentialAxle : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointVehicleDifferentialAxle, ndMeshJoint)
 	D_NEWTON_API ndMeshJointVehicleDifferentialAxle(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointVehicleDifferentialAxle(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -317,6 +332,7 @@ class ndMeshJointVehicleDifferentialAxle : public ndMeshJoint
 class ndMeshJointVehicleTorsionBar : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointVehicleTorsionBar, ndMeshJoint)
 	D_NEWTON_API ndMeshJointVehicleTorsionBar(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointVehicleTorsionBar(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
@@ -344,6 +360,7 @@ class ndMeshJointVehicleTireJoint : public ndMeshJointWheel
 		m_coulombCicleOfFriction,
 	};
 
+	D_CLASS_REFLECTION(ndMeshJointVehicleTireJoint, ndMeshJointWheel)
 	D_NEWTON_API ndMeshJointVehicleTireJoint(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointVehicleTireJoint(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 	D_NEWTON_API ndMeshJointVehicleTireJoint(const ndMeshJointVehicleTireJoint& other);
@@ -356,14 +373,13 @@ class ndMeshJointVehicleTireJoint : public ndMeshJointWheel
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 	ndFrictionModel m_frictionModel;
-	ndReal m_lateralStiffness;
-	ndReal m_longitudinalStiffness;
 	ndReal m_maxSideSlipAngle;
 };
 
 class ndMeshJointVehicleMotor : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointVehicleMotor, ndMeshJoint)
 	D_NEWTON_API ndMeshJointVehicleMotor(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointVehicleMotor(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 	D_NEWTON_API ndMeshJointVehicleMotor(const ndMeshJointVehicleMotor& other);
@@ -382,6 +398,7 @@ class ndMeshJointVehicleMotor : public ndMeshJoint
 class ndMeshJointVehicleGearBox : public ndMeshJoint
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshJointVehicleGearBox, ndMeshJoint)
 	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMeshJointVehicleGearBox& other);

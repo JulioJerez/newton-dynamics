@@ -83,6 +83,8 @@ class ndMesh : public ndClassAlloc
 		ndReal m_lenght;
 	};
 
+	D_BASE_CLASS_REFLECTION(ndMesh)
+
 	D_NEWTON_API ndMesh();
 	D_NEWTON_API ndMesh(const ndMesh& src);
 	D_NEWTON_API ndMesh(const ndShapeInstance& src, ndUvMapingMode mapping = m_box);
@@ -255,6 +257,7 @@ void ndMesh::NodeIterator(Function func)
 class ndCloseLoopConstraints: public ndMesh
 {
 	public:
+	D_CLASS_REFLECTION(ndCloseLoopConstraints, ndMesh)
 	D_NEWTON_API ndCloseLoopConstraints();
 	D_NEWTON_API ndCloseLoopConstraints(const ndCloseLoopConstraints& src);
 
@@ -276,6 +279,7 @@ class ndCloseLoopConstraints: public ndMesh
 class ndCollidingPairs : public ndMesh
 {
 	public:
+	D_CLASS_REFLECTION(ndCollidingPairs, ndMesh)
 	D_NEWTON_API ndCollidingPairs();
 	D_NEWTON_API ndCollidingPairs(const ndCollidingPairs& src);
 
