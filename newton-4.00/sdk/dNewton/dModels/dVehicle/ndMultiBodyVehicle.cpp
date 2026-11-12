@@ -40,6 +40,8 @@
 #define D_MAX_STEERING_RATE				ndFloat32(0.03f)
 #define D_MAX_SIZE_SLIP_RATE			ndFloat32(2.0f)
 
+//#define D_TIRE_CONTACT_EXPERIMENTAL		
+
 ndMultiBodyVehicle::ndDownForce::ndDownForce()
 	:m_suspensionStiffnessModifier(ndFloat32(1.0f))
 {
@@ -903,7 +905,6 @@ void ndMultiBodyVehicle::CalculateRestSprungWeight()
 	tireArray.SetCount(count);
 
 	const ndFloat32 downGravity = ndAbs(m_gravityMagnitud);
-	//const ndFloat32 downGravity = ndAbs (m_gravityMagnitud * (ndFloat32 (1.0f) + m_downForce.GetMaxDownforceFactor()));
 	const ndVector upDir(m_localFrame.m_up.Scale(ndFloat32(1.0f)));
 	for (ndInt32 i = 0; i < tireArray.GetCount(); ++i)
 	{
@@ -1261,8 +1262,8 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	// we now carculate the projected longidudinal and lateral force, 
 	// first we need the sprung normal force
 	const ndFloat32 sprungWeight = tire->m_frictionModel.m_sprungWeight;
-	const ndFloat32 isotropicMaterialFriction = contactPoint.m_material.m_staticFriction0;
-	const ndFloat32 pacejkaAmplitud = sprungWeight * isotropicMaterialFriction;
+	//const ndFloat32 isotropicMaterialFriction = contactPoint.m_material.m_staticFriction0;
+	//const ndFloat32 pacejkaAmplitud = sprungWeight * isotropicMaterialFriction;
 
 	//I am now using the direct coeficients B, C, E, D as explained in 
 	//The multibody system approach to vehicle dynamics page 300 to 306
@@ -1280,15 +1281,22 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 
 	// whe can now get the actual tire forces.
 	const ndTireFrictionModel& frictionModel = tire->m_frictionModel;
-	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, pacejkaAmplitud);
-	const ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, pacejkaAmplitud);
+	const ndFloat32 lateralStiffness = sprungWeight * contactPoint.m_material.m_staticFriction1;
+	const ndFloat32 longitudinalStiffness = sprungWeight * contactPoint.m_material.m_staticFriction0;
+	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, lateralStiffness);
+	const ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, longitudinalStiffness);
 
+	const ndFloat32 absFz = ndAbs(pure_fz * phi_z);
+	const ndFloat32 absFx = ndAbs(pure_fx * phi_x);
+
+#if defined (D_TIRE_CONTACT_EXPERIMENTAL) 
+	// experimental:
+	// apply the paceska forces to the tire and body,  
+	// and nullify the constration accelration if the veleoity is lower than the slip
 	ndJacobianPair lateralJacobian;
 	ndJacobianPair longitudicalJacobian;
 	tire->GetJacobian(lateralJacobian, longitudicalJacobian);
 
-	const ndFloat32 absFz = ndAbs(pure_fz * phi_z);
-	const ndFloat32 absFx = ndAbs(pure_fx * phi_x);
 	const ndFloat32 fz = ndSign(speed_z) * ((lateralDir.DotProduct(lateralJacobian.m_jacobianM0.m_linear).GetScalar() > ndFloat32 (0.0)) ? absFz : -absFz);
 	//const ndFloat32 fx = ndSign(vr_x) * ((longitudinalDir.DotProduct(longitudicalJacobian.m_jacobianM0.m_linear).GetScalar() > ndFloat32(0.0)) ? absFx : -absFx);
 	const ndFloat32 fx = 0.0f;
@@ -1320,10 +1328,16 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	const ndFloat32 sideSlipSpeed = sideSlipAngle * ndAbs(wheelComSpeed_x);
 	contactPoint.m_material.m_targetSlidingFriction1 = sideSlipSpeed;
 
-//if (tire->m_localMatrix1.m_posit.m_x > 0 && tire->m_localMatrix1.m_posit.m_z > 0)
-//{
-//	ndTrace(("f=%f a=%f a1=%f s=%f\n", fz, sideSlipAngle * ndRadToDegree, sideSlipAngleInRadians * ndRadToDegree, sideSlipSpeed));
-//}
+#else
+
+	// apply the pacejka combined force directly to the constraing forces.
+	contactPoint.m_material.m_staticFriction0 = absFx;
+	contactPoint.m_material.m_kineticFriction0 = absFx;
+	contactPoint.m_material.m_staticFriction1 = absFz;
+	contactPoint.m_material.m_kineticFriction1 = absFz;
+	ndUnsigned32 newFlags = contactPoint.m_material.m_flags | m_override0Friction | m_override1Friction;
+	contactPoint.m_material.m_flags = newFlags;
+#endif
 	return true;
 }
 
