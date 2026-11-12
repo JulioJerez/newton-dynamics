@@ -44,18 +44,17 @@ ndMultiBodyVehicle::ndDownForce::ndDownForce()
 	:m_suspensionStiffnessModifier(ndFloat32(1.0f))
 {
 	m_downForceTable.PushBack(ndSpeedForcePair(ndFloat32(0.0f) * ndFloat32(0.27f), ndFloat32(0.0f), ndFloat32(0.0f)));
-	m_downForceTable.PushBack(ndSpeedForcePair(ndFloat32(30.0f) * ndFloat32(0.27f), ndFloat32(0.5f), CalculateFactor(&m_downForceTable[0])));
-	m_downForceTable.PushBack(ndSpeedForcePair(ndFloat32(60.0f) * ndFloat32(0.27f), ndFloat32(1.0f), CalculateFactor(&m_downForceTable[1])));
-	m_downForceTable.PushBack(ndSpeedForcePair(ndFloat32(140.0f) * ndFloat32(0.27f), ndFloat32(2.0f), CalculateFactor(&m_downForceTable[2])));
-	m_downForceTable.PushBack(ndSpeedForcePair(ndFloat32(1000.0f) * ndFloat32(0.27f), ndFloat32(2.0f), CalculateFactor(&m_downForceTable[3])));
-}
+	m_downForceTable.PushBack(ndSpeedForcePair(ndFloat32(30.0f) * ndFloat32(0.27f), ndFloat32(0.5f), ndFloat32(0.0f)));
+	m_downForceTable.PushBack(ndSpeedForcePair(ndFloat32(60.0f) * ndFloat32(0.27f), ndFloat32(1.0f), ndFloat32(0.0f)));
+	m_downForceTable.PushBack(ndSpeedForcePair(ndFloat32(140.0f) * ndFloat32(0.27f), ndFloat32(2.0f), ndFloat32(0.0f)));
+	m_downForceTable.PushBack(ndSpeedForcePair(ndFloat32(1000.0f) * ndFloat32(0.27f), ndFloat32(2.0f), ndFloat32(0.0f)));
 
-ndFloat32 ndMultiBodyVehicle::ndDownForce::CalculateFactor(const ndSpeedForcePair* const entry0) const
-{
-	const ndSpeedForcePair* const entry1 = entry0 + 1;
-	ndFloat32 num = ndMax(entry1->m_gravityFactor - entry0->m_gravityFactor, ndFloat32(0.0f));
-	ndFloat32 den = ndMax(ndAbs(entry1->m_speed - entry0->m_speed), ndFloat32(1.0f));
-	return num / (den * den);
+	for (ndInt32 i = 1; i < m_downForceTable.GetCount(); ++i)
+	{
+		ndFloat32 num = ndMax(m_downForceTable[i].m_gravityFactor - m_downForceTable[i-1].m_gravityFactor, ndFloat32(0.0f));
+		ndFloat32 den = ndMax(ndAbs(m_downForceTable[i].m_speed - m_downForceTable[i-1].m_speed), ndFloat32(1.0f));
+		m_downForceTable[i].m_aerodynamicDownforceConstant = num / (den * den);
+	}
 }
 
 ndFloat32 ndMultiBodyVehicle::ndDownForce::GetMaxDownforceFactor() const
@@ -1020,6 +1019,62 @@ void ndMultiBodyVehicle::CalculateRestSprungWeight()
 	SetTransform(savedMatrix);
 }
 
+ndFloat32 ndMultiBodyVehicle::CalculateUndersteerGradient()
+{
+	const ndMatrix savedMatrix(GetRoot()->m_body->GetMatrix());
+	SetTransform(ndGetIdentityMatrix());
+
+	ndCenterOfMassDynamics kinematics (CalculateCentreOfMassKinematics());
+	const ndVector dir(m_chassis->GetMatrix().RotateVector(m_localFrame.m_front));
+
+	const ndVector com(kinematics.m_com);
+	ndFloat32 frontDist = ndFloat32(0.0f);
+	ndFloat32 rearDist = ndFloat32(0.0f);
+	ndWeakPtr<ndMultiBodyVehicleTireJoint> rearTire(nullptr);
+	ndWeakPtr<ndMultiBodyVehicleTireJoint> frontTire(nullptr);
+
+	ndFloat32 rearStiffness = ndFloat32(0.0f);
+	ndFloat32 frontStiffness = ndFloat32(0.0f);
+	auto FindAxels = [&](ndNode* const node)
+	{
+		if (node->m_joint && node->m_joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
+		{
+			ndMatrix matrix(node->m_body->GetMatrix());
+			ndFloat32 dist = dir.DotProduct(matrix.m_posit - com).GetScalar();
+
+			ndMultiBodyVehicleTireJoint* const tire = static_cast<ndMultiBodyVehicleTireJoint*>(*node->m_joint);
+			if (dist > ndFloat32(0.0f))
+			{
+				frontStiffness += tire->m_frictionModel.m_lateralPacejka.m_d * tire->m_frictionModel.m_sprungWeight;
+				if (dist > frontDist)
+				{
+					frontDist = dist;
+					frontTire = tire;
+				}
+			}
+
+			if (dist < ndFloat32(0.0f))
+			{
+				rearStiffness += tire->m_frictionModel.m_lateralPacejka.m_d * tire->m_frictionModel.m_sprungWeight;
+				if (dist < rearDist)
+				{
+					rearDist = dist;
+					rearTire = tire;
+				}
+			}
+		}
+	};
+	NodeIterator(FindAxels);
+	
+	rearDist = ndAbs(rearDist);
+	frontDist = ndAbs(frontDist);
+	ndFloat32 l = frontDist + rearDist;
+	ndFloat32 k = kinematics.m_mass / (l * l) * (rearDist / frontStiffness - frontDist / rearStiffness);
+
+	SetTransform(savedMatrix);
+	return k;
+}
+
 void ndMultiBodyVehicle::ConvertToMotorVehicle()
 {
 	auto SetChassisAndMotor = [this](ndNode* const node)
@@ -1186,7 +1241,7 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	// option I’ve found stable in practice, if not theoretically satisfying, therefore I am going with that. 
 	// I still find the lateral force some what too strong.
 
-	//I am assuming sv and sv to be zero, threfore deal;t alpha and delta phi are both zero.
+	//I am assuming sv and sv to be zero, threfore dealt alpha and delta phi are both zero.
 	//under these conditions u and v become
 	ndFloat32 den = ndFloat32(1.0f) + ndAbs(longitudialSlip);
 	ndFloat32 phi_x = -longitudialSlip / den;

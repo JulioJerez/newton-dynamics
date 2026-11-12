@@ -135,7 +135,7 @@ bool ndMeshCollisionShapeSphere::operator==(const ndMeshCollisionShape& other) c
 		const ndMeshCollisionShapeSphere* const otherShape = (ndMeshCollisionShapeSphere*)&other;
 		test = test && (m_radius == otherShape->m_radius);
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeSphere::ApplyScale(ndFloat32 scale)
@@ -188,7 +188,7 @@ bool ndMeshCollisionShapeBox::operator==(const ndMeshCollisionShape& other) cons
 		test = test && (m_y == otherShape->m_y);
 		test = test && (m_z == otherShape->m_z);
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeBox::ApplyScale(ndFloat32 scale)
@@ -247,7 +247,7 @@ bool ndMeshCollisionShapeCapsule::operator==(const ndMeshCollisionShape& other) 
 		test = test && (m_radius0 == otherShape->m_radius0);
 		test = test && (m_radius1 == otherShape->m_radius1);
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeCapsule::ApplyScale(ndFloat32 scale)
@@ -306,7 +306,7 @@ bool ndMeshCollisionShapeCylinder::operator==(const ndMeshCollisionShape& other)
 		test = test && (m_radius0 == otherShape->m_radius0);
 		test = test && (m_radius1 == otherShape->m_radius1);
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeCylinder::ApplyScale(ndFloat32 scale)
@@ -363,7 +363,7 @@ bool ndMeshCollisionShapeChamferCylinder::operator==(const ndMeshCollisionShape&
 		test = test && (m_height == otherShape->m_height);
 		test = test && (m_radius == otherShape->m_radius);
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeChamferCylinder::ApplyScale(ndFloat32 scale)
@@ -470,7 +470,7 @@ bool ndMeshCollisionShapeConvexHull::operator==(const ndMeshCollisionShape& othe
 			test = test && (err2 < ndFloat32 (1.0e-6f));
 		}
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeConvexHull::ApplyScale(ndFloat32 scale)
@@ -551,7 +551,7 @@ bool ndMeshCollisionShapeTree::operator==(const ndMeshCollisionShape& other) con
 		//	test = test && (err2 < ndFloat32(1.0e-6f));
 		//}
 	}
-	return false;
+	return test;
 }
 
 //void ndMeshCollisionShapeTree::ApplyScale(ndFloat32 scale)
@@ -657,7 +657,7 @@ bool ndMeshCollisionShapeCompound::operator==(const ndMeshCollisionShape& other)
 			selftNode = selftNode->GetNext();
 		}
 	}
-	return false;
+	return test;
 }
 
 void ndMeshCollisionShapeCompound::ApplyScale(ndFloat32 scale)
