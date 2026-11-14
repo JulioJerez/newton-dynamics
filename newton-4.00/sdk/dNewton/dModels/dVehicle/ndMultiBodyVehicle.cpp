@@ -1219,8 +1219,7 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	const ndVector lateralDir(contactPoint.m_dir1);
 	const ndFloat32 speed_z = tireComVeloc.DotProduct(lateralDir).GetScalar();
 	const ndFloat32 wheelComSpeed_z = (speed_z > ndFloat32(1.0e-3f) || (speed_z < ndFloat32(-1.0e-3f))) ? speed_z : ndFloat32(0.0f);
-	const ndFloat32 sideSlipAngleInRadians = ndAtan2(wheelComSpeed_z, wheelComAbsSpeed_x);
-	tire->m_lateralSlip = ndMax(tire->m_lateralSlip, ndAbs(sideSlipAngleInRadians));
+	tire->m_lateralSlip = ndMax(tire->m_lateralSlip, ndAbs(ndAtan2(wheelComSpeed_z, wheelComAbsSpeed_x)));
 
 	//now apply the combine effect, according to Genta book page 76
 	// ----- Combined‑force calculation notes -----
@@ -1244,9 +1243,10 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 
 	//I am assuming sv and sv to be zero, threfore dealt alpha and delta phi are both zero.
 	//under these conditions u and v become
-	ndFloat32 den = ndFloat32(1.0f) + ndAbs(longitudialSlip);
+	const ndFloat32 sideSlip = wheelComSpeed_z / wheelComAbsSpeed_x;
+	const ndFloat32 den = ndFloat32(1.0f) + ndAbs(longitudialSlip);
 	ndFloat32 phi_x = -longitudialSlip / den;
-	ndFloat32 phi_z = ndTan(sideSlipAngleInRadians) / den;
+	ndFloat32 phi_z = ndTan(sideSlip) / den;
 
 	ndFloat32 phi2 = phi_x * phi_x + phi_z * phi_z;
 	if (phi2 < ndFloat32(1.0e-6f))
@@ -1258,12 +1258,9 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	phi_x *= invPhi;
 	phi_z *= invPhi;
 
-
 	// we now carculate the projected longidudinal and lateral force, 
 	// first we need the sprung normal force
 	const ndFloat32 sprungWeight = tire->m_frictionModel.m_sprungWeight;
-	//const ndFloat32 isotropicMaterialFriction = contactPoint.m_material.m_staticFriction0;
-	//const ndFloat32 pacejkaAmplitud = sprungWeight * isotropicMaterialFriction;
 
 	//I am now using the direct coeficients B, C, E, D as explained in 
 	//The multibody system approach to vehicle dynamics page 300 to 306
@@ -1283,7 +1280,7 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	const ndTireFrictionModel& frictionModel = tire->m_frictionModel;
 	const ndFloat32 lateralStiffness = sprungWeight * contactPoint.m_material.m_staticFriction1;
 	const ndFloat32 longitudinalStiffness = sprungWeight * contactPoint.m_material.m_staticFriction0;
-	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, lateralStiffness);
+	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlip, lateralStiffness);
 	const ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, longitudinalStiffness);
 
 	const ndFloat32 absFz = ndAbs(pure_fz * phi_z);
@@ -1324,7 +1321,7 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	contactPoint.m_material.m_staticFriction1 = ndFloat32(1.0f);
 
 	const ndFloat32 maxSideAngle = ndMax(tire->m_maxSideAngle, ND_TIRE_MIN_STATIC_SLIP_ANGLE);
-	const ndFloat32 sideSlipAngle = ndMin(ndAbs(sideSlipAngleInRadians), maxSideAngle);
+	const ndFloat32 sideSlipAngle = ndMin(ndAbs(ndAtan2(wheelComSpeed_z, wheelComAbsSpeed_x)), maxSideAngle);
 	const ndFloat32 sideSlipSpeed = sideSlipAngle * ndAbs(wheelComSpeed_x);
 	contactPoint.m_material.m_targetSlidingFriction1 = sideSlipSpeed;
 
