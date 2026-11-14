@@ -195,13 +195,19 @@ void ndTireFrictionModel::ndPacejkaTireModel::CalculateMaxPhi()
 	m_normalizingPhi = maxPhi;
 }
 
+// phi = phi + Sh;
+// F = D * sin(C * atan(B * (1 - E) * phi) + E * atan(B * phi))) + Sv
+// X = B * (1.0 - E) * phi
+// Y = E * atan(B * phi)
+// Z = C * atan (X + Y) 
+// F = D * sin(Z) + Sv
 ndFloat32 ndTireFrictionModel::ndPacejkaTireModel::Evaluate(ndFloat32 phi, ndFloat32 sprungWeight) const
 {
 	ndFloat32 displacedPhi = phi + m_sh;
-	ndFloat32 EaTang = m_e * ndAtan(m_b * displacedPhi);
-	ndFloat32 BEarg = m_b * (ndFloat32(1.0f) - m_e) * displacedPhi;
-	ndFloat32 Carg = m_c * ndAtan(BEarg + EaTang);
-	ndFloat32 unitForce = m_d * ndSin(Carg) + m_sv;
+	ndFloat32 Y = m_e * ndAtan(m_b * displacedPhi);
+	ndFloat32 X = m_b * (ndFloat32(1.0f) - m_e) * displacedPhi;
+	ndFloat32 Z = m_c * ndAtan(X + Y);
+	ndFloat32 unitForce = m_d * ndSin(Z) + m_sv;
 	return sprungWeight * unitForce;
 }
 
