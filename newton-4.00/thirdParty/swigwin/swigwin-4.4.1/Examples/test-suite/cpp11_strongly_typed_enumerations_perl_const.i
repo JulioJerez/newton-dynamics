@@ -1,3 +1,0 @@
-%module cpp11_strongly_typed_enumerations_perl_const
-
-%include "cpp11_strongly_typed_enumerations.i"
