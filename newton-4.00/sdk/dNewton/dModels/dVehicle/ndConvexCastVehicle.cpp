@@ -390,9 +390,9 @@ void ndConvexCastVehicle::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 	for (ndInt32 i = 0; i < m_savedBody.GetCount(); ++i)
 	{
 		ndBodyDynamic* const body = m_savedBody[i];
-		const ndJacobian& forceTorque = m_savedForceTorque[i];
-		body->m_savedExternalForce = forceTorque.m_linear;
-		body->m_savedExternalTorque = forceTorque.m_angular;
+		const ndVector8& forceTorque = m_savedForceTorque[i];
+		body->m_savedExternalForce = forceTorque.GetLow();
+		body->m_savedExternalTorque = forceTorque.GetHigh();
 	}
 }
 
@@ -487,11 +487,8 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 				const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
 
 				ndUnsigned8 equilibrium = body->m_equilibrium;
-				ndJacobian forceTorque;
-				forceTorque.m_linear = body->m_externalForce;
-				forceTorque.m_angular = body->m_externalTorque;
 				m_savedBody.PushBack(body);
-				m_savedForceTorque.PushBack(forceTorque);
+				m_savedForceTorque.PushBack(ndVector8(body->GetForce(), body->GetTorque()));
 				body->SetForce(force);
 				body->SetTorque(torque);
 				body->m_equilibrium = equilibrium;

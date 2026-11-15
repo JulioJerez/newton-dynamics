@@ -51,7 +51,7 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 
 	ndIkSolver m_solver;
 	ndFixSizeArray<ndBodyDynamic*, ND_MAX_SKEL_ITEMS> m_savedBody;
-	ndFixSizeArray<ndJacobian, ND_MAX_SKEL_ITEMS> m_savedForceTorque;
+	ndFixSizeArray<ndVector8, ND_MAX_SKEL_ITEMS> m_savedForceTorque;
 	ndSharedPtr<ndSkeletonContainer> m_skeleton;
 	ndWeakPtr<ndSkeletonContainer> m_originaSkeleton;
 	ndSharedPtr<ndJointBilateralConstraint> m_castGearBox;
