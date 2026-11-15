@@ -398,6 +398,9 @@ void ndConvexCastVehicle::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 
 void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 {
+	m_savedBody.SetCount(0);
+	m_savedForceTorque.SetCount(0);
+
 	if (!m_skeleton)
 	{
 		return;
@@ -422,8 +425,6 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 
 	ndAssert(GetWorld());
 	ndWorld* const world = GetWorld();
-	m_savedBody.SetCount(0);
-	m_savedForceTorque.SetCount(0);
 
 	m_skeleton->m_owner = world;
 	CalculateConvexCastTireContacts(threadId);
