@@ -383,89 +383,25 @@ void ndConvexCastVehicle::TransformUpdate(ndFloat32 timestep)
 	NodeIterator(UpdateIntenalTransforms);
 }
 
-void ndConvexCastVehicle::SaveOuterBodiesBodies()
-{
-	//m_savedBody.SetCount(0);
-	//m_savedForceTorque.SetCount(0);
-	//
-	//m_originaSkeleton = GetRoot()->m_body->GetAsBodyKinematic()->GetSkeleton();
-	//auto ApplyExternalForces = [&, timestep, threadId](ndNode* const node)
-	//{
-	//	if (node->m_body)
-	//	{
-	//		ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
-	//		ndAssert(body->GetSkeleton() == *m_originaSkeleton);
-	//		body->SetSkeleton(*m_skeleton);
-	//
-	//		if (node->m_joint)
-	//		{
-	//			ndSharedPtr<ndJointBilateralConstraint> joint(node->m_joint);
-	//			if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
-	//			{
-	//				body->GetNotifyCallback()->OnApplyExternalForce(threadId, timestep);
-	//			}
-	//			else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
-	//			{
-	//				body->GetNotifyCallback()->OnApplyExternalForce(threadId, timestep);
-	//			}
-	//			else if (joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
-	//			{
-	//				body->GetNotifyCallback()->OnApplyExternalForce(threadId, timestep);
-	//			}
-	//			else
-	//			{
-	//				m_body.PushBack(body);
-	//				m_velocity.PushBack(ndVector8(body->GetVelocity(), body->GetOmega()));
-	//			}
-	//		}
-	//		else
-	//		{
-	//			m_body.PushBack(body);
-	//			m_velocity.PushBack(ndVector8(body->GetVelocity(), body->GetOmega()));
-	//		}
-	//	}
-	//};
-	//NodeIterator(ApplyExternalForces);
-
-	m_savedBody.SetCount(0);
-	m_savedForceTorque.SetCount(0);
-	m_originalSkeleton.SetCount(0);
-	auto SaveInfo = [&](ndNode* const node)
-	{
-		if (node->m_body)
-		{
-			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
-			m_savedBody.PushBack(body);
-			m_savedForceTorque.PushBack(ndVector8(body->GetForce(), body->GetTorque()));
-			m_originalSkeleton.PushBack(body->GetSkeleton());
-			body->SetSkeleton(*m_skeleton);
-		}
-	};
-	NodeIterator(SaveInfo);
-}
-
 void ndConvexCastVehicle::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 {
 	ndMultiBodyVehicle::PostUpdate(timestep, threadId);
-	if (m_skeleton)
+
+	for (ndInt32 i = 0; i < m_savedBody.GetCount(); ++i)
 	{
-		for (ndInt32 i = 0; i < m_savedBody.GetCount(); ++i)
-		{
-			ndBodyDynamic* const body = m_savedBody[i];
-			body->SetSkeleton(m_originalSkeleton[i]);
-			const ndVector8& forceTorque = m_savedForceTorque[i];
-			body->m_savedExternalForce = forceTorque.GetLow();
-			body->m_savedExternalTorque = forceTorque.GetHigh();
-		}
+		ndBodyDynamic* const body = m_savedBody[i];
+		const ndJacobian& forceTorque = m_savedForceTorque[i];
+		body->m_savedExternalForce = forceTorque.m_linear;
+		body->m_savedExternalTorque = forceTorque.m_angular;
 	}
 }
+
 void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 {
 	if (!m_skeleton)
 	{
 		return;
 	}
-	SaveOuterBodiesBodies();
 
 	// check for equilibrium state here
 	if (IsSleeping())
@@ -485,17 +421,16 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	ND_PROFILE_ZONE();
 
 	ndAssert(GetWorld());
-
-#if 0
 	ndWorld* const world = GetWorld();
+	m_savedBody.SetCount(0);
+	m_savedForceTorque.SetCount(0);
+
 	m_skeleton->m_owner = world;
 	CalculateConvexCastTireContacts(threadId);
 
-	// apply all external forces to interios bodies
-	// also velocity of the exteriors bodies (chassis or othe attachments)
-	ndFixSizeArray<ndVector8, 32> m_velocity;
-	ndFixSizeArray<ndBodyDynamic*, 32> m_body;
-	auto ApplyExternalForces = [&, timestep, threadId](ndNode* const node)
+	// apply all external forces to internal bodies
+	m_originaSkeleton = GetRoot()->m_body->GetAsBodyKinematic()->GetSkeleton();
+	auto ApplyExternalForces = [this, timestep, threadId](ndNode* const node)
 	{
 		if (node->m_body)
 		{
@@ -518,16 +453,6 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 				{
 					body->GetNotifyCallback()->OnApplyExternalForce(threadId, timestep);
 				}
-				else
-				{
-					m_body.PushBack(body);
-					m_velocity.PushBack(ndVector8(body->GetVelocity(), body->GetOmega()));
-				}
-			}
-			else
-			{
-				m_body.PushBack(body);
-				m_velocity.PushBack(ndVector8(body->GetVelocity(), body->GetOmega()));
 			}
 		}
 	};
@@ -537,193 +462,95 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	ndMultiBodyVehicle::Update(timestep, threadId);
 
 	// solve using immediate solver.
-	const ndFloat32 subtimestep = timestep * ndFloat32(0.25f);
-	m_solver.SolverBegin(*m_skeleton, nullptr, 0, world, subtimestep, threadId);
+	m_solver.SolverBegin(*m_skeleton, nullptr, 0, world, timestep, threadId);
 
-	for (ndInt32 step = 0; step < 4; step++)
+	// calculate forces
+	m_solver.Solve();
+
+	// integrate tires, and internal drive train components
+	// apply reaction impulses to other bodies
+	// apply the impulse to model bodies. 
+	// restore the orginal skeleton
+	auto IntegrateBodyParts = [this, timestep](ndNode* const node)
 	{
-		// calculate forces
-		m_solver.Solve();
-
-		// integrate all body parts
-		auto IntegrateBodyParts = [&](ndNode* const node)
+		if (node->m_body)
 		{
-			//if (node->m_body)
-			//{
-			//	ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
-			//	body->SetSkeleton(*m_originaSkeleton);
-			//
-			//	auto IntegrateStructuralPart = [this, body, timestep]()
-			//	{
-			//		// for model bodies we just set the net force
-			//		const ndMatrix inertia(body->CalculateInertiaMatrix());
-			//		const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
-			//		const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
-			//
-			//		ndUnsigned8 equilibrium = body->m_equilibrium;
-			//		ndJacobian forceTorque;
-			//		forceTorque.m_linear = body->m_externalForce;
-			//		forceTorque.m_angular = body->m_externalTorque;
-			//		m_savedBody.PushBack(body);
-			//		m_savedForceTorque.PushBack(forceTorque);
-			//		body->SetForce(force);
-			//		body->SetTorque(torque);
-			//		body->m_equilibrium = equilibrium;
-			//	};
-			//
-			//	if (node->m_joint)
-			//	{
-			//		auto IntegrateInternalPart = [body, timestep]()
-			//			{
-			//				const ndMatrix inertia(body->CalculateInertiaMatrix());
-			//				const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
-			//				const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
-			//				body->SetForce(force);
-			//				body->SetTorque(torque);
-			//				body->IntegrateExternalForce(timestep);
-			//				body->IntegrateVelocity(timestep);
-			//			};
-			//
-			//		// internal bodies are full integrared
-			//		ndSharedPtr<ndJointBilateralConstraint>& joint(node->m_joint);
-			//		if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
-			//		{
-			//			IntegrateInternalPart();
-			//			// save contact normal force 
-			//			ndBodyKinematic::ndContactMap::Iterator it(node->m_body->GetAsBodyKinematic()->GetContactMap());
-			//			const ndVector normalForce(joint->GetForceBody0());
-			//			for (it.Begin(); it; it++)
-			//			{
-			//				ndContact* const contact = it.GetNode()->GetInfo();
-			//				if (contact->IsActive())
-			//				{
-			//					for (ndContactPointList::ndNode* pointNode = contact->GetContactPoints().GetFirst(); pointNode; pointNode = pointNode->GetNext())
-			//					{
-			//						ndContactMaterial& point = pointNode->GetInfo();
-			//						ndFloat32 forceMag = point.m_normal.DotProduct(normalForce).GetScalar();
-			//						point.m_normal_Force.Push(ndAbs(forceMag));
-			//					}
-			//				}
-			//			}
-			//		}
-			//		else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
-			//		{
-			//			IntegrateInternalPart();
-			//		}
-			//		else if (joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
-			//		{
-			//			IntegrateInternalPart();
-			//		}
-			//		else
-			//		{
-			//			IntegrateStructuralPart();
-			//		}
-			//	}
-			//	else
-			//	{
-			//		IntegrateStructuralPart();
-			//	}
-			//}
+			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+			body->SetSkeleton(*m_originaSkeleton);
 
-			if (node->m_body)
+			auto IntegrateStructuralPart = [this, body, timestep]()
 			{
-				ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+				// for model bodies we just set the net force
 				const ndMatrix inertia(body->CalculateInertiaMatrix());
-				const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
 				const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
+				const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
+
+				ndUnsigned8 equilibrium = body->m_equilibrium;
+				ndJacobian forceTorque;
+				forceTorque.m_linear = body->m_externalForce;
+				forceTorque.m_angular = body->m_externalTorque;
+				m_savedBody.PushBack(body);
+				m_savedForceTorque.PushBack(forceTorque);
 				body->SetForce(force);
 				body->SetTorque(torque);
-				body->IntegrateExternalForce(timestep);
-				body->IntegrateVelocity(timestep);
+				body->m_equilibrium = equilibrium;
+			};
 
+			if (node->m_joint)
+			{
+				auto IntegrateInternalPart = [body, timestep]()
+				{
+					const ndMatrix inertia(body->CalculateInertiaMatrix());
+					const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
+					const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
+					body->SetForce(force);
+					body->SetTorque(torque);
+					body->IntegrateExternalForce(timestep);
+					body->IntegrateVelocity(timestep);
+				};
+
+				// internal bodies are full integrared
+				ndSharedPtr<ndJointBilateralConstraint>& joint(node->m_joint);
+				if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
+				{
+					IntegrateInternalPart();
+					// save contact normal force 
+					ndBodyKinematic::ndContactMap::Iterator it(node->m_body->GetAsBodyKinematic()->GetContactMap());
+					const ndVector normalForce(joint->GetForceBody0());
+					for (it.Begin(); it; it++)
+					{
+						ndContact* const contact = it.GetNode()->GetInfo();
+						if (contact->IsActive())
+						{
+							for (ndContactPointList::ndNode* pointNode = contact->GetContactPoints().GetFirst(); pointNode; pointNode = pointNode->GetNext())
+							{
+								ndContactMaterial& point = pointNode->GetInfo();
+								ndFloat32 forceMag = point.m_normal.DotProduct(normalForce).GetScalar();
+								point.m_normal_Force.Push(ndAbs(forceMag));
+							}
+						}
+					}
+				}
+				else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
+				{
+					IntegrateInternalPart();
+				}
+				else if (joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
+				{
+					IntegrateInternalPart();
+				}
+				else
+				{
+					IntegrateStructuralPart();
+				}
 			}
-		};
-		NodeIterator(IntegrateBodyParts);
-	}
+			else
+			{
+				IntegrateStructuralPart();
+			}
+		}
+	};
+	NodeIterator(IntegrateBodyParts);
 
 	m_solver.SolverEnd();
-
-
-	//auto IntegrateBodyParts = [this, timestep](ndNode* const node)
-	//	{
-	//		if (node->m_body)
-	//		{
-	//			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
-	//			body->SetSkeleton(*m_originaSkeleton);
-	//
-	//			auto IntegrateStructuralPart = [this, body, timestep]()
-	//				{
-	//					// for model bodies we just set the net force
-	//					const ndMatrix inertia(body->CalculateInertiaMatrix());
-	//					const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
-	//					const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
-	//
-	//					ndUnsigned8 equilibrium = body->m_equilibrium;
-	//					ndJacobian forceTorque;
-	//					forceTorque.m_linear = body->m_externalForce;
-	//					forceTorque.m_angular = body->m_externalTorque;
-	//					m_savedBody.PushBack(body);
-	//					m_savedForceTorque.PushBack(forceTorque);
-	//					body->SetForce(force);
-	//					body->SetTorque(torque);
-	//					body->m_equilibrium = equilibrium;
-	//				};
-	//
-	//			if (node->m_joint)
-	//			{
-	//				auto IntegrateInternalPart = [body, timestep]()
-	//					{
-	//						const ndMatrix inertia(body->CalculateInertiaMatrix());
-	//						const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
-	//						const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
-	//						body->SetForce(force);
-	//						body->SetTorque(torque);
-	//						body->IntegrateExternalForce(timestep);
-	//						body->IntegrateVelocity(timestep);
-	//					};
-	//
-	//				// internal bodies are full integrared
-	//				ndSharedPtr<ndJointBilateralConstraint>& joint(node->m_joint);
-	//				if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
-	//				{
-	//					IntegrateInternalPart();
-	//					// save contact normal force 
-	//					ndBodyKinematic::ndContactMap::Iterator it(node->m_body->GetAsBodyKinematic()->GetContactMap());
-	//					const ndVector normalForce(joint->GetForceBody0());
-	//					for (it.Begin(); it; it++)
-	//					{
-	//						ndContact* const contact = it.GetNode()->GetInfo();
-	//						if (contact->IsActive())
-	//						{
-	//							for (ndContactPointList::ndNode* pointNode = contact->GetContactPoints().GetFirst(); pointNode; pointNode = pointNode->GetNext())
-	//							{
-	//								ndContactMaterial& point = pointNode->GetInfo();
-	//								ndFloat32 forceMag = point.m_normal.DotProduct(normalForce).GetScalar();
-	//								point.m_normal_Force.Push(ndAbs(forceMag));
-	//							}
-	//						}
-	//					}
-	//				}
-	//				else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
-	//				{
-	//					IntegrateInternalPart();
-	//				}
-	//				else if (joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
-	//				{
-	//					IntegrateInternalPart();
-	//				}
-	//				else
-	//				{
-	//					IntegrateStructuralPart();
-	//				}
-	//			}
-	//			else
-	//			{
-	//				IntegrateStructuralPart();
-	//			}
-	//		}
-	//	};
-	//NodeIterator(IntegrateBodyParts);
-	//}
-#endif
 }
