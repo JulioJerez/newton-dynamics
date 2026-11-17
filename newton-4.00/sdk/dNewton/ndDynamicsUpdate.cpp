@@ -1165,29 +1165,21 @@ void ndDynamicsUpdate::InitSkeletons()
 		m_skeletonOrder.SetCount(0);
 		if (scene->GetThreadCount() > 1)
 		{
-			class ndCompareSkeletons
+			ndSort(&activeSkeletons[0], ndInt32(activeSkeletons.GetCount()), [](const ndSkeletonContainer* const elementA, const ndSkeletonContainer* const elementB)
 			{
-				public:
-				ndCompareSkeletons(void*)
+				const ndInt32 rowsA = elementA->m_isResting ? 0 : elementA->GetTotalJoints();
+				const ndInt32 rowsB = elementB->m_isResting ? 0 : elementB->GetTotalJoints();
+				if (rowsA < rowsB)
 				{
+					return 1;
 				}
+				if (rowsA > rowsB)
+				{
+					return -1;
+				}
+				return 0;
+			});
 
-				ndInt32 Compare(const ndSkeletonContainer* const elementA, const ndSkeletonContainer* const elementB) const
-				{
-					const ndInt32 rowsA = elementA->m_isResting ? 0 : elementA->GetTotalJoints();
-					const ndInt32 rowsB = elementB->m_isResting ? 0 : elementB->GetTotalJoints();
-					if (rowsA < rowsB)
-					{
-						return 1;
-					}
-					if (rowsA > rowsB)
-					{
-						return -1;
-					}
-					return 0;
-				}
-			};
-			ndSort<ndSkeletonContainer*, ndCompareSkeletons>(&activeSkeletons[0], ndInt32(activeSkeletons.GetCount()), nullptr);
 			ndInt32 sum = 0;
 			m_activeSkeleton = 0;
 			for (ndInt32 i = 0; i < ndInt32(activeSkeletons.GetCount()); ++i)

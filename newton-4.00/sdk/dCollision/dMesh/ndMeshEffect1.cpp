@@ -226,21 +226,10 @@ void ndMeshEffect::ndPointFormat::CompressData(
 	ndVertexSortData sortContext;
 	sortContext.m_points = &m_vertex;
 	sortContext.m_vertexSortIndex = firstSortAxis;
-	class CompareKey
+	ndSort(remapIndex, cluster.m_count, [&sortContext](const ndSortKey& elementA, const ndSortKey& elementB)
 	{
-		public:
-		CompareKey(void* const context)
-			:m_context((ndVertexSortData*)context)
-		{
-		}
-
-		ndInt32 Compare(const ndSortKey& elementA, const ndSortKey& elementB) const
-		{
-			return ndMeshEffect::ndFormat::CompareVertex(&elementA, &elementB, m_context);
-		}
-		ndVertexSortData* m_context;
-	};
-	ndSort<ndSortKey, CompareKey>(remapIndex, cluster.m_count, &sortContext);
+		return ndMeshEffect::ndFormat::CompareVertex(&elementA, &elementB, &sortContext);
+	});
 
 	const ndFloat64 minDist = ndMin(ndMin(variance.m_x, variance.m_y), variance.m_z);
 	const ndFloat64 tolerance = ndMax(ndMin(minDist, ndFloat64(tol)), ndFloat64(1.0e-8f));
@@ -496,22 +485,10 @@ void ndMeshEffect::ndAttibuteFormat::CompressData(
 	sortContext.m_points = &points.m_vertex;
 	sortContext.m_vertexSortIndex = firstSortAxis;
 
-	class CompareKey
+	ndSort(remapIndex, cluster.m_count, [&sortContext](const ndSortKey& elementA, const ndSortKey& elementB)
 	{
-		public:
-		CompareKey(void* const context)
-			:m_context(context)
-		{
-		}
-
-		ndInt32 Compare(const ndSortKey& elementA, const ndSortKey& elementB) const
-		{
-			return ndMeshEffect::ndFormat::CompareVertex(&elementA, &elementB, m_context);
-		}
-
-		void* m_context;
-	};
-	ndSort<ndSortKey, CompareKey>(remapIndex, cluster.m_count, &sortContext);
+		return ndMeshEffect::ndFormat::CompareVertex(&elementA, &elementB, &sortContext);
+	});
 
 	const ndFloat64 minDist = ndMin(ndMin(variance.m_x, variance.m_y), variance.m_z);
 	const ndFloat64 tolerance = ndMax(ndMin(minDist, ndFloat64(tol)), ndFloat64(1.0e-8f));

@@ -842,14 +842,9 @@ void ndWorld::UpdateSkeletons()
 		skeleton->ClearCloseLoopJoints();
 	}
 
-	class CompareVertex
+	if (m_activeSkeletons.GetCount() > 1)
 	{
-		public:
-		CompareVertex(void*)
-		{
-		}
-
-		ndInt32 Compare(const ndSkeletonContainer* const skeletonA, const ndSkeletonContainer* const skeletonB) const
+		ndSort(&m_activeSkeletons[0], ndInt32(m_activeSkeletons.GetCount()), [](const ndSkeletonContainer* const skeletonA, const ndSkeletonContainer* const skeletonB)
 		{
 			ndInt32 countA = (ndInt32)skeletonA->GetNodeList().GetCount();
 			ndInt32 countB = (ndInt32)skeletonB->GetNodeList().GetCount();
@@ -862,11 +857,7 @@ void ndWorld::UpdateSkeletons()
 				return 1;
 			}
 			return 0;
-		}
-	};
-	if (m_activeSkeletons.GetCount())
-	{
-		ndSort<ndSkeletonContainer*, CompareVertex>(&m_activeSkeletons[0], ndInt32(m_activeSkeletons.GetCount()), nullptr);
+		});
 	}
 }
 

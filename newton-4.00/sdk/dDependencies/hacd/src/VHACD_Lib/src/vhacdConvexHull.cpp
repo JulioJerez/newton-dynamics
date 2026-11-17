@@ -104,13 +104,10 @@ namespace nd
 
 		void ConvexHull3dPointSet::GetUniquePoints()
 		{
-			class CompareVertex
+			ndInt32 count = ndInt32(GetCount());
+			if (count)
 			{
-				public:
-				CompareVertex() {}
-				CompareVertex(void*) {}
-
-				ndInt32 Compare(const ndBigVector& elementA, const ndBigVector& elementB) const
+				auto Compare = [](const ndBigVector& elementA, const ndBigVector& elementB)
 				{
 					for (ndInt32 i = 0; i < 3; i++)
 					{
@@ -124,22 +121,20 @@ namespace nd
 						}
 					}
 					return 0;
-				}
-			};
+				};
 
-			ndInt32 count = ndInt32(GetCount());
-			if (count)
-			{
 				ndArray<ndBigVector>& array = *this;
-				ndSort<ndBigVector, CompareVertex>(&array[0], count, nullptr);
+				ndSort(&array[0], count, [Compare](const ndBigVector& elementA, const ndBigVector& elementB)
+				{
+					return Compare(elementA, elementB);
+				});
 
 				ndInt32 indexCount = 0;
-				CompareVertex compareVetex;
 				for (ndInt32 i = 1; i < count; ++i)
 				{
 					for (; i < count; ++i)
 					{
-						if (compareVetex.Compare(array[indexCount], array[i]))
+						if (Compare(array[indexCount], array[i]))
 						{
 							indexCount++;
 							array[indexCount] = array[i];

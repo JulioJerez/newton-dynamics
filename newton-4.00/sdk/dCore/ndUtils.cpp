@@ -120,34 +120,23 @@ static ndInt32 SortVertices(
 	sortContext.m_vertex = vertexList;
 	sortContext.m_stride = stride;
 	sortContext.m_vertexSortIndex = firstSortAxis;
-	class ndCompareKey
+
+	ndSort(remapIndex, cluster.m_count, [&sortContext](const ndSortKey& elementA, const ndSortKey& elementB)
 	{
-		public:
-		ndCompareKey(void* const context)
-			:m_sortContext((ndVertexSortData*)context)
+		const ndInt32 index0 = elementA.m_vertexIndex * sortContext.m_stride + sortContext.m_vertexSortIndex;
+		const ndInt32 index1 = elementB.m_vertexIndex * sortContext.m_stride + sortContext.m_vertexSortIndex;
+		const ndFloat64 val0 = sortContext.m_vertex[index0];
+		const ndFloat64 val1 = sortContext.m_vertex[index1];
+		if (val0 < val1)
 		{
+			return -1;
 		}
-
-		ndInt32 Compare(const ndSortKey& elementA, const ndSortKey& elementB) const
+		if (val0 > val1)
 		{
-			const ndInt32 index0 = elementA.m_vertexIndex * m_sortContext->m_stride + m_sortContext->m_vertexSortIndex;
-			const ndInt32 index1 = elementB.m_vertexIndex * m_sortContext->m_stride + m_sortContext->m_vertexSortIndex;
-			const ndFloat64 val0 = m_sortContext->m_vertex[index0];
-			const ndFloat64 val1 = m_sortContext->m_vertex[index1];
-			if (val0 < val1)
-			{
-				return -1;
-			}
-			if (val0 > val1)
-			{
-				return 1;
-			}
-			return 0;
+			return 1;
 		}
-
-		ndVertexSortData* m_sortContext;
-	};
-	ndSort<ndSortKey, ndCompareKey>(remapIndex, cluster.m_count, &sortContext);
+		return 0;
+	});
 
 	const ndBigVector origin(cluster.m_sum.Scale(ndFloat32(1.0f) / (ndFloat32)cluster.m_count));
 	const ndBigVector variance(ndBigVector::m_zero.GetMax(cluster.m_sum2.Scale(ndFloat32(1.0f) / (ndFloat32)cluster.m_count) - origin * origin).Sqrt());

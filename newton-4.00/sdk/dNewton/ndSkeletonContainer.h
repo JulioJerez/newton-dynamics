@@ -209,6 +209,7 @@ class ndSkeletonContainer
 	ndNode* GetRoot() const;
 
 	void Clear();
+	void SortPairs();
 	void CheckSleepState();
 	ndNode* AddChild(ndJointBilateralConstraint* const joint, ndNode* const parent);
 	void Init(const ndWorld* const owner, ndBodyKinematic* const rootBody, ndInt32 id);

@@ -1030,35 +1030,24 @@ void ndShapeCompound::EndAddRemove()
 						ndAssert(leafNodesCount <= (nodeCount + 1));
 					}
 				}
-		
-				class CompareNodes
-				{
-					public:
-					CompareNodes(void*)
-					{
-					}
 
-					ndInt32 Compare(const ndNodeBase* const elementA, const ndNodeBase* const elementB) const
+				ndSort(leafArray, leafNodesCount, [](const ndNodeBase* const elementA, const ndNodeBase* const elementB)
+				{
+					ndFloat32 areaA = elementA->m_area;
+					ndFloat32 areaB = elementB->m_area;
+					if (areaA < areaB)
 					{
-						ndFloat32 areaA = elementA->m_area;
-						ndFloat32 areaB = elementB->m_area;
-						if (areaA < areaB)
-						{
-							return 1;
-						}
-						if (areaA > areaB)
-						{
-							return -1;
-						}
-						return 0;
+						return 1;
 					}
-				};
-				ndSort<ndNodeBase*, CompareNodes>(leafArray, leafNodesCount, nullptr);
+					if (areaA > areaB)
+					{
+						return -1;
+					}
+					return 0;
+				});
 
 				ndInt32 rootIndex = 0;
 				m_root = BuildTopDownBig(&leafArray[0], 0, leafNodesCount - 1, nodeArray, rootIndex);
-
-				//m_root->Sanity();
 				m_treeEntropy = CalculateEntropy(nodeCount, nodeArray);
 			}
 			while (m_root->m_parent) 

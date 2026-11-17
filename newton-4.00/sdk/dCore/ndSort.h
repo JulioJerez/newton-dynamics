@@ -28,8 +28,8 @@
 #include "ndThreadPool.h"
 #include "ndFixSizeArray.h"
 
-template <class T, class dCompareKey>
-void ndSort(T* const array, ndInt32 elements, void* const context);
+template <class T, typename ndCompareKey>
+void ndSort(T* const array, ndInt32 elements, ndCompareKey compare);
 
 template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
 void ndCountingSort(const T* const srcArray, T* const dstArray, ndInt32 size, ndUnsigned32* const prefixScanOut, void* const context);
@@ -50,10 +50,10 @@ template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
 void ndCountingSortInPlace(ndThreadPool& threadPool, T* const array, T* const scratchBuffer, ndInt32 size, ndUnsigned32* const prefixScanOut, void* const context);
 
 // *****************************************************
-// Implementation 
+// standard quick sort template implementation
 // *****************************************************
-template <class T, class dCompareKey>
-void ndSort(T* const array, ndInt32 elements, void* const context)
+template <class T, typename ndCompareKey>
+void ndSort(T* const array, ndInt32 elements, ndCompareKey compare)
 {
 	//ND_PROFILE_ZONE();
 	const ndInt32 batchSize = 8;
@@ -72,11 +72,10 @@ void ndSort(T* const array, ndInt32 elements, void* const context)
 		ndInt32 m_end;
 	};
 
-	ndFixSizeArray<ndIntervale, 256> stack;
-	
+	ndFixSizeArray<ndIntervale, 64> stack;
+
 	stack.PushBack(ndIntervale(0, elements - 1));
 
-	const dCompareKey comparator(context);
 	while (stack.GetCount())
 	{
 		ndIntervale span(stack.Pop());
@@ -85,15 +84,15 @@ void ndSort(T* const array, ndInt32 elements, void* const context)
 		if ((hi - lo) > batchSize)
 		{
 			ndInt32 mid = (lo + hi) >> 1;
-			if (comparator.Compare(array[lo], array[mid]) > 0)
+			if (compare(array[lo], array[mid]) > 0)
 			{
 				ndSwap(array[lo], array[mid]);
 			}
-			if (comparator.Compare(array[mid], array[hi]) > 0)
+			if (compare(array[mid], array[hi]) > 0)
 			{
 				ndSwap(array[mid], array[hi]);
 			}
-			if (comparator.Compare(array[lo], array[mid]) > 0)
+			if (compare(array[lo], array[mid]) > 0)
 			{
 				ndSwap(array[lo], array[mid]);
 			}
@@ -102,15 +101,15 @@ void ndSort(T* const array, ndInt32 elements, void* const context)
 			const T pivot(array[mid]);
 			do
 			{
-				while (comparator.Compare(array[i], pivot) < 0)
+				while (compare(array[i], pivot) < 0)
 				{
 					i++;
 				}
-				while (comparator.Compare(array[j], pivot) > 0)
+				while (compare(array[j], pivot) > 0)
 				{
 					j--;
 				}
-
+	
 				if (i <= j)
 				{
 					ndSwap(array[i], array[j]);
@@ -118,7 +117,7 @@ void ndSort(T* const array, ndInt32 elements, void* const context)
 					j--;
 				}
 			} while (i <= j);
-
+	
 			if (i < hi)
 			{
 				stack.PushBack(ndIntervale(i, hi));
@@ -129,7 +128,7 @@ void ndSort(T* const array, ndInt32 elements, void* const context)
 			}
 		}
 	}
-
+	
 	ndInt32 stride = batchSize + 1;
 	if (elements < stride)
 	{
@@ -137,17 +136,17 @@ void ndSort(T* const array, ndInt32 elements, void* const context)
 	}
 	for (ndInt32 i = 1; i < stride; ++i)
 	{
-		if (comparator.Compare(array[0], array[i]) > 0)
+		if (compare(array[0], array[i]) > 0)
 		{
 			ndSwap(array[0], array[i]);
 		}
 	}
-
+	
 	for (ndInt32 i = 1; i < elements; ++i)
 	{
 		ndInt32 j = i;
 		const T tmp(array[i]);
-		for (; comparator.Compare(array[j - 1], tmp) > 0; --j)
+		for (; compare(array[j - 1], tmp) > 0; --j)
 		{
 			ndAssert(j > 0);
 			array[j] = array[j - 1];
@@ -155,12 +154,12 @@ void ndSort(T* const array, ndInt32 elements, void* const context)
 		array[j] = tmp;
 	}
 
-#ifdef _DEBUG
+	#ifdef _DEBUG
 	for (ndInt32 i = 0; i < (elements - 1); ++i)
 	{
-		ndAssert(comparator.Compare(array[i], array[i + 1]) <= 0);
+		ndAssert(compare(array[i], array[i + 1]) <= 0);
 	}
-#endif
+	#endif
 }
 
 template <class T, class ndEvaluateKey, ndInt32 keyBitSize>

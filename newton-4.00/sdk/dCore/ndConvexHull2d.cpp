@@ -144,38 +144,29 @@ ndInt32 ndConvexHull2d(ndVector* const vertexCloud2d, ndInt32 count)
 	}
 
 	// Sort points lexicographically
-	class CompareVertex
+	ndSort(vertexCloud2d, count, [](const ndVector& elementA, const ndVector& elementB)
 	{
-		public:
-		CompareVertex(void*)
+		if (elementA.m_x < elementB.m_x)
 		{
+			return -1;
 		}
-
-		ndInt32 Compare(const ndVector& elementA, const ndVector& elementB) const
+		else if (elementA.m_x > elementB.m_x)
 		{
-			if (elementA.m_x < elementB.m_x)
+			return 1;
+		}
+		else
+		{
+			if (elementA.m_y < elementB.m_y)
 			{
 				return -1;
 			}
-			else if (elementA.m_x > elementB.m_x)
+			else if (elementA.m_y > elementB.m_y)
 			{
 				return 1;
 			}
-			else
-			{
-				if (elementA.m_y < elementB.m_y)
-				{
-					return -1;
-				}
-				else if (elementA.m_y > elementB.m_y)
-				{
-					return 1;
-				}
-			}
-			return 0;
 		}
-	};
-	ndSort<ndVector, CompareVertex>(vertexCloud2d, count, nullptr);
+		return 0;
+	});
 
 	ndFixSizeArray<ndVector, 256> hull(2 * count);
 

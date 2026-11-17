@@ -731,29 +731,20 @@ ndInt32 ndSkeletonContainer::RamapPairArray() const
 	pairSort[2 * count].m_m = 0x7fffffff;
 	pairSort[2 * count].m_index = 0;
 
-	class CompareKey
+	ndSort(pairSort, 2 * count + 1, [](const ndPairSort& elementA, const ndPairSort& elementB)
 	{
-		public:
-		CompareKey(void* const)
+		ndInt64 indexA = (ndInt64(elementA.m_m) << 16) + elementA.m_index;
+		ndInt64 indexB = (ndInt64(elementB.m_m) << 16) + elementB.m_index;
+		if (indexA < indexB)
 		{
+			return -1;
 		}
-
-		ndInt32 Compare(const ndPairSort& elementA, const ndPairSort& elementB) const
+		else if (indexA > indexB)
 		{
-			ndInt64 indexA = (ndInt64(elementA.m_m) << 16) + elementA.m_index;
-			ndInt64 indexB = (ndInt64(elementB.m_m) << 16) + elementB.m_index;
-			if (indexA < indexB)
-			{
-				return -1;
-			}
-			else if (indexA > indexB)
-			{
-				return 1;
-			}
-			return 0;
+			return 1;
 		}
-	};
-	ndSort<ndPairSort, CompareKey>(pairSort, 2 * count + 1, nullptr);
+		return 0;
+	});
 
 	ndInt16 pairBodyIndex = 0;
 	for (ndInt32 i = 0; i < 2 * count; ++i)
@@ -761,7 +752,6 @@ ndInt32 ndSkeletonContainer::RamapPairArray() const
 		ndInt32 index = pairSort[i].m_index;
 		ndNodePair& pair = m_pairs[index];
 		ndInt16* const indexPtr = &pair.m_index0;
-		//(pairSort[i].m_m == pair.m_m0) ? pair.m_index0 = pairBodyIndex : pair.m_index1 = pairBodyIndex;
 		ndInt32 indexOffset = (pairSort[i].m_m == pair.m_m0) ? 0 : 1;
 		indexPtr[indexOffset] = pairBodyIndex;
 		pairBodyIndex += (pairSort[i].m_m != pairSort[i + 1].m_m) ? 1 : 0;
@@ -773,7 +763,7 @@ ndInt32 ndSkeletonContainer::RamapPairArray() const
 void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp)
 {
 	ND_PROFILE_ZONE();
-#if 1
+
 	const ndInt32 bodyCount = RamapPairArray() + 2;
 	ndVector8* const rowPtr = ndAlloca(ndVector8, bodyCount + 2);
 	ndVector8* const row = ndAlignPtr(ndVector8, rowPtr);
@@ -858,121 +848,6 @@ void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const d
 			row[index1_i] = zero;
 		}
 	};
-
-#else
-
-	auto CalculateLoopMassMatrixCoefficients = [this, diagDamp](ndInt32 groupId)
-	{
-		const ndInt32 index = groupId;
-		const ndVector8 zero(ndVector8::m_zero);
-
-		const ndInt32 primaryCount = m_rowCount - m_auxiliaryRowCount;
-		const ndInt32 ii = m_matrixRowsIndex[primaryCount + index];
-		const ndLeftHandSide* const row_i = &m_leftHandSide[ii];
-		const ndRightHandSide* const rhs_i = &m_rightHandSide[ii];
-
-		const ndVector8& JtM0 = reinterpret_cast<const ndVector8&>(row_i->m_Jt.m_jacobianM0);
-		const ndVector8& JtM1 = reinterpret_cast<const ndVector8&>(row_i->m_Jt.m_jacobianM1);
-		const ndVector8& JMinvM0 = reinterpret_cast<const ndVector8&>(row_i->m_JMinv.m_jacobianM0);
-		const ndVector8& JMinvM1 = reinterpret_cast<const ndVector8&>(row_i->m_JMinv.m_jacobianM1);
-		const ndVector8 element(JMinvM0 * JtM0 + JMinvM1 * JtM1);
-
-		// I know I am doubling the matrix regularizer, but this makes the solution more robust.
-		ndFloat32* const matrixRow11 = &m_massMatrix11[m_auxiliaryRowCount * index];
-		ndFloat32 diagonal = element.AddHorizontal() + rhs_i->m_diagDamp * ndFloat32(2.0f);
-		ndAssert(matrixRow11[index] == ndFloat32(0.0f));
-		matrixRow11[index] = diagonal;
-		diagDamp[index] = diagonal * m_defualtRegularizer;
-
-		const ndInt32 m0_i = m_pairs[primaryCount + index].m_m0;
-		const ndInt32 m1_i = m_pairs[primaryCount + index].m_m1;
-		for (ndInt32 j = index + 1; j < m_auxiliaryRowCount; ++j)
-		{
-			const ndInt32 jj = m_matrixRowsIndex[primaryCount + j];
-			const ndLeftHandSide* const row_j = &m_leftHandSide[jj];
-
-			const ndInt32 k = primaryCount + j;
-			const ndInt32 m0_j = m_pairs[k].m_m0;
-			const ndInt32 m1_j = m_pairs[k].m_m1;
-
-			bool hasEffect = false;
-			ndVector8 acc(zero);
-			if (m0_i == m0_j)
-			{
-				hasEffect = true;
-				acc = acc.MulAdd(JMinvM0, reinterpret_cast<const ndVector8&>(row_j->m_Jt.m_jacobianM0));
-			}
-			else if (m0_i == m1_j)
-			{
-				hasEffect = true;
-				acc = acc.MulAdd(JMinvM0, reinterpret_cast<const ndVector8&>(row_j->m_Jt.m_jacobianM1));
-			}
-
-			if (m1_i == m1_j)
-			{
-				hasEffect = true;
-				acc = acc.MulAdd(JMinvM1, reinterpret_cast<const ndVector8&>(row_j->m_Jt.m_jacobianM1));
-			}
-			else if (m1_i == m0_j)
-			{
-				hasEffect = true;
-				acc = acc.MulAdd(JMinvM1, reinterpret_cast<const ndVector8&>(row_j->m_Jt.m_jacobianM0));
-			}
-
-			if (hasEffect)
-			{
-				ndFloat32 offDiagValue = acc.AddHorizontal();
-				if (ndAbs(offDiagValue) > ndFloat32(0.0f))
-				{
-					ndAssert(matrixRow11[j] == ndFloat32(0.0f));
-					matrixRow11[j] = offDiagValue;
-					m_massMatrix11[j * m_auxiliaryRowCount + index] = offDiagValue;
-				}
-			}
-		}
-
-		ndFloat32* const matrixRow10 = &m_massMatrix10[primaryCount * index];
-		for (ndInt32 j = 0; j < primaryCount; ++j)
-		{
-			const ndInt32 jj = m_matrixRowsIndex[j];
-			const ndLeftHandSide* const row_j = &m_leftHandSide[jj];
-
-			const ndInt32 m0_j = m_pairs[j].m_m0;
-			const ndInt32 m1_j = m_pairs[j].m_m1;
-
-			bool hasEffect = false;
-			ndVector8 acc(zero);
-			if (m0_i == m0_j)
-			{
-				hasEffect = true;
-				acc = acc.MulAdd(JMinvM0, reinterpret_cast<const ndVector8&>(row_j->m_Jt.m_jacobianM0));
-			}
-			else if (m0_i == m1_j)
-			{
-				hasEffect = true;
-				acc = acc.MulAdd(JMinvM0, reinterpret_cast<const ndVector8&>(row_j->m_Jt.m_jacobianM1));
-			}
-
-			if (m1_i == m1_j)
-			{
-				hasEffect = true;
-				acc = acc.MulAdd(JMinvM1, reinterpret_cast<const ndVector8&>(row_j->m_Jt.m_jacobianM1));
-			}
-			else if (m1_i == m0_j)
-			{
-				hasEffect = true;
-				acc = acc.MulAdd(JMinvM1, reinterpret_cast<const ndVector8&>(row_j->m_Jt.m_jacobianM0));
-			}
-
-			if (hasEffect)
-			{
-				ndFloat32 val = acc.AddHorizontal();
-				ndAssert(matrixRow10[j] == ndFloat32 (0.0f));
-				matrixRow10[j] = val;
-			}
-		}
-	};
-#endif
 
 	for (ndInt32 index = 0; index < m_auxiliaryRowCount; ++index)
 	{
@@ -2024,33 +1899,29 @@ void ndSkeletonContainer::InitLoopMassMatrix()
 		RegularizeLcp();
 	}
 
+	SortPairs();
+}
+
+void ndSkeletonContainer::SortPairs()
+{
 	auto SortIndexArray = [this](ndInt32 groupId)
 	{
-		class CompareKey
-		{
-			public:
-			CompareKey(void* const)
-			{
-			}
-	
-			ndInt32 Compare(const ndBodyForceIndexPair& elementA, const ndBodyForceIndexPair& elementB) const
-			{
-				ndInt32 indexA = (elementA.m_bodyIndex << 16) + elementA.m_forceIndex;
-				ndInt32 indexB = (elementB.m_bodyIndex << 16) + elementB.m_forceIndex;
-				if (indexA < indexB)
-				{
-					return -1;
-				}
-				else if (indexA > indexB)
-				{
-					return 1;
-				}
-				return 0;
-			}
-		};
 		ndBodyForcePtr& bodyForceRemap = groupId ? m_bodyForceRemap1 : m_bodyForceRemap0;
-		ndSort<ndBodyForceIndexPair, CompareKey>(bodyForceRemap.m_index, m_rowCount, nullptr);
-	
+		ndSort(bodyForceRemap.m_index, m_rowCount, [](const ndBodyForceIndexPair& elementA, const ndBodyForceIndexPair& elementB)
+		{
+			ndInt32 indexA = (elementA.m_bodyIndex << 16) + elementA.m_forceIndex;
+			ndInt32 indexB = (elementB.m_bodyIndex << 16) + elementB.m_forceIndex;
+			if (indexA < indexB)
+			{
+				return -1;
+			}
+			else if (indexA > indexB)
+			{
+				return 1;
+			}
+			return 0;
+		});
+
 		ndInt32 spanIndex = 0;
 		for (ndInt32 i = 0; i < m_rowCount; ++i)
 		{
