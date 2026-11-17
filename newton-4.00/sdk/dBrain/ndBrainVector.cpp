@@ -373,7 +373,7 @@ void ndBrainMemVector::Swap(ndBrainMemVector& src)
 // using Random variate generation from https://en.wikipedia.org/wiki/Gumbel_distribution 
 void ndBrainVector::CategoricalSample(const ndBrainVector& probability, ndBrainFloat beta)
 {
-	#ifdef _DEBUG
+	#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		ndBrainFloat acc = ndBrainFloat(0.0f);
 		for (ndInt32 i = 0; i < GetCount(); ++i)
 		{
@@ -411,11 +411,11 @@ void ndBrainVector::CalculateMeanAndVariance(ndBrainFloat& mean, ndBrainFloat& d
 	ndFloat64 sum2 = ndFloat64(0.0f);
 	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
 	{
-		ndFloat64 x = (*this)[i];
+		ndFloat64 x = ndFloat64((*this)[i]);
 		sum += x;
 		sum2 += x * x;
 	}
-	ndFloat64 den = ndFloat64(1.0f) / ndBrainFloat(GetCount());
+	ndFloat64 den = ndFloat64(1.0f) / ndFloat64(GetCount());
 	ndFloat64 average = sum * den;
 	ndFloat64 variance2 = ndMax((sum2 * den - average * average), ndFloat64(1.0e-12f));
 

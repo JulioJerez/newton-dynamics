@@ -399,9 +399,12 @@ typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>:
 template<class OBJECT, class KEY, class allocator>
 typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>::GetNodeFromInfo (OBJECT &info) const
 {
-	ndNode* const node = (ndNode* ) &info;
-	ndInt64 offset = ((char*) &node->m_info) - ((char *) node);
-	ndNode* const retnode = (ndNode* ) (((char *) node) - offset);
+	//ndNode* const node = (ndNode* ) &info;
+	ndNode* const node = reinterpret_cast<ndNode*>(&info);
+	//ndInt64 offset = ((char*) &node->m_info) - ((char *) node);
+	ndInt64 offset = reinterpret_cast<char*>(&node->m_info) - reinterpret_cast<char*>(node);
+	//ndNode* const retnode = (ndNode* ) (((char *) node) - offset);
+	ndNode* const retnode = reinterpret_cast<ndNode*>(reinterpret_cast<char*>(node) - offset);
 
 	ndAssert (retnode->IsInTree ());
 	ndAssert (&retnode->GetInfo () == &info);
@@ -449,7 +452,8 @@ typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>:
 	}
 #endif
 
-	return (ndNode* )prev; 
+	//return (ndNode*)prev; 
+	return static_cast<ndNode*>(prev);
 }
 
 template<class OBJECT, class KEY, class allocator>
@@ -600,9 +604,8 @@ typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>:
 	}
 
 	//ndNode** const headPtr = (ndNode**) &m_head;
-	ndNode** const headPtr = static_cast<ndNode**>(&m_head);
 	//ptr->InsertFixup ((ndRedBackNode**)headPtr);
-	ptr->InsertFixup(reinterpret_cast<ndRedBackNode**>(headPtr));
+	ptr->InsertFixup(reinterpret_cast<ndRedBackNode**>(&m_head));
 	return ptr;
 }
 
@@ -730,8 +733,9 @@ typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>:
 		}
 	}
 
-	ndNode** const headPtr = (ndNode**) &m_head;
-	ptr->InsertFixup ((ndRedBackNode**)headPtr);
+	//ndNode** const headPtr = (ndNode**) &m_head;
+	//ptr->InsertFixup ((ndRedBackNode**)headPtr);
+	ptr->InsertFixup(reinterpret_cast<ndRedBackNode**>(&m_head));
 	return ptr;
 }
 
@@ -806,8 +810,9 @@ void ndTree<OBJECT, KEY, allocator>::Unlink (typename ndTree<OBJECT, KEY, alloca
 {
 	m_count	--;
 
-	ndNode** const headPtr = (ndNode**) &m_head;
-	node->Unlink ((ndRedBackNode**)headPtr);
+	//ndNode** const headPtr = (ndNode**) &m_head;
+	//node->Unlink ((ndRedBackNode**)headPtr);
+	node->Unlink(reinterpret_cast<ndRedBackNode**>(&m_head));
 	ndAssert (!Find (node->GetKey()));
 }
 

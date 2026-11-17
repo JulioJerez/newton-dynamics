@@ -154,7 +154,7 @@ void ndSort(T* const array, ndInt32 elements, ndCompareKey compare)
 		array[j] = tmp;
 	}
 
-	#ifdef _DEBUG
+#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = 0; i < (elements - 1); ++i)
 	{
 		ndAssert(compare(array[i], array[i + 1]) <= 0);
@@ -210,7 +210,7 @@ void ndCountingSortInPlace(T* const array, T* const scratchBuffer, ndInt32 size,
 		scans[key] = index + 1;
 	}
 
-#ifdef _DEBUG
+#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = size - 2; i >= 0; --i)
 	{
 		ndInt32 key0 = evaluator.GetKey(array[i - 0]);
@@ -317,7 +317,7 @@ void ndCountingSortInPlace(ndThreadPool& threadPool, T* const array, T* const sc
 	});
 	threadPool.ParallelExecute(ndShuffleArray, numberOfGroups, 1);
 
-#ifdef _DEBUG
+#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = size - 2; i >= 0; --i)
 	{
 		ndInt32 key0 = evaluator.GetKey(array[i - 0]);
@@ -374,7 +374,7 @@ void ndCountingSort(const T* const srcArray, T* const dstArray, ndInt32 size, nd
 		scans[key] = index + 1;
 	}
 
-#ifdef _DEBUG
+#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = size - 2; i >= 0; --i)
 	{
 		ndInt32 key0 = evaluator.GetKey(dstArray[i - 0]);
@@ -480,7 +480,7 @@ void ndCountingSort(ndThreadPool& threadPool, const T* const srcArray, T* const 
 	});
 	threadPool.ParallelExecute(ndShuffleArray, numberOfGroups, 1);
 
-#ifdef _DEBUG
+#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = size - 2; i >= 0; --i)
 	{
 		ndInt32 key0 = evaluator.GetKey(dstArray[i - 0]);

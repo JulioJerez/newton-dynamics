@@ -426,7 +426,7 @@ void ndModelArticulation::SetTransform(const ndMatrix& matrix)
 		ndMatrix bodyMatrix(m_rootNode->m_body->GetMatrix());
 		const ndMatrix offset(bodyMatrix.OrthoInverse() * matrix);
 		ndAssert(offset.TestOrthogonal());
-		auto ApplyTransfrom = [this, &offset](ndModelArticulation::ndNode* const node)
+		auto ApplyTransfrom = [&offset](ndModelArticulation::ndNode* const node)
 		{
 			if (node->m_body)
 			{
@@ -613,7 +613,7 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 ndMesh* ndModelArticulation::CreateDefaultMesh() const
 {
 	ndMesh* rootMesh = nullptr;
-	auto BuildDefaultMesh = [this, &rootMesh](ndModelArticulation::ndNode* const node)
+	auto BuildDefaultMesh = [&rootMesh](ndModelArticulation::ndNode* const node)
 	{
 		if (node->m_body)
 		{
@@ -875,7 +875,7 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	
 	ndFixSizeArray<ndVector, D_INV_IK_MAX_LINKS> bodyCenter;
 	ndFixSizeArray<const ndBodyKinematic*, D_INV_IK_MAX_LINKS> bodyArray;
-	auto CalculateCom = [this, &dynamics, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
+	auto CalculateCom = [&dynamics, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
 	{
 		if (node->m_body)
 		{
@@ -1019,7 +1019,7 @@ ndMatrix ndModelArticulation::CalculateComMassMatrix() const
 	ndVector centerOfMass(ndVector::m_zero);
 	ndFixSizeArray<ndVector, D_INV_IK_MAX_LINKS> bodyCenter;
 	ndFixSizeArray<const ndBodyKinematic*, D_INV_IK_MAX_LINKS> bodyArray;
-	auto CalculateCom = [this, &totalMass, &centerOfMass, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
+	auto CalculateCom = [&totalMass, &centerOfMass, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
 	{
 		if (node->m_body)
 		{

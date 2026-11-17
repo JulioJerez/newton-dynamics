@@ -128,7 +128,7 @@ inline ndBrainMemVector::ndBrainMemVector(const ndBrainFloat* const mem, ndInt64
 {
 	m_size = size;
 	m_capacity = size + 1;
-	m_array = (ndBrainFloat*)mem;
+	m_array = const_cast<ndBrainFloat*>(mem);
 }
 
 inline ndBrainMemVector::~ndBrainMemVector()

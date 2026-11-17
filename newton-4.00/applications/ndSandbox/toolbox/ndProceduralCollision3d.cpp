@@ -16,11 +16,11 @@
 #include "ndHeightFieldPrimitive.h"
 #include "ndDebugDisplayRenderPass.h"
 
-//#define D_TERRAIN__WIDTH			1024
+//#define D_TERRAIN_WIDTH			1024
 //#define D_TERRAIN_HEIGHT			1024
-#define D_TERRAIN__WIDTH			512
+#define D_TERRAIN_WIDTH				512
 #define D_TERRAIN_HEIGHT			512
-//#define D_TERRAIN__WIDTH			256
+//#define D_TERRAIN_WIDTH			256
 //#define D_TERRAIN_HEIGHT			256
 
 #define D_TERRAIN_NOISE_OCTAVES		8
@@ -41,7 +41,7 @@ class ndProceduralTerrainShape3d : public ndShapeStaticProceduralMesh
 	{
 		public:
 		ndIsoTerrain(ndProceduralTerrainShape3d* const owner, ndDemoEntityManager* const scene)
-			:ndMarchingCubeIsoSurface(scene->GetWorld()->GetScene(), ndVector(ndFloat32(-D_TERRAIN__WIDTH / 2)), ndVector(ndFloat32(D_TERRAIN__WIDTH / 2)), D_TERRAIN_GRID_SIZE)
+			:ndMarchingCubeIsoSurface(scene->GetWorld()->GetScene(), ndVector(ndFloat32(-D_TERRAIN_WIDTH / 2)), ndVector(ndFloat32(D_TERRAIN_WIDTH / 2)), D_TERRAIN_GRID_SIZE)
 			,m_material()
 			,m_heightfield()
 			,m_owner(owner)
@@ -56,14 +56,14 @@ class ndProceduralTerrainShape3d : public ndShapeStaticProceduralMesh
 			GenerateMesh();
 
 			time = ndGetTimeInMicroseconds() - time;
-			ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time) * ndFloat32(1.0e-6f));
+			ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat64(ndFloat32(time) * ndFloat32(1.0e-6f)));
 		}
 
 		// make a rolling terrain from a 2d noise function
 		void MakeNoiseHeightfield()
 		{
-			m_material.SetCount(D_TERRAIN__WIDTH * D_TERRAIN_HEIGHT);
-			m_heightfield.SetCount(D_TERRAIN__WIDTH * D_TERRAIN_HEIGHT);
+			m_material.SetCount(D_TERRAIN_WIDTH * D_TERRAIN_HEIGHT);
+			m_heightfield.SetCount(D_TERRAIN_WIDTH * D_TERRAIN_HEIGHT);
 
 			const ndInt32 octaves = D_TERRAIN_NOISE_OCTAVES;
 			const ndFloat32 persistance = D_TERRAIN_NOISE_PERSISTANCE;
@@ -73,18 +73,18 @@ class ndProceduralTerrainShape3d : public ndShapeStaticProceduralMesh
 			ndReal maxHeight = ndFloat32(-1.0e10f);
 			for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT; z++)
 			{
-				for (ndInt32 x = 0; x < D_TERRAIN__WIDTH; x++)
+				for (ndInt32 x = 0; x < D_TERRAIN_WIDTH; x++)
 				{
 					ndReal noiseVal = ndReal(BrownianMotion(octaves, persistance, noiseGridScale * ndFloat32(x), noiseGridScale * ndFloat32(z)));
 					//noiseVal = 0.0f;
 
-					m_heightfield[z * D_TERRAIN__WIDTH + x] = noiseVal;
+					m_heightfield[z * D_TERRAIN_WIDTH + x] = noiseVal;
 					minHeight = ndMin(minHeight, noiseVal);
 					maxHeight = ndMax(maxHeight, noiseVal);
 
 					// that app should populate this with app materials ids.
 					// just make a zero material index, for the demo
-					m_material[z * D_TERRAIN__WIDTH + x] = 0;
+					m_material[z * D_TERRAIN_WIDTH + x] = 0;
 				}
 			}
 			ndReal scale = D_TERRAIN_ELEVATION_SCALE;
@@ -124,10 +124,10 @@ class ndProceduralTerrainShape3d : public ndShapeStaticProceduralMesh
 			const ndVector gridSpace(PositionToGridSpace(posit));
 			ndAssert(gridSpace.m_x >= 0);
 			ndAssert(gridSpace.m_z >= 0);
-			ndAssert(gridSpace.m_x < D_TERRAIN__WIDTH);
-			ndAssert(gridSpace.m_z < D_TERRAIN__WIDTH);
+			ndAssert(gridSpace.m_x < D_TERRAIN_WIDTH);
+			ndAssert(gridSpace.m_z < D_TERRAIN_WIDTH);
 
-			ndInt32 address = ndInt32(gridSpace.m_z * D_TERRAIN__WIDTH + gridSpace.m_x);
+			ndInt32 address = ndInt32(gridSpace.m_z * D_TERRAIN_WIDTH + gridSpace.m_x);
 
 			ndReal bridgeValue = SampleTorus(posit, m_bridgeLocation);
 			ndReal wormholeValue = SampleTorus(posit, m_wormholeLocation);
@@ -302,7 +302,7 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 
 		for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT - 1; z += D_TERRAIN_TILE_SIZE)
 		{
-			for (ndInt32 x = 0; x < D_TERRAIN__WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
+			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
 			{
 				TilePosit posit;
 				posit.m_x = x;
@@ -344,7 +344,7 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 		}
 
 		time = ndGetTimeInMicroseconds() - time;
-		ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time)* ndFloat32(1.0e-6f));
+		ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat64(ndFloat32(time)* ndFloat32(1.0e-6f)));
 	}
 
 	private:
@@ -362,7 +362,7 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 		const ndArray<ndVector>& vertexArray = shape->m_terrain->GetMeshVertex();
 		const ndArray<ndVector>& normalArray = shape->m_terrain->GetMeshNormals();
 		
-		ndFloat32 fx0 = ndFloat32(x0 - D_TERRAIN__WIDTH / 2);
+		ndFloat32 fx0 = ndFloat32(x0 - D_TERRAIN_WIDTH / 2);
 		ndFloat32 fx1 = fx0 + D_TERRAIN_TILE_SIZE;
 		
 		ndFloat32 fz0 = ndFloat32(z0 - D_TERRAIN_HEIGHT / 2);
@@ -449,7 +449,8 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 ndSharedPtr<ndBody> BuildMarchingCubeHeighfield(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location)
 {
 	ndShapeInstance proceduralInstance(new ndProceduralTerrainShape3d(scene));
-	ndProceduralTerrainShape3d* const heighfield = (ndProceduralTerrainShape3d*)proceduralInstance.GetShape()->GetAsShapeStaticProceduralMesh();
+	//ndProceduralTerrainShape3d* const heighfield = (ndProceduralTerrainShape3d*)proceduralInstance.GetShape()->GetAsShapeStaticProceduralMesh();
+	ndProceduralTerrainShape3d* const heighfield = static_cast<ndProceduralTerrainShape3d*>(proceduralInstance.GetShape()->GetAsShapeStaticProceduralMesh());
 	
 	ndMatrix heighfieldLocation(location);
 	const ndVector origin (heighfield->GetObbOrigin());

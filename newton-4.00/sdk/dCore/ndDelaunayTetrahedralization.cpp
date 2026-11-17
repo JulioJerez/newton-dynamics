@@ -153,7 +153,7 @@ void ndDelaunayTetrahedralization::SortVertexArray ()
 
 void ndDelaunayTetrahedralization::RemoveUpperHull ()
 {
-	ndNode* nextNode = NULL;
+	ndNode* nextNode = nullptr;
 	for (ndNode* node = GetFirst(); node; node = nextNode) 
 	{
 		nextNode = node->GetNext();
@@ -181,7 +181,7 @@ void ndDelaunayTetrahedralization::DeleteFace (ndNode* const node)
 			{
 				if (twinTetra->m_faces[j].m_twin == node) 
 				{
-					twinTetra->m_faces[j].m_twin = NULL;
+					twinTetra->m_faces[j].m_twin = nullptr;
 					break;
 				}
 			}
