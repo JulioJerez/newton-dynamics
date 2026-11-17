@@ -10,8 +10,8 @@
 #include <vector>
 
 #if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Weverything"
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Weverything"
 #endif
 
 namespace ndOfbx

@@ -383,13 +383,13 @@ namespace nd
 				for (ndInt32 i = i0; i < i1; ++i) 
 				{
 					Vec3 boxcenter;
-					boxcenter[0] = (double)i;
+					boxcenter[0] = double(i);
 					for (ndInt32 j = j0; j < j1; ++j)
 					{
-						boxcenter[1] = (double)j;
+						boxcenter[1] = double(j);
 						for (ndInt32 k = k0; k < k1; ++k)
 						{
-							boxcenter[2] = (double)k;
+							boxcenter[2] = double(k);
 							ndInt32 res = TriBoxOverlap(boxcenter, boxhalfsize, p[0], p[1], p[2]);
 							unsigned char& value = GetVoxel(i, j, k);
 							if ((res == 1) && (value == PRIMITIVE_UNDEFINED)) 

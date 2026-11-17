@@ -61,7 +61,7 @@ namespace nd
 
 		uint32_t VHACD::GetNConvexHulls() const
 		{
-			return (uint32_t)m_convexHulls.GetCount();
+			return uint32_t(m_convexHulls.GetCount());
 		}
 
 		void VHACD::GetConvexHull(const uint32_t index, ConvexHull& ch) const
@@ -70,13 +70,13 @@ namespace nd
 			ch.m_nPoints = ndInt32(mesh->GetNPoints());
 			ch.m_nTriangles = ndInt32(mesh->GetNTriangles());
 			ch.m_points = mesh->GetPoints();
-			ch.m_triangles = (ndInt32*)mesh->GetTriangles();
+			ch.m_triangles = reinterpret_cast<ndInt32*>(const_cast<int32_t*>(mesh->GetTriangles()));
 		}
 
 		void VHACD::ComputePrimitiveSet(const Parameters&)
 		{
 			m_pset = ndSharedPtr<PrimitiveSet>(new VoxelSet);
-			m_volume->Convert(*((VoxelSet*)*m_pset));
+			m_volume->Convert(*reinterpret_cast<VoxelSet*>(*m_pset));
 		}
 
 		void VHACD::Compute(const float* const points,const uint32_t nPoints,
@@ -85,7 +85,7 @@ namespace nd
 			ComputeACD(points, nPoints, triangles, nTriangles, params);
 		}
 
-		double ComputePreferredCuttingDirection(const PrimitiveSet* const tset, Vec3& dir)
+		static double ComputePreferredCuttingDirection(const PrimitiveSet* const tset, Vec3& dir)
 		{
 			double ex = tset->GetEigenValue(AXIS_X);
 			double ey = tset->GetEigenValue(AXIS_Y);
@@ -119,7 +119,7 @@ namespace nd
 			}
 		}
 
-		void ComputeAxesAlignedClippingPlanes(const VoxelSet& vset, const short downsampling, SArray<Plane>& planes)
+		static void ComputeAxesAlignedClippingPlanes(const VoxelSet& vset, const short downsampling, SArray<Plane>& planes)
 		{
 			const Triangle minV (vset.GetMinBBVoxels());
 			const Triangle maxV (vset.GetMaxBBVoxels());
@@ -166,7 +166,7 @@ namespace nd
 			}
 		}
 
-		void RefineAxesAlignedClippingPlanes(const VoxelSet& vset, const Plane& bestPlane, const short downsampling,
+		static void RefineAxesAlignedClippingPlanes(const VoxelSet& vset, const Plane& bestPlane, const short downsampling,
 			SArray<Plane>& planes)
 		{
 			const Triangle minV = vset.GetMinBBVoxels();
@@ -241,8 +241,8 @@ namespace nd
 			ndInt32 iBest = -1;
 			ndInt32 nPlanes = ndInt32(planes.Size());
 			double minTotal = MAX_DOUBLE;
-			double minBalance = MAX_DOUBLE;
-			double minSymmetry = MAX_DOUBLE;
+			//double minBalance = MAX_DOUBLE;
+			//double minSymmetry = MAX_DOUBLE;
 			minConcavity = MAX_DOUBLE;
 
 			class CommonData
@@ -293,8 +293,8 @@ namespace nd
 					double volumeRight;
 					m_commonData->m_inputPSet->ComputeClippedVolumes(m_plane, volumeRight, volumeLeft);
 			
-					double concavityLeft = float(ComputeConcavity(volumeLeft, volumeLeftCH, m_commonData->m_me->m_volumeCH0));
-					double concavityRight = float(ComputeConcavity(volumeRight, volumeRightCH, m_commonData->m_me->m_volumeCH0));
+					double concavityLeft = ComputeConcavity(volumeLeft, volumeLeftCH, m_commonData->m_me->m_volumeCH0);
+					double concavityRight = ComputeConcavity(volumeRight, volumeRightCH, m_commonData->m_me->m_volumeCH0);
 					double concavity = (concavityLeft + concavityRight);
 			
 					// compute cost
@@ -340,8 +340,8 @@ namespace nd
 
 			iBest = 0;
 			minConcavity = jobs[0].m_concavity;
-			minBalance = jobs[0].m_balance;
-			minSymmetry = jobs[0].m_symmetry;
+			//minBalance = jobs[0].m_balance;
+			//minSymmetry = jobs[0].m_symmetry;
 			bestPlane = jobs[0].m_plane;
 			minTotal = jobs[0].m_concavity + jobs[0].m_balance + jobs[0].m_symmetry;
 			for (ndInt32 i = 1; i < nPlanes; ++i)
@@ -350,8 +350,8 @@ namespace nd
 				if ((total < minTotal && int32_t(i) < iBest) || total < minTotal)
 				{
 					minConcavity = jobs[i].m_concavity;
-					minBalance = jobs[i].m_balance;
-					minSymmetry = jobs[i].m_symmetry;
+					//minBalance = jobs[i].m_balance;
+					//minSymmetry = jobs[i].m_symmetry;
 					bestPlane = jobs[i].m_plane;
 					minTotal = total;
 					iBest = i;
@@ -419,7 +419,7 @@ namespace nd
 						m_volumeCH0 = volumeCH;
 					}
 
-					double concavity = float(ComputeConcavity(volume, volumeCH, m_volumeCH0));
+					double concavity = ComputeConcavity(volume, volumeCH, m_volumeCH0);
 					double error = 1.01 * pset->ComputeMaxVolumeError() / m_volumeCH0;
 					// make the value smaller, later put it the parameters.
 					error *= params.m_concavityToVolumeWeigh;
@@ -435,7 +435,7 @@ namespace nd
 						double w = ComputePreferredCuttingDirection(*pset, preferredCuttingDirection);
 						planes.Resize(0);
 
-						ComputeAxesAlignedClippingPlanes(*((VoxelSet*)*pset), short(params.m_planeDownsampling), planes);
+						ComputeAxesAlignedClippingPlanes(*reinterpret_cast<VoxelSet*>(*pset), short(params.m_planeDownsampling), planes);
 
 						Plane bestPlane;
 						double minConcavity = MAX_DOUBLE;
@@ -455,7 +455,7 @@ namespace nd
 						if ((params.m_planeDownsampling > 1 || params.m_convexhullDownsampling > 1)) 
 						{
 							planesRef.Resize(0);
-							RefineAxesAlignedClippingPlanes(*((VoxelSet*)*pset), bestPlane, short(params.m_planeDownsampling), planesRef);
+							RefineAxesAlignedClippingPlanes(*reinterpret_cast<VoxelSet*>(*pset), bestPlane, short(params.m_planeDownsampling), planesRef);
 
 							ComputeBestClippingPlane(
 								*pset,
@@ -521,7 +521,7 @@ namespace nd
 			}
 		}
 
-		void AddPoints(const Mesh* const mesh, SArray<Vec3>& pts)
+		static void AddPoints(const Mesh* const mesh, SArray<Vec3>& pts)
 		{
 			const size_t n = mesh->GetNPoints();
 			for (size_t i = 0; i < n; ++i) 
@@ -529,13 +529,14 @@ namespace nd
 				pts.PushBack(mesh->GetPoint(i));
 			}
 		}
-		void ComputeConvexHull(const Mesh* const ch1, const Mesh* const ch2, SArray<Vec3>& pts, Mesh* const combinedCH)
+
+		static void ComputeConvexHull(const Mesh* const ch1, const Mesh* const ch2, SArray<Vec3>& pts, Mesh* const combinedCH)
 		{
 			pts.Resize(0);
 			AddPoints(ch1, pts);
 			AddPoints(ch2, pts);
 	
-			ConvexHull ch((double*)pts.Data(), sizeof(Vec3), (int32_t)pts.Size(), 1.0e-5f);
+			ConvexHull ch(reinterpret_cast<double*>(pts.Data()), sizeof(Vec3), int32_t(pts.Size()), double(1.0e-5f));
 
 			combinedCH->ResizePoints(0);
 			combinedCH->ResizeTriangles(0);
@@ -640,7 +641,7 @@ namespace nd
 						const float volume0 = float(convexHulls[pair.m_p0]->ComputeVolume());
 						const float volume1 = float(convexHulls[pair.m_p1]->ComputeVolume());
 						ComputeConvexHull(*convexHulls[pair.m_p0], *convexHulls[pair.m_p1], pts, &combinedCH);
-						pair.m_cost = float(ComputeConcavity(volume0 + volume1, combinedCH.ComputeVolume(), m_volumeCH0));
+						pair.m_cost = float(ComputeConcavity(double(volume0 + volume1), combinedCH.ComputeVolume(), m_volumeCH0));
 					}
 				}
 
@@ -718,7 +719,7 @@ namespace nd
 				for (ndInt32 i = 0; i < convexPairArray.GetCount(); i++)
 				{
 					ConvexPair& pair = convexPairArray[i];
-					if (pair.m_cost < (2.0f * params.m_minMergeToleranace))
+					if (double(pair.m_cost) < (double(2.0f) * params.m_minMergeToleranace))
 					{
 						priority.Push(pair, pair.m_cost);
 					}
@@ -726,7 +727,7 @@ namespace nd
 
 				Mesh combinedCH;
 				SArray<Vec3> pts;
-				while (((nConvexHulls > params.m_maxConvexHulls) || (priority.Value() <= params.m_minMergeToleranace)) && priority.GetCount())
+				while (((nConvexHulls > params.m_maxConvexHulls) || (double(priority.Value()) <= params.m_minMergeToleranace)) && priority.GetCount())
 				{
 					ConvexKey key(priority[0]);
 					ndTree<ndInt32, ConvexKey, ndContainersFreeListAlloc<ndInt32>>::ndNode* const it = hullGraph.Find(key);
@@ -777,7 +778,7 @@ namespace nd
 									ConvexPair pair(i0, index);
 									const float volume1 = float(convexProxyArray[i].m_hull->ComputeVolume());
 									ComputeConvexHull(*newHull, *convexProxyArray[i].m_hull, pts, &combinedCH);
-									float cost = float(ComputeConcavity(volume0 + volume1, combinedCH.ComputeVolume(), m_volumeCH0));
+									float cost = float(ComputeConcavity(double(volume0 + volume1), combinedCH.ComputeVolume(), m_volumeCH0));
 									priority.Push(pair, cost);
 								}
 							}
@@ -839,7 +840,7 @@ namespace nd
 			const uint32_t* const triangles, const uint32_t nTriangles,
 			const Parameters& params)
 		{
-			VoxelizeMesh(points, 3, nPoints, (int32_t*)triangles, 3, nTriangles, params);
+			VoxelizeMesh(points, 3, nPoints, reinterpret_cast<int32_t*>(const_cast <uint32_t*>(triangles)), 3, nTriangles, params);
 			ComputePrimitiveSet(params);
 			ComputeACD(params);
 			MergeConvexHulls(params);

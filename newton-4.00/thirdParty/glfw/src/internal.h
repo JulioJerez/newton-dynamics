@@ -55,10 +55,7 @@
 
 #if defined(__clang__)
     #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wunused-parameter"
-    #pragma clang diagnostic ignored "-Wreserved-identifier"
-    #pragma clang diagnostic ignored "-Wreserved-macro-identifier"
-    #pragma clang diagnostic ignored "-Wnonportable-system-include-path"
+    #pragma clang diagnostic ignored "-Weverything"
 #endif
 
 #define _GLFW_INSERT_FIRST      0

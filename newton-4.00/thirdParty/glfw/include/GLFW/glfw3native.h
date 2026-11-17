@@ -29,6 +29,11 @@
 #ifndef _glfw3_native_h_
 #define _glfw3_native_h_
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Weverything"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -622,6 +627,10 @@ GLFWAPI OSMesaContext glfwGetOSMesaContext(GLFWwindow* window);
 
 #ifdef __cplusplus
 }
+#endif
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
 #endif
 
 #endif /* _glfw3_native_h_ */

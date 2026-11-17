@@ -361,7 +361,7 @@ void ndWorld::PhysicsUpdate()
 	PreUpdate(m_timestep);
 
 	ndInt32 const steps = m_subSteps;
-	ndFloat32 timestep = m_timestep / (ndFloat32)steps;
+	ndFloat32 timestep = m_timestep / ndFloat32(steps);
 	for (ndInt32 i = 0; i < steps; ++i)
 	{
 		SubStepUpdate(timestep);
@@ -378,7 +378,7 @@ void ndWorld::PhysicsUpdate()
 
 	m_scene->End();
 
-	m_lastExecutionTime = (ndFloat32)(ndGetTimeInMicroseconds() - timeAcc) * ndFloat32(1.0e-6f);
+	m_lastExecutionTime = ndFloat32(ndGetTimeInMicroseconds() - timeAcc) * ndFloat32(1.0e-6f);
 	CalculateAverageUpdateTime();
 }
 
@@ -395,7 +395,7 @@ void ndWorld::CollisionUpdate()
 	PreUpdate(m_timestep);
 
 	ndInt32 const steps = m_subSteps;
-	ndFloat32 timestep = m_timestep / (ndFloat32)steps;
+	ndFloat32 timestep = m_timestep / ndFloat32(steps);
 
 	//SubStepUpdate(timestep);
 	OnSubStepPreUpdate(timestep);
@@ -425,7 +425,7 @@ void ndWorld::CollisionUpdate()
 
 	m_scene->End();
 
-	m_lastExecutionTime = (ndFloat32)(ndGetTimeInMicroseconds() - timeAcc) * ndFloat32(1.0e-6f);
+	m_lastExecutionTime = ndFloat32(ndGetTimeInMicroseconds() - timeAcc) * ndFloat32(1.0e-6f);
 	CalculateAverageUpdateTime();
 
 	m_collisionUpdate = false;
@@ -638,7 +638,8 @@ void ndWorld::UpdateSkeletons()
 		// find all root nodes for all independent joint arrangements
 		ndInt32 inslandCount = 0;
 		solverUpdate.m_leftHandSide.SetCount(ndMax(ndInt32 (bodyArray.GetCount()) + 256, 1024));
-		ndIslandMember* const islands = (ndIslandMember*)&solverUpdate.m_leftHandSide[0];
+		//ndIslandMember* const islands = (ndIslandMember*)&solverUpdate.m_leftHandSide[0];
+		ndIslandMember* const islands = reinterpret_cast<ndIslandMember*>(&solverUpdate.m_leftHandSide[0]);
 		for (ndInt32 i = 0; i < bodyArray.GetCount(); ++i)
 		{
 			ndBodyKinematic* const body = bodyArray[i];
@@ -703,7 +704,7 @@ void ndWorld::UpdateSkeletons()
 									//dTrace(("%s %d %d\n", constraint->GetClassName(), constraint->GetBody0()->GetId(), constraint->GetBody1()->GetId()));
 									constraint->m_mark0 = 1;
 									ndAssert(childBody == skeleton->GetRoot()->m_body);
-									ndSkeletonContainer::ndNode* const node = skeleton->AddChild((ndJointBilateralConstraint*)constraint, skeleton->GetRoot());
+									ndSkeletonContainer::ndNode* const node = skeleton->AddChild(constraint, skeleton->GetRoot());
 									node->m_body->m_skeletonMark = 1;
 									ndAssert(node->m_body != childBody);
 									queuePool.Push(node);
@@ -733,7 +734,7 @@ void ndWorld::UpdateSkeletons()
 					if (test && (constraint->GetSolverModel() != m_jointkinematicCloseLoop))
 					{
 						ndBodyKinematic* const childBody = (constraint->GetBody0() != rootBody) ? constraint->GetBody0() : constraint->GetBody1();
-						if (childBody->GetInvMass())
+						if (childBody->GetInvMass() > ndFloat32 (0.0f))
 						{
 							hasJoints = true;
 							break;
@@ -757,7 +758,7 @@ void ndWorld::UpdateSkeletons()
 						{
 							constraint->m_mark0 = 1;
 							ndAssert(skeleton->GetRoot()->m_body != ((constraint->GetBody0() != rootBody) ? constraint->GetBody0() : constraint->GetBody1()));
-							ndSkeletonContainer::ndNode* const node = skeleton->AddChild((ndJointBilateralConstraint*)constraint, skeleton->GetRoot());
+							ndSkeletonContainer::ndNode* const node = skeleton->AddChild(constraint, skeleton->GetRoot());
 							node->m_body->m_skeletonMark = 1;
 							ndAssert(node->m_body == ((constraint->GetBody0() != rootBody) ? constraint->GetBody0() : constraint->GetBody1()));
 							queuePool.Push(node);
@@ -769,8 +770,9 @@ void ndWorld::UpdateSkeletons()
 			if (skeleton)
 			{
 				// add the rest of the children to this skeleton
-				ndInt32 loopCount = 0;
-				ndJointBilateralConstraint* loopJoints[128];
+				//ndInt32 loopCount = 0;
+				//ndJointBilateralConstraint* loopJoints[128];
+				ndFixSizeArray<ndJointBilateralConstraint*, 256> loopJoints;
 			
 				while (!queuePool.IsEmpty())
 				{
@@ -806,10 +808,11 @@ void ndWorld::UpdateSkeletons()
 											ndSkeletonContainer::ndNode* const childNode = skeleton->AddChild(constraint, parentNode);
 											queuePool.Push(childNode);
 										}
-										else if (loopCount < ndInt32 ((sizeof(loopJoints) / sizeof(loopJoints[0]))))
+										//else if (loopCount < ndInt32 ((sizeof(loopJoints) / sizeof(loopJoints[0]))))
+										else 
 										{
-											loopJoints[loopCount] = (ndJointBilateralConstraint*)constraint;
-											loopCount++;
+											//loopJoints[loopCount] = (ndJointBilateralConstraint*)constraint;
+											loopJoints.PushBack(constraint);
 										}
 									}
 								}
@@ -823,7 +826,7 @@ void ndWorld::UpdateSkeletons()
 						}
 					}
 				}
-				skeleton->Finalize(loopCount, loopJoints);
+				skeleton->Finalize(loopJoints.GetCount(), loopJoints.GetCount() ? &loopJoints[0] : nullptr);
 			}
 		}
 	
@@ -846,8 +849,8 @@ void ndWorld::UpdateSkeletons()
 	{
 		ndSort(&m_activeSkeletons[0], ndInt32(m_activeSkeletons.GetCount()), [](const ndSkeletonContainer* const skeletonA, const ndSkeletonContainer* const skeletonB)
 		{
-			ndInt32 countA = (ndInt32)skeletonA->GetNodeList().GetCount();
-			ndInt32 countB = (ndInt32)skeletonB->GetNodeList().GetCount();
+			ndInt32 countA = ndInt32(skeletonA->GetNodeList().GetCount());
+			ndInt32 countB = ndInt32(skeletonB->GetNodeList().GetCount());
 			if (countA > countB)
 			{
 				return -1;
@@ -891,7 +894,7 @@ void ndWorld::SelectSolver(ndSolverModes solverMode)
 		{
 			case ndSimd8Solver:
 			{
-				ndWorldScene* const newScene = new ndWorldScene(*((ndWorldScene*)m_scene));
+				ndWorldScene* const newScene = new ndWorldScene(*static_cast<ndWorldScene*>(m_scene));
 				delete m_scene;
 				m_scene = newScene;
 
@@ -902,7 +905,7 @@ void ndWorld::SelectSolver(ndSolverModes solverMode)
 
 			case ndSimd16Solver:
 			{
-				ndWorldScene* const newScene = new ndWorldScene(*((ndWorldScene*)m_scene));
+				ndWorldScene* const newScene = new ndWorldScene(*static_cast<ndWorldScene*>(m_scene));
 				delete m_scene;
 				m_scene = newScene;
 
@@ -914,7 +917,7 @@ void ndWorld::SelectSolver(ndSolverModes solverMode)
 			case ndStandardSolver:
 			default:
 			{
-				ndWorldScene* const newScene = new ndWorldScene(*((ndWorldScene*)m_scene));
+				ndWorldScene* const newScene = new ndWorldScene(*static_cast<ndWorldScene*>(m_scene));
 				delete m_scene;
 				m_scene = newScene;
 
@@ -924,7 +927,7 @@ void ndWorld::SelectSolver(ndSolverModes solverMode)
 			}
 		}
 
-		#ifdef _DEBUG
+		#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		for (ndBodyListView::ndNode* node = m_scene->GetBodyList().GetFirst(); node; node = node->GetNext())
 		{
 			ndBodyKinematic* const body = node->GetInfo()->GetAsBodyKinematic();
@@ -977,7 +980,8 @@ void ndWorld::AddModel(const ndSharedPtr<ndModel>& model)
 	ndScopeSpinLock lock(m_addRemoveModelsLock);
 	m_modelList.AddModel(model, this);
 	model->OnAddToWorld();
-	OnAddModel((ndModel*)*model);
+	//ndModel* const modelPtr = const_cast<ndModel*> (*model);
+	OnAddModel(const_cast<ndModel*> (*model));
 }
 
 void ndWorld::RemoveModel(ndModel* const model)
@@ -1004,9 +1008,10 @@ void ndWorld::AddJoint(const ndSharedPtr<ndJointBilateralConstraint>& joint)
 			m_skeletonList.m_skelListIsDirty = true;
 		}
 		joint->m_worldNode = m_jointList.Append(joint);
-		joint->m_body0Node = joint->GetBody0()->AttachJoint((ndJointBilateralConstraint*)*joint);
-		joint->m_body1Node = joint->GetBody1()->AttachJoint((ndJointBilateralConstraint*)*joint);
-		OnAddJoint((ndJointBilateralConstraint*)*joint);
+		ndJointBilateralConstraint* const jointPtr = const_cast<ndJointBilateralConstraint*> (*joint);
+		joint->m_body0Node = joint->GetBody0()->AttachJoint(jointPtr);
+		joint->m_body1Node = joint->GetBody1()->AttachJoint(jointPtr);
+		OnAddJoint(const_cast<ndJointBilateralConstraint*>(jointPtr));
 	}
 }
 

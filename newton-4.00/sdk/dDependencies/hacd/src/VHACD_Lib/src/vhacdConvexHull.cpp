@@ -45,10 +45,10 @@ namespace nd
 
 			isvalid = false;
 			double mag2 = plane.DotProduct(plane).GetScalar();
-			if (mag2 > 1.0e-16f)
+			if (mag2 > double(1.0e-16f))
 			{
 				isvalid = true;
-				plane = plane.Scale(1.0f / sqrt(mag2));
+				plane = plane.Scale(double(1.0f) / sqrt(mag2));
 			}
 			return plane;
 		}
@@ -495,7 +495,7 @@ namespace nd
 					}
 					else
 					{
-						ConvexHull3dPointCluster* const cluster = (ConvexHull3dPointCluster*)me;
+						ConvexHull3dPointCluster* const cluster = reinterpret_cast<ConvexHull3dPointCluster*>(const_cast<ConvexHullAABBTreeNode*>(me));
 						const ndInt32* const indices = cluster->m_indices;
 
 						for (ndInt32 i = 0; i < cluster->m_count; ++i)

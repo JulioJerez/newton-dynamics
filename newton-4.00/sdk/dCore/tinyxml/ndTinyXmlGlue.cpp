@@ -72,7 +72,7 @@ class ndParseXmlData
 
 static char* FloatToString(char* const buffer, ndInt32 size, ndFloat32 value)
 {
-	snprintf(buffer, size_t(size), "%g", value);
+	snprintf(buffer, size_t(size), "%g", ndFloat64(value));
 	char* ptr = buffer + strlen(buffer);
 	*ptr = ' ';
 	ptr++;
@@ -85,7 +85,7 @@ static void CleanWhiteSpace(const char* const value)
 	size_t size = strlen(value) - 1;
 	if (value[size] == ' ')
 	{
-		char* ptr = (char*)value;
+		char* const ptr = const_cast<char*>(value);
 		ptr[size] = 0;
 	}
 }
@@ -148,7 +148,7 @@ void xmlSaveAttribute(nd::TiXmlElement* const rootNode, const char* const name, 
 
 void xmlSaveAttribute(nd::TiXmlElement* const rootNode, const char* const name, ndReal value)
 {
-	rootNode->SetDoubleAttribute(name, value);
+	rootNode->SetDoubleAttribute(name, ndFloat64 (value));
 }
 
 void xmlSaveAttribute(nd::TiXmlElement* const rootNode, const char* const name, ndTriplexReal value)
@@ -204,7 +204,7 @@ void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, ndIn
 {
 	char buffer[1024];
 	long long x = value;
-	snprintf(buffer, sizeof (buffer), "%llu", x);
+	snprintf(buffer, sizeof (buffer), "%lld", x);
 	xmlSaveParam(rootNode, name, "int64", buffer);
 }
 
@@ -351,14 +351,14 @@ void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, cons
 ndInt32 xmlGetNodeId(const nd::TiXmlNode* const rootNode)
 {
 	ndInt32 id;
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode;
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode);
 	element->Attribute("nodeId", &id);
 	return id;
 }
 
 ndInt32 xmlGetInt(const nd::TiXmlNode* const rootNode, const char* const name)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 	ndInt32 value;
 	element->Attribute("int32", &value);
@@ -367,26 +367,26 @@ ndInt32 xmlGetInt(const nd::TiXmlNode* const rootNode, const char* const name)
 
 ndInt64 xmlGetInt64(const nd::TiXmlNode* const rootNode, const char* const name)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 	const char* const data = element->Attribute("int64");
 
-	ndInt32 ret = 0;
+	//ndInt32 ret = 0;
 	long long int value;
-	ret = sscanf(data, "%lld", &value);
+	sscanf(data, "%lld", &value);
 	return ndInt64(value);
 }
 
 const char* xmlGetString(const nd::TiXmlNode* const rootNode, const char* const name)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 	return element->Attribute("string");
 }
 
 ndFloat32 xmlGetFloat(const nd::TiXmlNode* const rootNode, const char* const name)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 	ndFloat64 value;
 	element->Attribute("float", &value);
@@ -395,7 +395,7 @@ ndFloat32 xmlGetFloat(const nd::TiXmlNode* const rootNode, const char* const nam
 
 ndVector xmlGetVector3(const nd::TiXmlNode* const rootNode, const char* const name)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 
 	const char* const positData = element->Attribute("float3");
@@ -403,8 +403,8 @@ ndVector xmlGetVector3(const nd::TiXmlNode* const rootNode, const char* const na
 	ndFloat64 fx;
 	ndFloat64 fy;
 	ndFloat64 fz;
-	ndInt32 ret = 0;
-	ret = sscanf(positData, "%lf %lf %lf", &fx, &fy, &fz);
+	//ndInt32 ret = 0;
+	sscanf(positData, "%lf %lf %lf", &fx, &fy, &fz);
 
 	ndVector posit(ndVector::m_zero);
 	posit.m_x = ndFloat32(fx);
@@ -415,7 +415,7 @@ ndVector xmlGetVector3(const nd::TiXmlNode* const rootNode, const char* const na
 
 ndMatrix xmlGetMatrix(const nd::TiXmlNode* const rootNode, const char* const name)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 
 	ndVector posit(xmlGetVector3(element, "posit"));
@@ -429,7 +429,7 @@ ndMatrix xmlGetMatrix(const nd::TiXmlNode* const rootNode, const char* const nam
 
 void xmlGetInt(const nd::TiXmlNode* const rootNode, const char* const name, ndArray<ndInt32>& array)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 	ndInt32 count;
 	element->Attribute("count", &count);
@@ -447,7 +447,7 @@ void xmlGetInt(const nd::TiXmlNode* const rootNode, const char* const name, ndAr
 
 void xmlGetInt64(const nd::TiXmlNode* const rootNode, const char* const name, ndArray<ndInt64>& array)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 	ndInt32 count;
 	element->Attribute("count", &count);
@@ -465,7 +465,7 @@ void xmlGetInt64(const nd::TiXmlNode* const rootNode, const char* const name, nd
 
 void xmlGetRealArray(const nd::TiXmlNode* const rootNode, const char* const name, ndArray<ndReal>& array)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 	ndInt32 count;
 	element->Attribute("count", &count);
@@ -483,7 +483,7 @@ void xmlGetRealArray(const nd::TiXmlNode* const rootNode, const char* const name
 
 void xmlGetFloatArray3(const nd::TiXmlNode* const rootNode, const char* const name, ndArray<ndTriplexReal>& array)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 	ndInt32 count;
 	element->Attribute("count", &count);
@@ -504,7 +504,7 @@ void xmlGetFloatArray3(const nd::TiXmlNode* const rootNode, const char* const na
 
 void xmlGetFloatArray3(const nd::TiXmlNode* const rootNode, const char* const name, ndArray<ndVector>& array)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 	ndInt32 count;
 	element->Attribute("count", &count);
@@ -525,7 +525,7 @@ void xmlGetFloatArray3(const nd::TiXmlNode* const rootNode, const char* const na
 
 void xmlGetFloat64Array3(const nd::TiXmlNode* const rootNode, const char* const name, ndArray<ndBigVector>& array)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	ndAssert(element);
 	ndInt32 count;
 	element->Attribute("count", &count);
@@ -545,7 +545,7 @@ void xmlGetFloat64Array3(const nd::TiXmlNode* const rootNode, const char* const 
 
 D_TINY_API bool xmlHasParam(const nd::TiXmlNode* const rootNode, const char* const name)
 {
-	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
+	const nd::TiXmlElement* const element = static_cast<const nd::TiXmlElement*>(rootNode->FirstChild(name));
 	return element ? true : false;
 }
 

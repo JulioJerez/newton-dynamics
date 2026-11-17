@@ -44,12 +44,7 @@ const char* LODEPNG_VERSION_STRING = "20161127";
 
 #if defined(__clang__)
     #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wcast-qual"
-    #pragma clang diagnostic ignored "-Wswitch-default"
-    #pragma clang diagnostic ignored "-Wold-style-cast"
-    #pragma clang diagnostic ignored "-Wmissing-prototypes"
-    #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
-    #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+    #pragma clang diagnostic ignored "-Weverything"
 #endif
 
 
