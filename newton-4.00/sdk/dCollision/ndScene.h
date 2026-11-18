@@ -111,6 +111,9 @@ class ndScene : public ndThreadPool
 	D_COLLISION_API ndArray<ndConstraint*>& GetActiveContactArray();
 	D_COLLISION_API const ndArray<ndConstraint*>& GetActiveContactArray() const;
 
+	D_COLLISION_API ndSharedPtr<ndGpuDriver> GetGpuContext() const;
+	D_COLLISION_API void SetGpuContext(ndSharedPtr<ndGpuDriver>);
+
 	D_COLLISION_API ndFloat32 GetTimestep() const;
 	D_COLLISION_API void SetTimestep(ndFloat32 timestep);
 	D_COLLISION_API ndBodyKinematic* GetSentinelBody() const;

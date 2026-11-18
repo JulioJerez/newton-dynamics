@@ -244,6 +244,17 @@ ndBodyKinematic* ndScene::GetSentinelBody() const
 	return const_cast<ndBodyKinematic *>(*m_sentinelBody);
 }
 
+ndSharedPtr<ndGpuDriver> ndScene::GetGpuContext() const
+{
+	return m_gpuContext;
+}
+
+void ndScene::SetGpuContext(ndSharedPtr<ndGpuDriver> driver)
+{
+	m_gpuContext = driver;
+}
+
+
 void ndScene::Sync()
 {
 	ndThreadPool::Sync();

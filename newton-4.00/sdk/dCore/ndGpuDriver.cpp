@@ -53,6 +53,11 @@ bool ndGpuDriver::IsValid() const
 	return false;
 }
 
+ndGpuDriver* ndGpuDriver::Create()
+{
+	return new ndGpuDriver();
+}
+
 #else
 //#ifdef D_USE_OPENCL_SDK
 //	#define CL_HPP_TARGET_OPENCL_VERSION 300

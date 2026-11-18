@@ -34,6 +34,11 @@ class ndDynamicsUpdateGpu : public ndDynamicsUpdate
 
 	virtual void Update() override;
 
+	private:
+	void UpdateGpu();
+
+	ndWeakPtr<ndGpuDriver> m_context;
+
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 

@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef ND_CPU_CONTEXT_H_
-#define ND_CPU_CONTEXT_H_
+#ifndef ND_CPU_DRIVER_H_
+#define ND_CPU_DRIVER_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"
@@ -32,8 +32,9 @@ class ndGpuDriver : public ndClassAlloc
 	public:
 	class ndInternal;
 
+	D_CORE_API static ndGpuDriver* Create();
+
 	D_CORE_API ~ndGpuDriver();
-	D_CORE_API ndGpuDriver* Create();
 	D_CORE_API bool IsValid() const;
 
 	private:

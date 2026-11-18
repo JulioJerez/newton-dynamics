@@ -30,7 +30,15 @@
 
 ndDynamicsUpdateGpu::ndDynamicsUpdateGpu(ndWorld* const world)
 	:ndDynamicsUpdate(ndDynamicsUpdate(world))
+	,m_context(nullptr)
 {
+	ndSharedPtr<ndGpuDriver> driver (ndGpuDriver::Create());
+	if (driver->IsValid())
+	{
+		ndScene* const scene = world->GetScene();
+		scene->SetGpuContext(driver);
+		m_context = ndWeakPtr<ndGpuDriver>(*driver);
+	}
 }
 
 ndDynamicsUpdateGpu::~ndDynamicsUpdateGpu()
@@ -40,5 +48,19 @@ ndDynamicsUpdateGpu::~ndDynamicsUpdateGpu()
 
 void ndDynamicsUpdateGpu::Update()
 {
+	if (m_context)
+	{
+		UpdateGpu();
+	}
+	else
+	{
+		// if not GPU found, default to cpu 
+		ndDynamicsUpdate::Update();
+	}
+}
+
+void ndDynamicsUpdateGpu::UpdateGpu()
+{
 	ndDynamicsUpdate::Update();
 }
+
