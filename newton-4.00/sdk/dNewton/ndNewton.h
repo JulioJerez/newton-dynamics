@@ -44,6 +44,7 @@
 #include <ndDynamicsUpdate.h>
 #include <ndMeshComponents.h>
 #include <ndSkeletonContainer.h>
+#include <ndDynamicsUpdateGpu.h>
 #include <ndDynamicsUpdateSimd8.h>
 #include <ndDynamicsUpdateSimd16.h>
 

@@ -495,7 +495,7 @@ namespace nd
 					}
 					else
 					{
-						ConvexHull3dPointCluster* const cluster = reinterpret_cast<ConvexHull3dPointCluster*>(const_cast<ConvexHullAABBTreeNode*>(me));
+						ConvexHull3dPointCluster* const cluster = static_cast<ConvexHull3dPointCluster*>(const_cast<ConvexHullAABBTreeNode*>(me));
 						const ndInt32* const indices = cluster->m_indices;
 
 						for (ndInt32 i = 0; i < cluster->m_count; ++i)

@@ -17,6 +17,11 @@ if (NEWTON_USE_DEFAULT_NEW_AND_DELETE)
 	add_definitions(-DD_USE_DEFAULT_NEW_AND_DELETE)
 endif()
 
+if(MSVC AND NEWTON_ENABLE_GPU_PHYSCIS)
+	add_definitions(-DND_USE_GPU_PHYSICS)
+endif()
+
+
 if (NEWTON_BUILD_PROFILER)
 	add_subdirectory(dProfiler)
 endif()

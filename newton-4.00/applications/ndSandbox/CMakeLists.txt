@@ -79,7 +79,7 @@ endif()
 set (openclSDKPath ${CMAKE_SOURCE_DIR}/thirdParty/opencl/OpenCL-SDK-v2024.10.24-Win-x64)
 
 # for now opencl only for windows, I need to figure out the path for linux systems
-if(NEWTON_ENABLE_OPENCL_SDK AND MSVC)
+if(MSVC AND (NEWTON_ENABLE_GPU_BRAIN OR NEWTON_ENABLE_GPU_PHYSCIS))
 	include_directories(${openclSDKPath}/include)
 	include_directories(../../sdk/dBrain/dOpencl)
 else()
@@ -151,7 +151,7 @@ if (NEWTON_BUILD_PROFILER)
 endif ()
 
 if(MSVC OR MINGW)
-	if(NEWTON_ENABLE_OPENCL_SDK)
+	if(NEWTON_ENABLE_GPU_BRAIN)
 		target_link_libraries (${projectName} PUBLIC ${openclSDKPath}/lib/OpenCL.lib)
 	endif()
 

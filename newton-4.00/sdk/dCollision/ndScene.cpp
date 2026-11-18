@@ -62,6 +62,7 @@ ndScene::ndScene()
 	,m_newPairs(1024)
 	,m_lock()
 	,m_rootNode(nullptr)
+	,m_gpuContext(nullptr)
 	,m_sentinelBody(nullptr)
 	,m_contactNotifyCallback(nullptr)
 	,m_timestep(ndFloat32 (0.0f))
@@ -104,6 +105,9 @@ ndScene::ndScene(const ndScene& src)
 {
 	ndScene* const stealData = (ndScene*)&src;
 
+	// each world have to have its own sentinel
+	m_sentinelBody = new ndBodySentinel(this);
+
 	SetThreadCount(src.GetThreadCount());
 
 	m_scratchBuffer.Swap(stealData->m_scratchBuffer);
@@ -111,7 +115,7 @@ ndScene::ndScene(const ndScene& src)
 	m_activeConstraintArray.Swap(stealData->m_activeConstraintArray);
 
 	ndSwap(m_rootNode, stealData->m_rootNode);
-	ndSwap(m_sentinelBody, stealData->m_sentinelBody);
+	//ndSwap(m_sentinelBody, stealData->m_sentinelBody);
 	ndSwap(m_contactNotifyCallback, stealData->m_contactNotifyCallback);
 
 	m_sentinelBody->m_scene = this;
@@ -237,7 +241,7 @@ void ndScene::SetTimestep(ndFloat32 timestep)
 
 ndBodyKinematic* ndScene::GetSentinelBody() const
 {
-	return m_sentinelBody;
+	return const_cast<ndBodyKinematic *>(*m_sentinelBody);
 }
 
 void ndScene::Sync()
@@ -1300,11 +1304,12 @@ void ndScene::Cleanup()
 	m_frameNumber = 0;
 	m_subStepNumber = 0;
 
-	if (m_sentinelBody)
-	{
-		delete m_sentinelBody;
-		m_sentinelBody = nullptr;
-	}
+	m_sentinelBody = ndSharedPtr<ndBodyKinematic>(nullptr);
+	//if (m_sentinelBody)
+	//{
+	//	delete m_sentinelBody;
+	//	m_sentinelBody = nullptr;
+	//}
 
 	m_bvhSceneManager.CleanUp();
 	m_contactArray.DeleteAllContacts();
@@ -1484,7 +1489,7 @@ void ndScene::UpdateBodyList()
 	if (m_bodyList.UpdateView())
 	{
 		ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
-		view.PushBack(m_sentinelBody);
+		view.PushBack(*m_sentinelBody);
 	}
 }
 
@@ -1616,7 +1621,7 @@ void ndScene::InitBodyArray()
 		}
 	}
 	
-	ndBodyKinematic* const sentinelBody = m_sentinelBody;
+	ndBodyKinematic* const sentinelBody = *m_sentinelBody;
 	sentinelBody->PrepareStep(ndInt32(GetActiveBodyArray().GetCount()) - 1);
 	
 	sentinelBody->m_isStatic = 1;
@@ -1807,7 +1812,7 @@ bool ndScene::ValidateScene()
 
 	ndInt32 index = 0;
 	const ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
-	if (view[view.GetCount() - 1] != m_sentinelBody)
+	if (view[view.GetCount() - 1] != *m_sentinelBody)
 	{
 		return false;
 	}
@@ -1827,7 +1832,7 @@ bool ndScene::ValidateScene()
 		return false;
 	}
 
-	filter.Insert(m_sentinelBody, m_sentinelBody);
+	filter.Insert(*m_sentinelBody, *m_sentinelBody);
 	for (ndJointList::ndNode* node = GetWorld()->GetJointList().GetFirst(); node; node = node->GetNext())
 	{
 		const ndConstraint* const joint = *node->GetInfo();

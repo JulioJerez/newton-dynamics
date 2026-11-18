@@ -914,6 +914,17 @@ void ndWorld::SelectSolver(ndSolverModes solverMode)
 				break;
 			}
 
+			case ndGpuSolver:
+			{
+				ndWorldScene* const newScene = new ndWorldScene(*static_cast<ndWorldScene*>(m_scene));
+				delete m_scene;
+				m_scene = newScene;
+
+				m_solverMode = solverMode;
+				m_solver = new ndDynamicsUpdateGpu(this);
+				break;
+			}
+
 			case ndStandardSolver:
 			default:
 			{

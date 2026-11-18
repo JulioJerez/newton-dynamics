@@ -37,10 +37,9 @@ class ndConvexCastNotify;
 class ndBodiesInAabbNotify;
 class ndJointBilateralConstraint;
 
-#define D_NEWTON_ENGINE_MAJOR_VERSION 4
-#define D_NEWTON_ENGINE_MINOR_VERSION 00
-
-#define D_SLEEP_ENTRIES			8
+#define D_NEWTON_ENGINE_MAJOR_VERSION	4
+#define D_NEWTON_ENGINE_MINOR_VERSION	00
+#define D_SLEEP_ENTRIES					8
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndWorld: public ndClassAlloc
@@ -51,6 +50,7 @@ class ndWorld: public ndClassAlloc
 		ndStandardSolver = 1,
 		ndSimd8Solver,
 		ndSimd16Solver,
+		ndGpuSolver,
 	};
 
 	D_BASE_CLASS_REFLECTION(ndWorld)

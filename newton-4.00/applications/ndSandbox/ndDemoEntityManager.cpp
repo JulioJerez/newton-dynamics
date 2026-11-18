@@ -1059,6 +1059,7 @@ void ndDemoEntityManager::ShowMainMenuBar()
 			ImGui::RadioButton("default", &solverMode, ndWorld::ndStandardSolver);
 			ImGui::RadioButton("simd-8", &solverMode, ndWorld::ndSimd8Solver);
 			ImGui::RadioButton("simd-16", &solverMode, ndWorld::ndSimd16Solver);
+			ImGui::RadioButton("gpu", &solverMode, ndWorld::ndGpuSolver);
 	
 			m_solverMode = ndWorld::ndSolverModes(solverMode);
 			ImGui::Separator();

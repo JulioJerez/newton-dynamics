@@ -13,6 +13,7 @@
 #define ND_SHARED_PTR_H_
 
 #include "ndCoreStdafx.h"
+#include "ndThreadSyncUtils.h"
 #include "ndContainersAlloc.h"
 
 template <typename T>

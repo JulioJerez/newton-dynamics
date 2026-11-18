@@ -76,7 +76,7 @@ namespace nd
 		void VHACD::ComputePrimitiveSet(const Parameters&)
 		{
 			m_pset = ndSharedPtr<PrimitiveSet>(new VoxelSet);
-			m_volume->Convert(*reinterpret_cast<VoxelSet*>(*m_pset));
+			m_volume->Convert(*static_cast<VoxelSet*>(*m_pset));
 		}
 
 		void VHACD::Compute(const float* const points,const uint32_t nPoints,
@@ -435,7 +435,7 @@ namespace nd
 						double w = ComputePreferredCuttingDirection(*pset, preferredCuttingDirection);
 						planes.Resize(0);
 
-						ComputeAxesAlignedClippingPlanes(*reinterpret_cast<VoxelSet*>(*pset), short(params.m_planeDownsampling), planes);
+						ComputeAxesAlignedClippingPlanes(*static_cast<VoxelSet*>(*pset), short(params.m_planeDownsampling), planes);
 
 						Plane bestPlane;
 						double minConcavity = MAX_DOUBLE;
@@ -455,7 +455,7 @@ namespace nd
 						if ((params.m_planeDownsampling > 1 || params.m_convexhullDownsampling > 1)) 
 						{
 							planesRef.Resize(0);
-							RefineAxesAlignedClippingPlanes(*reinterpret_cast<VoxelSet*>(*pset), bestPlane, short(params.m_planeDownsampling), planesRef);
+							RefineAxesAlignedClippingPlanes(*static_cast<VoxelSet*>(*pset), bestPlane, short(params.m_planeDownsampling), planesRef);
 
 							ComputeBestClippingPlane(
 								*pset,
