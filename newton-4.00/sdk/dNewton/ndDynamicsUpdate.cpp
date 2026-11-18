@@ -142,7 +142,7 @@ void ndDynamicsUpdate::SortBodyJointScan()
 	ndCountingSort<ndJointBodyPairIndex, ndEvaluateKey0, D_MAX_BODY_RADIX_BIT>(*scene, &bodyJointPairs[0], tempBuffer, ndInt32 (bodyJointPairs.GetCount()), nullptr, nullptr);
 	ndCountingSort<ndJointBodyPairIndex, ndEvaluateKey1, D_MAX_BODY_RADIX_BIT>(*scene, tempBuffer, &bodyJointPairs[0], ndInt32 (bodyJointPairs.GetCount()), nullptr, nullptr);
 
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = 1; i < bodyJointPairs.GetCount(); ++i)
 	{
 		ndInt32 key0 = bodyJointPairs[i - 1].m_body;
@@ -178,7 +178,7 @@ void ndDynamicsUpdate::SortBodyJointScan()
 		bodyJointIndexAcc += count;
 	}
 
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	const ndArray<ndJointBodyPairIndex>& jointBodyPairIndexBuffer = GetJointBodyPairIndexBuffer();
 	for (ndInt32 i = 0; i < scene->GetActiveBodyArray().GetCount(); ++i)
 	{
@@ -404,7 +404,7 @@ void ndDynamicsUpdate::SortJointsScan()
 	});
 	scene->ParallelExecute(Sort0, numberOfWorkGroups, 1);
 	
-	#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+	#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		for (ndInt32 i = 0; i < (jointArray.GetCount() - 1); ++i)
 		{
 			const ndConstraint* const joint0 = tempJointBuffer[i];
@@ -447,7 +447,7 @@ void ndDynamicsUpdate::SortJoints()
 	m_leftHandSide.SetCount(rowCount);
 	m_rightHandSide.SetCount(rowCount);
 
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndAssert(m_activeJointCount <= jointArray.GetCount());
 	for (ndInt32 i = 0; i < ndInt32 (jointArray.GetCount()); ++i)
 	{

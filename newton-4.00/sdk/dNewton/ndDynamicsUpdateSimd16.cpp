@@ -115,7 +115,7 @@ void ndDynamicsUpdateSimd16::SortJoints()
 	ndScene* const scene = m_world->GetScene();
 	ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
 
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = 1; i < m_activeJointCount; ++i)
 	{
 		ndConstraint* const joint0 = jointArray[i - 1];
@@ -219,7 +219,7 @@ void ndDynamicsUpdateSimd16::SortJoints()
 	m_rightHandSide.SetCount(rowsCount);
 	m_simdMassMatrixArray->SetCount(soaJointRowCount);
 
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndAssert(m_activeJointCount <= jointArray.GetCount());
 	const ndInt32 maxRowCount = ndInt32(m_leftHandSide.GetCount());
 	for (ndInt32 i = 0; i < ndInt32(jointArray.GetCount()); ++i)

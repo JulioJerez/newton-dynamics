@@ -2163,7 +2163,7 @@ ndEdge* ndPolyhedra::OptimizeCollapseEdge (ndEdge* const edge)
 	ndInt32 v0 = edge->m_incidentVertex;
 	ndInt32 v1 = edge->m_twin->m_incidentVertex;
 
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndPolyhedra::ndPairKey TwinKey (v1, v0);
 	ndPolyhedra::ndNode* const node = Find (TwinKey.GetVal());
 	ndEdge* const twin1 = node ? &node->GetInfo() : nullptr;

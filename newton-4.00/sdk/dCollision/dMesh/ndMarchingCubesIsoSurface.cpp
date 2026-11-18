@@ -596,96 +596,30 @@ ndFloat32 ndMarchingCubeIsoSurface::RayCast(const ndVector& localP0, const ndVec
 
 void ndMarchingCubeIsoSurface::GenerateIndexList()
 {
-	class ndKey_lowX
-	{
-		public:
-		ndKey_lowX(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			const ndFloat32 intBase = ndFloor(point.m_x);
-			const ndInt32 frac = ((point.m_x - intBase) > ndFloat32(0.0f)) ? 1 : 0;
-			const ndInt32 key = 2 * ndInt32(intBase) + frac;
-			return key & 0xff;
-		}
-	};
-	
-	class ndKey_highX
-	{
-		public:
-		ndKey_highX(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			const ndFloat32 intBase = ndFloor(point.m_x);
-			const ndInt32 frac = ((point.m_x - intBase) > ndFloat32(0.0f)) ? 1 : 0;
-			const ndInt32 key = (2 * ndInt32(intBase) + frac) >> 8;
-			return key & 0xff;
-		}
-	};
-	
-	class ndKey_lowY
-	{
-		public:
-		ndKey_lowY(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			const ndFloat32 intBase = ndFloor(point.m_y);
-			const ndInt32 frac = ((point.m_y - intBase) > ndFloat32(0.0f)) ? 1 : 0;
-			const ndInt32 key = 2 * ndInt32(intBase) + frac;
-			return key & 0xff;
-		}
-	};
-	
-	class ndKey_highY
-	{
-		public:
-		ndKey_highY(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			const ndFloat32 intBase = ndFloor(point.m_y);
-			const ndInt32 frac = ((point.m_y - intBase) > ndFloat32(0.0f)) ? 1 : 0;
-			const ndInt32 key = (2 * ndInt32(intBase) + frac) >> 8;
-			return key & 0xff;
-		}
-	};
-	
-	class ndKey_lowZ
-	{
-		public:
-		ndKey_lowZ(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			const ndFloat32 intBase = ndFloor(point.m_z);
-			const ndInt32 frac = ((point.m_z - intBase) > ndFloat32(0.0f)) ? 1 : 0;
-			const ndInt32 key = 2 * ndInt32(intBase) + frac;
-			return key & 0xff;
-		}
-	};
-	
-	class ndKey_highZ
-	{
-		public:
-		ndKey_highZ(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			const ndFloat32 intBase = ndFloor(point.m_z);
-			const ndInt32 frac = ((point.m_z - intBase) > ndFloat32(0.0f)) ? 1 : 0;
-			const ndInt32 key = (2 * ndInt32(intBase) + frac) >> 8;
-			return key & 0xff;
-		}
-	};
-	
 	for (ndInt32 i = 0; i < ndInt32 (m_meshPoints.GetCount()); ++i)
 	{
 		m_meshPoints[i].m_w = ndFloat32(i);
 	}
 
 	m_meshNormals.SetCount(m_meshPoints.GetCount());
-	ndCountingSort<ndVector, ndKey_lowX, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
-	ndCountingSort<ndVector, ndKey_highX, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
-	ndCountingSort<ndVector, ndKey_lowY, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
-	ndCountingSort<ndVector, ndKey_highY, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
-	ndCountingSort<ndVector, ndKey_lowZ, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
-	ndCountingSort<ndVector, ndKey_highZ, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
+	for (ndInt32 i = 0; i < 3; ++i)
+	{
+		ndCountingSortNew(m_meshPoints, m_meshNormals, nullptr, 8, [&i](const ndVector& point)
+		{
+			const ndFloat32 intBase = ndFloor(point[i]);
+			const ndInt32 frac = ((point[i] - intBase) > ndFloat32(0.0f)) ? 1 : 0;
+			const ndInt32 key = 2 * ndInt32(intBase) + frac;
+			return key & 0xff;
+		});
+
+		ndCountingSortNew(m_meshPoints, m_meshNormals, nullptr, 8, [&i](const ndVector& point)
+		{
+			const ndFloat32 intBase = ndFloor(point[i]);
+			const ndInt32 frac = ((point[i] - intBase) > ndFloat32(0.0f)) ? 1 : 0;
+			const ndInt32 key = (2 * ndInt32(intBase) + frac) >> 8;
+			return key & 0xff;
+		});
+	}
 
 	class ndHash : public ndGridHash
 	{
@@ -737,7 +671,6 @@ void ndMarchingCubeIsoSurface::GenerateIndexList()
 
 	auto ApplyScale = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		//m_meshNormals[groupId] = ndVector::m_zero;
 		m_meshPoints[groupId] = ndVector::m_triplexMask & (m_meshPoints[groupId] * m_gridSize + m_boxP0);
 	});
 	m_threadPool->ParallelExecute(ApplyScale, ndInt32 (m_meshPoints.GetCount()), 256);

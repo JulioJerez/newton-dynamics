@@ -24,6 +24,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndArray.h"
+#include "ndUtils.h"
 #include "ndProfiler.h"
 #include "ndThreadPool.h"
 #include "ndFixSizeArray.h"
@@ -32,13 +33,16 @@ template <class T, typename ndCompareKey>
 void ndSort(T* const array, ndInt32 elements, ndCompareKey compare);
 
 template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
-void ndCountingSort(const T* const srcArray, T* const dstArray, ndInt32 size, ndUnsigned32* const prefixScanOut, void* const context);
+void ndCountingSortOld(const T* const srcArray, T* const dstArray, ndInt32 size, ndUnsigned32* const prefixScanOut, void* const context);
+
+template <class T, typename ndEvaluateKey>
+void ndCountingSortNew(const T* const srcArray, T* const dstArray, ndInt32 size, ndUnsigned32* const prefixScanOut, ndInt32 bitSize, ndEvaluateKey keyTest);
 
 template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
 void ndCountingSort(ndThreadPool& threadPool, const T* const srcArray, T* const dstArray, ndInt32 size, ndUnsigned32* const prefixScanOut, void* const context);
 
-template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
-void ndCountingSort(ndArray<T>& array, ndArray<T>& scratchBuffer, ndUnsigned32* const prefixScanOut, void* const context);
+template <class T, typename ndEvaluateKey>
+void ndCountingSortNew(ndArray<T>& array, ndArray<T>& scratchBuffer, ndUnsigned32* const prefixScanOut, ndInt32 bitSize, ndEvaluateKey keyTest);
 
 template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
 void ndCountingSort(ndThreadPool& threadPool, ndArray<T>& array, ndArray<T>& scratchBuffer, ndUnsigned32* const prefixScanOut, void* const context);
@@ -154,7 +158,7 @@ void ndSort(T* const array, ndInt32 elements, ndCompareKey compare)
 		array[j] = tmp;
 	}
 
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = 0; i < (elements - 1); ++i)
 	{
 		ndAssert(compare(array[i], array[i + 1]) <= 0);
@@ -210,7 +214,7 @@ void ndCountingSortInPlace(T* const array, T* const scratchBuffer, ndInt32 size,
 		scans[key] = index + 1;
 	}
 
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = size - 2; i >= 0; --i)
 	{
 		ndInt32 key0 = evaluator.GetKey(array[i - 0]);
@@ -317,7 +321,7 @@ void ndCountingSortInPlace(ndThreadPool& threadPool, T* const array, T* const sc
 	});
 	threadPool.ParallelExecute(ndShuffleArray, numberOfGroups, 1);
 
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = size - 2; i >= 0; --i)
 	{
 		ndInt32 key0 = evaluator.GetKey(array[i - 0]);
@@ -328,9 +332,10 @@ void ndCountingSortInPlace(ndThreadPool& threadPool, T* const array, T* const sc
 }
 
 template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
-void ndCountingSort(const T* const srcArray, T* const dstArray, ndInt32 size, ndUnsigned32* const prefixScanOut, void* const context)
+void ndCountingSortOld(const T* const srcArray, T* const dstArray, ndInt32 size, ndUnsigned32* const prefixScanOut, void* const context)
 {
 	//ND_PROFILE_ZONE();
+	ndAssert(0);
 	ndAssert(keyBitSize > 0);
 	ndUnsigned32 scans[(1 << keyBitSize) + 1];
 	ndEvaluateKey evaluator(context);
@@ -374,7 +379,123 @@ void ndCountingSort(const T* const srcArray, T* const dstArray, ndInt32 size, nd
 		scans[key] = index + 1;
 	}
 
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+	for (ndInt32 i = size - 2; i >= 0; --i)
+	{
+		ndInt32 key0 = evaluator.GetKey(dstArray[i - 0]);
+		ndInt32 key1 = evaluator.GetKey(dstArray[i + 1]);
+		ndAssert(key0 <= key1);
+	}
+#endif
+}
+
+template <class T, typename ndEvaluateKey>
+void ndCountingSortNew(const T* const srcArray, T* const dstArray, ndInt32 size, ndUnsigned32* const prefixScanOut, ndInt32 keyBitSize, ndEvaluateKey keyTest)
+{
+	ndAssert(keyBitSize > 0);
+	ndAssert(keyBitSize <= 10);
+	//ndUnsigned32 scans[(1 << keyBitSize) + 1];
+	ndUnsigned32* const scans = ndAlloca (ndUnsigned32, (1 << keyBitSize) + 2);
+	//ndEvaluateKey evaluator(context);
+	for (ndInt32 i = 0; i < (1 << keyBitSize); ++i)
+	{
+		scans[i] = 0;
+	}
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		const T& entry = srcArray[i];
+		const ndInt32 key = keyTest(entry);
+		ndAssert(key >= 0);
+		ndAssert(key < (1 << keyBitSize));
+		scans[key]++;
+	}
+
+	ndUnsigned32 sum = 0;
+	for (ndInt32 i = 0; i < (1 << keyBitSize); ++i)
+	{
+		ndUnsigned32 partialSum = scans[i];
+		scans[i] = sum;
+		sum += partialSum;
+	}
+
+	if (prefixScanOut)
+	{
+		for (ndInt32 i = 0; i < ((1 << keyBitSize) + 1); ++i)
+		{
+			prefixScanOut[i] = scans[i];
+		}
+	}
+
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		const T& entry = srcArray[i];
+		const ndInt32 key = keyTest(entry);
+		ndAssert(key >= 0);
+		ndAssert(key < (1 << keyBitSize));
+		const ndUnsigned32 index = scans[key];
+		dstArray[index] = entry;
+		scans[key] = index + 1;
+	}
+
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+	for (ndInt32 i = size - 2; i >= 0; --i)
+	{
+		ndInt32 key0 = keyTest(dstArray[i - 0]);
+		ndInt32 key1 = keyTest(dstArray[i + 1]);
+		ndAssert(key0 <= key1);
+	}
+#endif
+}
+
+template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
+void ndCountingSort(const T* const srcArray, T* const dstArray, ndInt32 size, ndUnsigned32* const prefixScanOut, void* const context)
+{
+	//ND_PROFILE_ZONE();
+	ndAssert(0);
+	ndAssert(keyBitSize > 0);
+	ndUnsigned32 scans[(1 << keyBitSize) + 1];
+	ndEvaluateKey evaluator(context);
+	for (ndInt32 i = 0; i < (1 << keyBitSize); ++i)
+	{
+		scans[i] = 0;
+	}
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		const T& entry = srcArray[i];
+		const ndInt32 key = evaluator.GetKey(entry);
+		ndAssert(key >= 0);
+		ndAssert(key < (1 << keyBitSize));
+		scans[key] ++;
+	}
+
+	ndUnsigned32 sum = 0;
+	for (ndInt32 i = 0; i < (1 << keyBitSize); ++i)
+	{
+		ndUnsigned32 partialSum = scans[i];
+		scans[i] = sum;
+		sum += partialSum;
+	}
+
+	if (prefixScanOut)
+	{ 
+		for (ndInt32 i = 0; i < ((1 << keyBitSize) + 1); ++i)
+		{
+			prefixScanOut[i] = scans[i];
+		}
+	}
+
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		const T& entry = srcArray[i];
+		const ndInt32 key = evaluator.GetKey(entry);
+		ndAssert(key >= 0);
+		ndAssert(key < (1 << keyBitSize));
+		const ndUnsigned32 index = scans[key];
+		dstArray[index] = entry;
+		scans[key] = index + 1;
+	}
+
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = size - 2; i >= 0; --i)
 	{
 		ndInt32 key0 = evaluator.GetKey(dstArray[i - 0]);
@@ -480,7 +601,7 @@ void ndCountingSort(ndThreadPool& threadPool, const T* const srcArray, T* const 
 	});
 	threadPool.ParallelExecute(ndShuffleArray, numberOfGroups, 1);
 
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = size - 2; i >= 0; --i)
 	{
 		ndInt32 key0 = evaluator.GetKey(dstArray[i - 0]);
@@ -498,11 +619,11 @@ void ndCountingSort(ndThreadPool& threadPool, ndArray<T>& array, ndArray<T>& scr
 	array.Swap(scratchBuffer);
 }
 
-template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
-void ndCountingSort(ndArray<T>& array, ndArray<T>& scratchBuffer, ndUnsigned32* const prefixScanOut, void* const context)
+template <class T, typename ndEvaluateKey>
+void ndCountingSortNew(ndArray<T>& array, ndArray<T>& scratchBuffer, ndUnsigned32* const prefixScanOut, ndInt32 keyBitSize, ndEvaluateKey keyTest)
 {
 	scratchBuffer.SetCount(array.GetCount());
-	ndCountingSort<T, ndEvaluateKey, keyBitSize>(&array[0], &scratchBuffer[0], ndInt32(array.GetCount()), prefixScanOut, context);
+	ndCountingSortNew(&array[0], &scratchBuffer[0], ndInt32(array.GetCount()), prefixScanOut, keyBitSize, keyTest);
 	array.Swap(scratchBuffer);
 }
 

@@ -210,7 +210,7 @@ const ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndModelArtic
 
 void ndModelArticulation::AddCloseLoop(const ndSharedPtr<ndJointBilateralConstraint>& joint, const char* const name)
 {
-	#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+	#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	auto Check = [&](const ndBodyKinematic* const body)
 	{
 		if (body->GetInvMass() == ndFloat32(0.0f))

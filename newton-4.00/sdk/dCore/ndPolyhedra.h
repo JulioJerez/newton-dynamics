@@ -241,7 +241,7 @@ inline ndEdge* ndPolyhedra::AddFace (ndInt32 v0, ndInt32 v1, ndInt32 v2)
 
 inline ndInt32 ndPolyhedra::GetEdgeCount() const
 {
-#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndInt32 edgeCount = 0;
 	Iterator iter(*this);
 	for (iter.Begin(); iter; iter ++) 

@@ -373,7 +373,7 @@ void ndBrainMemVector::Swap(ndBrainMemVector& src)
 // using Random variate generation from https://en.wikipedia.org/wiki/Gumbel_distribution 
 void ndBrainVector::CategoricalSample(const ndBrainVector& probability, ndBrainFloat beta)
 {
-	#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+	#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		ndBrainFloat acc = ndBrainFloat(0.0f);
 		for (ndInt32 i = 0; i < GetCount(); ++i)
 		{

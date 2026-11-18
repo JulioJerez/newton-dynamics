@@ -938,7 +938,7 @@ void ndWorld::SelectSolver(ndSolverModes solverMode)
 			}
 		}
 
-		#if !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+		#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		for (ndBodyListView::ndNode* node = m_scene->GetBodyList().GetFirst(); node; node = node->GetNext())
 		{
 			ndBodyKinematic* const body = node->GetInfo()->GetAsBodyKinematic();

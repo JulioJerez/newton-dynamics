@@ -551,22 +551,13 @@ void ndSkeletonContainer::Finalize(ndInt32 loopJointsCount, ndJointBilateralCons
 		}
 	}
 
-	class ndEvaluateKey
-	{
-		public:
-		ndEvaluateKey(void* const)
-		{
-		}
-
-		ndInt32 GetKey(const ndNode* const node) const
-		{
-			return node->m_factorizeLayer;
-		}
-	};
-
 	ndAssert(maxLayer < 128);
 	m_factorizeSpans.SetCount(128);
-	ndCountingSort<ndNode*, ndEvaluateKey, 7>(tmpArray, m_nodesFactorizationOrder, m_nodeList.GetCount() - 1, &m_factorizeSpans[0], &maxLayer);
+	ndCountingSortNew(tmpArray, m_nodesFactorizationOrder, m_nodeList.GetCount() - 1, &m_factorizeSpans[0], 7, [](const ndNode* const node)
+	{
+		return node->m_factorizeLayer;
+	});
+
 	m_factorizeSpans.SetCount(maxLayer + 2);
 	ndAssert(ndInt32(m_factorizeSpans[m_factorizeSpans.GetCount() - 1]) == ndInt32(m_nodeList.GetCount() - 1));
 
