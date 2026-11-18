@@ -33,7 +33,7 @@
 #include "ndMultiBodyVehicleDifferentialAxle.h"
 
 //#define ND_MAX_VEHICLE_SIDESLIP (ndFloat32(15.0f) * ndDegreeToRad)
-#define ND_MAX_VEHICLE_SIDESLIP (ndFloat32(1.0f) * ndDegreeToRad)
+//#define ND_MAX_VEHICLE_SIDESLIP (ndFloat32(1.0f) * ndDegreeToRad)
 
 class ndConvexCastVehicle::ndBicycleModelContact: public ndContact
 {
@@ -55,7 +55,7 @@ class ndConvexCastVehicle::ndBicycleModelContact: public ndContact
 ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 	:ndMultiBodyVehicle(gravityMagnitud)
 	,m_solver()
-	,m_sleepCounter(0)
+	//,m_sleepCounter(0)
 {
 }
 
@@ -193,7 +193,7 @@ void ndConvexCastVehicle::CalculateConvexCastTireContacts(ndInt32 threadId)
 
 		virtual ndUnsigned32 OnRayPrecastAction(const ndBody* const body, const ndShapeInstance* const) override
 		{
-			const ndBodyKinematic* const dynBody = ((ndBody*)body)->GetAsBodyKinematic();
+			const ndBodyKinematic* const dynBody = const_cast<ndBody*>(body)->GetAsBodyKinematic();
 			ndModel* const model = dynBody->GetModel();
 			return (!model || (model->GetAsModelArticulation() != *m_self));
 		}
@@ -303,7 +303,8 @@ void ndConvexCastVehicle::CalculateConvexCastTireContacts(ndInt32 threadId)
 				// craete a contact joint
 				const ndInt32 start = scans[i];
 				const ndInt32 pointCount = scans[i + 1] - start;
-				ndBodyKinematic* const body1 = ((ndBody*)caster.m_contacts[start].m_body1)->GetAsBodyKinematic();
+				//ndBodyKinematic* const body1 = ((ndBody*)caster.m_contacts[start].m_body1)->GetAsBodyKinematic();
+				ndBodyKinematic* const body1 = const_cast<ndBodyKinematic*>(caster.m_contacts[start].m_body1)->GetAsBodyKinematic();
 				contact->SetActive(true);
 				contact->m_maxDof = 0;
 				contact->SetBodies(wheelBody, body1);
@@ -480,7 +481,7 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
 			body->SetSkeleton(originalSkeleton);
 
-			auto IntegrateStructuralPart = [this, body, timestep]()
+			auto IntegrateStructuralPart = [this, body]()
 			{
 				// for model bodies we just set the net force
 				const ndMatrix inertia(body->CalculateInertiaMatrix());

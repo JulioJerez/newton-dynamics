@@ -56,7 +56,7 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	//ndWeakPtr<ndSkeletonContainer> m_originalSkeleton;
 	ndSharedPtr<ndJointBilateralConstraint> m_castGearBox;
 	ndList<ndSharedPtr<ndJointBilateralConstraint>> m_castDifferentialAxelList;
-	ndInt32 m_sleepCounter;
+	//ndInt32 m_sleepCounter;
 
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 

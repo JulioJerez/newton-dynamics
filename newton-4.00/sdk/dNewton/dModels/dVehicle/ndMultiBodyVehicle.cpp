@@ -33,7 +33,7 @@
 #include "ndMultiBodyVehicleDifferentialAxle.h"
 
 #define D_MAX_CONTACT_SPEED_TRESHOLD	ndFloat32 (0.1f)
-#define D_MAX_CONTACT_PENETRATION		ndFloat32 (1.0e-2f)
+//#define D_MAX_CONTACT_PENETRATION		ndFloat32 (1.0e-2f)
 #define D_MIN_CONTACT_CLOSE_DISTANCE2	ndFloat32 (5.0e-2f * 5.0e-2f)
 
 #define D_MAX_SIDESLIP_ANGLE			ndFloat32(20.0f)
@@ -212,17 +212,20 @@ void ndMultiBodyVehicle::SetLocalFrame(const ndMatrix& localframe)
 
 ndBodyDynamic* ndMultiBodyVehicle::GetChassis() const
 {
-	return (ndBodyDynamic*)*m_chassis;
+	//return (ndBodyDynamic*)*m_chassis;
+	return m_chassis->GetAsBodyDynamic();
 }
 
 ndMultiBodyVehicleMotor* ndMultiBodyVehicle::GetMotor() const
 {
-	return (ndMultiBodyVehicleMotor*)*m_motor;
+	//return (ndMultiBodyVehicleMotor*)*m_motor;
+	return const_cast<ndMultiBodyVehicleMotor*>(*m_motor);
 }
 
 ndMultiBodyVehicleGearBox* ndMultiBodyVehicle::GetGearBox() const
 {
-	return (ndMultiBodyVehicleGearBox*)*m_gearBox;
+	//return (ndMultiBodyVehicleGearBox*)*m_gearBox;
+	return const_cast<ndMultiBodyVehicleGearBox*>(*m_gearBox);
 }
 
 const ndList<ndMultiBodyVehicleTireJoint*>& ndMultiBodyVehicle::GetTireList() const
@@ -258,7 +261,8 @@ void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSh
 {
 	ndAssert(m_chassis);
 	ndAssert(!strcmp(joint->ClassName(), "ndMultiBodyVehicleTireJoint"));
-	ndMultiBodyVehicleTireJoint* const tireJoint = (ndMultiBodyVehicleTireJoint*) * joint;
+	//ndMultiBodyVehicleTireJoint* const tireJoint = reinterpret_cast<ndJointBilateralConstraint*>(*joint);
+	ndMultiBodyVehicleTireJoint* const tireJoint = static_cast<ndMultiBodyVehicleTireJoint*>(const_cast<ndJointBilateralConstraint*>(*joint));
 	m_tireList.Append(tireJoint);
 	tireJoint->SetVehicleOwner(this);
 
@@ -310,7 +314,8 @@ void ndMultiBodyVehicle::AddMotor(const ndSharedPtr<ndBody>& motorBody, const nd
 {
 	ndAssert(m_chassis);
 	ndAssert(!strcmp(motorJoint->ClassName(), "ndMultiBodyVehicleMotor"));
-	m_motor = (ndMultiBodyVehicleMotor*)*motorJoint;
+	//m_motor = (ndMultiBodyVehicleMotor*)*motorJoint;
+	m_motor = static_cast<ndMultiBodyVehicleMotor*>(const_cast<ndJointBilateralConstraint*>(*motorJoint));
 	m_motor->m_vehicle = this;
 	
 	ndNode* const node = FindByBody(*motorBody);
@@ -364,7 +369,8 @@ ndMultiBodyVehicleMotor* ndMultiBodyVehicle::AddMotor(ndFloat32 mass, ndFloat32 
 
 ndShapeInstance ndMultiBodyVehicle::CreateTireShape(ndFloat32 radius, ndFloat32 width) const
 {
-	ndShapeInstance tireCollision((ndShape*)*m_tireShape);
+	//ndShapeInstance tireCollision((ndShape*)*m_tireShape);
+	ndShapeInstance tireCollision(m_tireShape);
 	ndVector scale(ndFloat32 (2.0f) * width, radius, radius, 0.0f);
 	tireCollision.SetScale(scale);
 	return tireCollision;
@@ -390,7 +396,8 @@ void ndMultiBodyVehicle::AddDifferential(const ndSharedPtr<ndBody>& differential
 	ndAssert(m_chassis);
 	ndAssert(!strcmp(differentialJoint->ClassName(), "ndMultiBodyVehicleDifferential"));
 
-	ndMultiBodyVehicleDifferential* const joint = (ndMultiBodyVehicleDifferential*)*differentialJoint;
+	//ndMultiBodyVehicleDifferential* const joint = (ndMultiBodyVehicleDifferential*)*differentialJoint;
+	ndMultiBodyVehicleDifferential* const joint = static_cast<ndMultiBodyVehicleDifferential*>(const_cast<ndJointBilateralConstraint*>(*differentialJoint));
 	m_differentialList.Append(joint);
 
 	// make internal body parts non collidable
@@ -407,16 +414,17 @@ void ndMultiBodyVehicle::AddDifferential(const ndSharedPtr<ndBody>& differential
 	differentialBody->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
 }
 
-ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleTireJoint* const leftTire, ndMultiBodyVehicleTireJoint* const, ndFloat32 slipOmegaLock)
+//ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleTireJoint* const leftTire, ndMultiBodyVehicleTireJoint* const, ndFloat32 slipOmegaLock)
+ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleTireJoint* const, ndMultiBodyVehicleTireJoint* const, ndFloat32 slipOmegaLock)
 {
 	ndAssert(m_chassis);
 	ndSharedPtr<ndBody> differentialBody (CreateInternalBodyPart(mass, radius));
 	ndSharedPtr<ndJointBilateralConstraint> differentialJoint(new ndMultiBodyVehicleDifferential(differentialBody->GetAsBodyDynamic(), *m_chassis, slipOmegaLock));
 	AddDifferential(differentialBody, differentialJoint);
 	
-	const ndVector pin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_front));
-	const ndVector upPin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_up));
-	const ndVector drivePin(leftTire->GetBody0()->GetMatrix().RotateVector(leftTire->GetLocalMatrix0().m_front));
+	//const ndVector pin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_front));
+	//const ndVector upPin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_up));
+	//const ndVector drivePin(leftTire->GetBody0()->GetMatrix().RotateVector(leftTire->GetLocalMatrix0().m_front));
 	
 	ndAssert(0);
 	//ndSharedPtr<ndJointBilateralConstraint> leftAxle (new ndMultiBodyVehicleDifferentialAxle(pin, upPin, differentialBody->GetAsBodyKinematic(), drivePin, leftTire->GetBody0()));
@@ -424,20 +432,22 @@ ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 ma
 	//AddDifferentialAxle(leftAxle);
 	//AddDifferentialAxle(rightAxle);
 
-	ndMultiBodyVehicleDifferential* const joint = (ndMultiBodyVehicleDifferential*)*differentialJoint;
+	//ndMultiBodyVehicleDifferential* const joint = (ndMultiBodyVehicleDifferential*)*differentialJoint;
+	ndMultiBodyVehicleDifferential* const joint = static_cast<ndMultiBodyVehicleDifferential*>(const_cast<ndJointBilateralConstraint*>(*differentialJoint));
 	return joint;
 }
 
-ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleDifferential* const leftDifferential, ndMultiBodyVehicleDifferential* const, ndFloat32 slipOmegaLock)
+//ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleDifferential* const leftDifferential, ndMultiBodyVehicleDifferential* const, ndFloat32 slipOmegaLock)
+ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleDifferential* const, ndMultiBodyVehicleDifferential* const, ndFloat32 slipOmegaLock)
 {
 	ndAssert(m_chassis);
 	ndSharedPtr<ndBody> differentialBody(CreateInternalBodyPart(mass, radius));
 	ndSharedPtr<ndJointBilateralConstraint> differentialJoint(new ndMultiBodyVehicleDifferential(differentialBody->GetAsBodyKinematic(), *m_chassis, slipOmegaLock));
 	AddDifferential(differentialBody, differentialJoint);
 
-	const ndVector pin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_front));
-	const ndVector upPin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_up));
-	const ndVector drivePin(leftDifferential->GetBody0()->GetMatrix().RotateVector(leftDifferential->GetLocalMatrix0().m_front.Scale(ndFloat32(-1.0f))));
+	//const ndVector pin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_front));
+	//const ndVector upPin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_up));
+	//const ndVector drivePin(leftDifferential->GetBody0()->GetMatrix().RotateVector(leftDifferential->GetLocalMatrix0().m_front.Scale(ndFloat32(-1.0f))));
 	
 	ndAssert(0);
 	//ndSharedPtr<ndJointBilateralConstraint> leftAxle (new ndMultiBodyVehicleDifferentialAxle(pin, upPin, differentialBody->GetAsBodyKinematic(), drivePin, leftDifferential->GetBody0()));
@@ -445,13 +455,15 @@ ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 ma
 	//AddDifferentialAxle(leftAxle);
 	//AddDifferentialAxle(rightAxle);
 
-	ndMultiBodyVehicleDifferential* const joint = (ndMultiBodyVehicleDifferential*)*differentialJoint;
+	//ndMultiBodyVehicleDifferential* const joint = (ndMultiBodyVehicleDifferential*)*differentialJoint;
+	ndMultiBodyVehicleDifferential* const joint = static_cast<ndMultiBodyVehicleDifferential*>(const_cast<ndJointBilateralConstraint*>(*differentialJoint));
 	return joint;
 }
 
 void ndMultiBodyVehicle::AddDifferentialAxle(const ndSharedPtr<ndJointBilateralConstraint>& differentialAxleJoint)
 {
-	ndMultiBodyVehicleDifferentialAxle* const joint = (ndMultiBodyVehicleDifferentialAxle*)*differentialAxleJoint;
+	//ndMultiBodyVehicleDifferentialAxle* const joint = (ndMultiBodyVehicleDifferentialAxle*)*differentialAxleJoint;
+	ndMultiBodyVehicleDifferentialAxle* const joint = static_cast<ndMultiBodyVehicleDifferentialAxle*>(const_cast<ndJointBilateralConstraint*>(*differentialAxleJoint));
 	ndNode* const node = FindLoopByJoint(joint);
 	if (!node)
 	{
@@ -461,7 +473,7 @@ void ndMultiBodyVehicle::AddDifferentialAxle(const ndSharedPtr<ndJointBilateralC
 
 void ndMultiBodyVehicle::AddTorsionBar(const ndSharedPtr<ndJointBilateralConstraint>& torsionBar)
 {
-	ndMultiBodyVehicleTorsionBar* const joint = (ndMultiBodyVehicleTorsionBar*)*torsionBar;
+	ndMultiBodyVehicleTorsionBar* const joint = static_cast<ndMultiBodyVehicleTorsionBar*>(const_cast<ndJointBilateralConstraint*>(*torsionBar));
 
 	const ndNode* const wheelNode = FindByBody(joint->GetBody0());
 	if (wheelNode)
@@ -480,7 +492,7 @@ void ndMultiBodyVehicle::AddTorsionBar(const ndSharedPtr<ndJointBilateralConstra
 
 void ndMultiBodyVehicle::AddGearBox(const ndSharedPtr<ndJointBilateralConstraint>& gearBoxJoint)
 {
-	m_gearBox = (ndMultiBodyVehicleGearBox*)*gearBoxJoint;
+	m_gearBox = static_cast<ndMultiBodyVehicleGearBox*>(const_cast<ndJointBilateralConstraint*>(*gearBoxJoint));
 	ndNode* const node = FindLoopByJoint(*m_gearBox);
 	if (!node)
 	{
@@ -872,9 +884,9 @@ void ndMultiBodyVehicle::CalculateRestSprungWeight()
 					pairM0.PushBack(m0);
 					pairM1.PushBack(m1);
 				}
-				if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
+				if (strcmp(joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
 				{
-					tireArray.PushBack((ndMultiBodyVehicleTireJoint*)joint);
+					tireArray.PushBack(static_cast<ndMultiBodyVehicleTireJoint*>(const_cast<ndJointBilateralConstraint*>(joint)));
 				}
 			}
 		}
@@ -906,11 +918,8 @@ void ndMultiBodyVehicle::CalculateRestSprungWeight()
 
 	const ndFloat32 downGravity = ndAbs(m_gravityMagnitud);
 	const ndVector upDir(m_localFrame.m_up.Scale(ndFloat32(1.0f)));
-	for (ndInt32 i = 0; i < tireArray.GetCount(); ++i)
+	for (ndInt32 j = 0; j < tireArray.GetCount(); ++j)
 	{
-		const ndMultiBodyVehicleTireJoint* const joint = tireArray[i];
-		const ndBodyDynamic* const body = joint->GetBody0()->GetAsBodyDynamic();
-
 		auto FindParentId = [&bodyArray, &bodyIndex](const ndBodyDynamic* const body)
 		{
 			for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
@@ -923,6 +932,9 @@ void ndMultiBodyVehicle::CalculateRestSprungWeight()
 			ndAssert(0);
 			return -1;
 		};
+		const ndMultiBodyVehicleTireJoint* const joint = tireArray[j];
+		const ndBodyDynamic* const body = joint->GetBody0()->GetAsBodyDynamic();
+
 		ndInt32 m0 = FindParentId(body);
 		ndInt32 m1 = 0;
 		ndJacobianPair jacobianPair;
@@ -1260,7 +1272,6 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 
 	// we now carculate the projected longidudinal and lateral force, 
 	// first we need the sprung normal force
-	const ndFloat32 sprungWeight = tire->m_frictionModel.m_sprungWeight;
 
 	//I am now using the direct coeficients B, C, E, D as explained in 
 	//The multibody system approach to vehicle dynamics page 300 to 306
@@ -1272,12 +1283,13 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	auto LateralForce = [](const ndTireFrictionModel::ndPacejkaTireModel& model, ndFloat32 phi, ndFloat32 sprungWeight)
 	{
 		// phi should be in degress
-		phi = ndAbs(ndRadToDegree * phi);
+		//phi = ndAbs(ndRadToDegree * phi);
 		return model.Evaluate(phi, sprungWeight);
 	};
 
 	// whe can now get the actual tire forces.
 	const ndTireFrictionModel& frictionModel = tire->m_frictionModel;
+	const ndFloat32 sprungWeight = tire->m_frictionModel.m_sprungWeight;
 	const ndFloat32 lateralStiffness = sprungWeight * contactPoint.m_material.m_staticFriction1;
 	const ndFloat32 longitudinalStiffness = sprungWeight * contactPoint.m_material.m_staticFriction0;
 	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlip, lateralStiffness);

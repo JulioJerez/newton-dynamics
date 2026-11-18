@@ -155,7 +155,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 
 	ndMatrix m_localFrame;
 	ndWeakPtr<ndBodyDynamic> m_chassis;
-	ndSharedPtr<ndShapeWheel> m_tireShape;
+	ndSharedPtr<ndShape> m_tireShape;
 	ndWeakPtr<ndMultiBodyVehicleMotor> m_motor;
 	ndWeakPtr<ndMultiBodyVehicleGearBox> m_gearBox;
 	ndList<ndMultiBodyVehicleTireJoint*> m_tireList;
