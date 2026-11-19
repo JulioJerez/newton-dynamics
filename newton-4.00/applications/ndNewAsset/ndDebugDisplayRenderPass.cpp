@@ -139,7 +139,7 @@ void ndDebugDisplayRenderPass::RebuildVisualDebugMesh()
 				descriptor.m_collision->SetLocalMatrix(kinematicBody->m_shapeInstance.m_localMatrix);
 				descriptor.m_collision->m_alignmentMatrix = kinematicBody->m_shapeInstance.m_alignmentMatrix;
 
-				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
+				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshWireFrame;
 				debugMesh.m_wireFrameMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 			}
 			break;
@@ -173,10 +173,10 @@ void ndDebugDisplayRenderPass::RebuildDebugCollision()
 					descriptor.m_collision->SetScale(ndVector::m_one);
 					descriptor.m_collision->SetLocalMatrix(ndGetIdentityMatrix());
 
-					descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
+					descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshHiddenLines;
 					debugMesh.m_zBufferShape = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 
-					descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
+					descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshWireFrame;
 					debugMesh.m_wireFrameShape = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 				}
 				break;
@@ -209,13 +209,13 @@ void ndDebugDisplayRenderPass::ResetScene()
 				ndRenderPrimitive::ndDescriptor descriptor(m_owner);
 				descriptor.m_meshNode = geometry;
 
-				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
+				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshHiddenLines;
 				entry.m_zBufferMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 
-				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
+				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshWireFrame;
 				entry.m_wireFrameMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 
-				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugFlatShaded;
+				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshFlatShaded;
 				entry.m_flatShadedMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 			}
 
@@ -228,10 +228,10 @@ void ndDebugDisplayRenderPass::ResetScene()
 				descriptor.m_collision->SetScale(ndVector::m_one);
 				descriptor.m_collision->SetLocalMatrix(ndGetIdentityMatrix());
 
-				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
+				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshHiddenLines;
 				entry.m_zBufferShape = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 
-				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
+				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshWireFrame;
 				entry.m_wireFrameShape = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 			}
 		}

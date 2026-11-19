@@ -111,7 +111,7 @@ class MarchingCubeParticles : public ndDemoEntityManager::OnPostUpdate
 		
 		ndRenderPrimitive::ndDescriptor descriptor(*scene->GetRenderer());
 		descriptor.m_collision = collision;
-		descriptor.m_mapping = ndRenderPrimitive::m_box;
+		descriptor.m_mapping = ndRenderPrimitive::m_box_uv;
 		ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(scene->GetRenderer()->GetTextureCache()->GetTexture(ndGetWorkingFileName("metal_30.png")));
 		material.m_opacity = ndFloat32(0.9f);
 		

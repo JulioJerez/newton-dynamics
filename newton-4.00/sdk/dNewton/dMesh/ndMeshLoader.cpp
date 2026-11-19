@@ -34,7 +34,7 @@ ndMeshLoader::~ndMeshLoader()
 
 bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 {
-	ndString oldloc(setlocale(LC_ALL, 0));
+	ndString oldloc(setlocale(LC_ALL, nullptr));
 	nd::TiXmlDocument doc(fullPathMeshName.GetStr());
 	doc.LoadFile();
 	if (doc.Error())
@@ -78,7 +78,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 
 		for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("ndMesh"); node; node = node->NextSibling("ndMesh"))
 		{
-			const nd::TiXmlElement* const linkNode = (nd::TiXmlElement*)node;
+			const nd::TiXmlElement* const linkNode = static_cast<const nd::TiXmlElement*>(node);
 			ndAssert(strcmp(linkNode->Value(), "ndMesh") == 0);
 
 			ndSharedPtr<ndMesh> child(new ndMesh());
@@ -118,7 +118,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			mesh->m_basePoseMatrix = xmlGetMatrix(entry.m_xmlNode, "basePoseMatrix");
 		}
 	
-		nd::TiXmlElement* const xmlNodeType = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("type");
+		const nd::TiXmlElement* const xmlNodeType = static_cast<const nd::TiXmlElement*>(entry.m_xmlNode->FirstChild("type"));
 		ndAssert(xmlNodeType);
 		const char* const nodeType = xmlGetNameAttribute(xmlNodeType, "nodeType");
 		if (!strcmp(nodeType, "node"))
@@ -158,7 +158,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		ndTriplexReal target(xmlGetTriplexRealAttribute(xmlNodeType, "target"));
 		mesh->SetBoneTarget(ndVector(target.m_x, target.m_y, target.m_z, ndReal(1.0f)));
 	
-		const nd::TiXmlElement* const xmlGeometry = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("geometry");
+		const nd::TiXmlElement* const xmlGeometry = static_cast<const nd::TiXmlElement*>(entry.m_xmlNode->FirstChild("geometry"));
 		if (xmlGeometry)
 		{
 			ndSharedPtr<ndMeshEffect> geometry(new ndMeshEffect());
@@ -166,7 +166,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			mesh->SetGeometry(geometry);
 		}
 	
-		const nd::TiXmlElement* const xmlRigidBody = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("rigidbody");
+		const nd::TiXmlElement* const xmlRigidBody = static_cast<const nd::TiXmlElement*>(entry.m_xmlNode->FirstChild("rigidbody"));
 		if (xmlRigidBody)
 		{
 			const char* const constructor = xmlGetString(xmlRigidBody, "constructor");
@@ -186,19 +186,19 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			}
 		}
 	
-		const nd::TiXmlElement* const xmlJoint = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("joint");
+		const nd::TiXmlElement* const xmlJoint = static_cast<const nd::TiXmlElement*>(entry.m_xmlNode->FirstChild("joint"));
 		if (xmlJoint)
 		{
 			mesh->SetJoint(mesh->LoadJoint(xmlJoint));
 		}
 
-		const nd::TiXmlElement* const xmlModifier = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("modifier");
+		const nd::TiXmlElement* const xmlModifier = static_cast<const nd::TiXmlElement*>(entry.m_xmlNode->FirstChild("modifier"));
 		if (xmlModifier)
 		{
 			modifiers.Append(entry);
 		}
 
-		const nd::TiXmlElement* const xmlCustomProp = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("customProperties");
+		const nd::TiXmlElement* const xmlCustomProp = static_cast<const nd::TiXmlElement*>(entry.m_xmlNode->FirstChild("customProperties"));
 		if (xmlCustomProp)
 		{
 			for (const nd::TiXmlNode* xmpProperty = xmlCustomProp->FirstChild("property"); xmpProperty; xmpProperty = xmpProperty->NextSibling("property"))
@@ -207,18 +207,18 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 				if (strcmp(constructor, ndMeshCustomPropertyFloat::StaticClassName()) == 0)
 				{
 					ndMeshCustomPropertyFloat* const property = new ndMeshCustomPropertyFloat(mesh);
-					property->DeserializeFromXml((nd::TiXmlElement*)xmpProperty);
+					property->DeserializeFromXml(static_cast<const nd::TiXmlElement*>(xmpProperty));
 					mesh->m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(property));
 				}
 				else if (strcmp(constructor, ndMeshCustomPropertyString::StaticClassName()) == 0)
 				{
 					ndMeshCustomPropertyString* const property = new ndMeshCustomPropertyString(mesh);
-					property->DeserializeFromXml((nd::TiXmlElement*)xmpProperty);
+					property->DeserializeFromXml(static_cast<const nd::TiXmlElement*>(xmpProperty));
 					mesh->m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(property));
 				}
 				else if (strcmp(constructor, ndMeshCustomPropertyNode::StaticClassName()) == 0)
 				{
-					MeshXmlNodePair propEntry(entry.m_mesh, (nd::TiXmlElement*)xmpProperty);
+					MeshXmlNodePair propEntry(entry.m_mesh, static_cast<const nd::TiXmlElement*>(xmpProperty));
 					customProps.Append(propEntry);
 				}
 				else
@@ -240,7 +240,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = mesh->GetChildren().GetLast();
 		for (const nd::TiXmlNode* node = entry.m_xmlNode->LastChild("ndMesh"); node; node = node->PreviousSibling("ndMesh"))
 		{
-			const nd::TiXmlElement* const linkNode = (nd::TiXmlElement*)node;
+			const nd::TiXmlElement* const linkNode = static_cast<const nd::TiXmlElement*>(node);
 			ndAssert(strcmp(linkNode->Value(), "ndMesh") == 0);
 			ndSharedPtr<ndMesh> child(childNode->GetInfo());
 			stack.PushBack(MeshXmlNodePair(*child, linkNode));
@@ -251,7 +251,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 	for (ndList<MeshXmlNodePair>::ndNode* ptr = modifiers.GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		MeshXmlNodePair entry(ptr->GetInfo());
-		const nd::TiXmlElement* const xmlModifier = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("modifier");
+		const nd::TiXmlElement* const xmlModifier = static_cast<const nd::TiXmlElement*>(entry.m_xmlNode->FirstChild("modifier"));
 		entry.m_mesh->SetModifier(entry.m_mesh->LoadModifier(xmlModifier));
 	}
 
@@ -260,7 +260,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		MeshXmlNodePair entry(ptr->GetInfo());
 		const nd::TiXmlNode* const xmpProperty = entry.m_xmlNode;
 		ndMeshCustomPropertyNode* const property = new ndMeshCustomPropertyNode(entry.m_mesh);
-		property->DeserializeFromXml((nd::TiXmlElement*)xmpProperty);
+		property->DeserializeFromXml(static_cast<const nd::TiXmlElement*>(xmpProperty));
 		entry.m_mesh->m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(property));
 	}
 
@@ -268,7 +268,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 	{
 		for (const nd::TiXmlNode* node = m_xmlPair->FirstChild("collindPair"); node; node = node->NextSibling("collindPair"))
 		{
-			const nd::TiXmlElement* const pairNode = (nd::TiXmlElement*)node;
+			const nd::TiXmlElement* const pairNode = static_cast<const nd::TiXmlElement*>(node);
 			const char* const referenceName0 = xmlGetString(pairNode, "reference0");
 			const char* const referenceName1 = xmlGetString(pairNode, "reference1");
 			ndAssert(referenceName0);
@@ -286,7 +286,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		const ndCloseLoopConstraints* const loopJointList = m_mesh->GetLoopJoints();
 		for (const nd::TiXmlNode* node = m_xmlLoops->FirstChild("loopJoint"); node; node = node->NextSibling("loopJoint"))
 		{
-			const nd::TiXmlElement* const xmlLoopJointNode = (nd::TiXmlElement*)node;
+			const nd::TiXmlElement* const xmlLoopJointNode = static_cast<const nd::TiXmlElement*>(node);
 			ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(loopJointList));
 			loopJoint->DeserializeFromXml(xmlLoopJointNode);
 			m_mesh->AddLoopJoint(loopJoint);
@@ -299,7 +299,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 
 void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 {
-	ndString oldloc(setlocale(LC_ALL, 0));
+	ndString oldloc(setlocale(LC_ALL, nullptr));
 	ndSharedPtr<nd::TiXmlDocument> doc(new nd::TiXmlDocument(""));
 	nd::TiXmlDeclaration* const decl = new nd::TiXmlDeclaration("1.0", "", "");
 	doc->LinkEndChild(decl);
@@ -355,6 +355,8 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 				break;
 
 			case ndMesh::m_collisionShape:
+
+			default:
 				xmlSaveAttribute(xmlNodeType, "nodeType", "collisionShape");
 				break;
 		}

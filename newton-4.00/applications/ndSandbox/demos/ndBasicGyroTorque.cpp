@@ -43,7 +43,7 @@ static ndSharedPtr<ndBody> CreateFlyWheel(ndDemoEntityManager* const scene, cons
 
 	ndRenderPrimitive::ndDescriptor descriptor(render);
 	descriptor.m_collision = flyWheelShape;
-	descriptor.m_mapping = ndRenderPrimitive::m_box;
+	descriptor.m_mapping = ndRenderPrimitive::m_box_uv;
 	descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("smilli.png")));
 
 	ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
@@ -81,7 +81,7 @@ static ndSharedPtr<ndBody> DzhanibekovEffect(ndDemoEntityManager* const scene, n
 	ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeBox(2.0f, 0.5f, 1.0)));
 	ndRenderPrimitive::ndDescriptor descriptor(render);
 	descriptor.m_collision = shape;
-	descriptor.m_mapping = ndRenderPrimitive::m_box;
+	descriptor.m_mapping = ndRenderPrimitive::m_box_uv;
 	descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("smilli.png")));
 
 	ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
@@ -117,7 +117,7 @@ static ndSharedPtr<ndBody> Phitop(ndDemoEntityManager* const scene, ndFloat32 ma
 
 	ndRenderPrimitive::ndDescriptor descriptor(render);
 	descriptor.m_collision = shape;
-	descriptor.m_mapping = ndRenderPrimitive::m_spherical;
+	descriptor.m_mapping = ndRenderPrimitive::m_spherical_uv;
 	descriptor.m_uvMatrix = ndPitchMatrix(ndPi);
 	//descriptor.m_material.m_texture = render->GetTextureCache()->GetTexture(ndGetWorkingFileName("marble.png"));
 	descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("smilli.png")));
@@ -155,7 +155,7 @@ static ndSharedPtr<ndBody> PrecessingTop(ndDemoEntityManager* const scene, const
 	ndRenderPrimitive::ndDescriptor descriptor(render);
 	descriptor.m_collision = shape;
 	descriptor.m_uvMatrix = shape->GetLocalMatrix();
-	descriptor.m_mapping = ndRenderPrimitive::m_cylindrical;
+	descriptor.m_mapping = ndRenderPrimitive::m_cylindrical_uv;
 	descriptor.m_stretchMaping = false;
 	descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("smilli.png")));
 
@@ -195,7 +195,7 @@ static ndSharedPtr<ndBody> RattleBack(ndDemoEntityManager* const scene, ndFloat3
 
 	ndRenderPrimitive::ndDescriptor descriptor(render);
 	descriptor.m_collision = shape;
-	descriptor.m_mapping = ndRenderPrimitive::m_spherical;
+	descriptor.m_mapping = ndRenderPrimitive::m_spherical_uv;
 
 	descriptor.m_uvMatrix = ndRollMatrix(-ndPi * 0.5f) * ndPitchMatrix(ndPi * 0.5f);
 	//descriptor.m_material.m_texture = render->GetTextureCache()->GetTexture(ndGetWorkingFileName("marble.png"));

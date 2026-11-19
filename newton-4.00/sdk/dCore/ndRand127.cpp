@@ -17,14 +17,14 @@
 #include "ndCoreStdafx.h"
 #include "ndRand127.h"
 
-#define MIN_LOOP 8
-#define PRE_LOOP 8
+//#define MIN_LOOP 8
+//#define PRE_LOOP 8
 
-#define TINYMT32_MEXP 127
-#define TINYMT32_SH0 1
-#define TINYMT32_SH1 10
-#define TINYMT32_SH8 8
-#define TINYMT32_MASK UINT32_C(0x7fffffff)
+//#define TINYMT32_MEXP 127
+//#define TINYMT32_SH0 1
+//#define TINYMT32_SH1 10
+//#define TINYMT32_SH8 8
+//#define TINYMT32_MASK UINT32_C(0x7fffffff)
 
 ndRand127::ndRand127()
 {
