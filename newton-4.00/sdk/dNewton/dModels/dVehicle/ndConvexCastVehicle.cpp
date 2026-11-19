@@ -33,7 +33,7 @@
 #include "ndMultiBodyVehicleDifferentialAxle.h"
 
 //#define ND_MAX_VEHICLE_SIDESLIP (ndFloat32(15.0f) * ndDegreeToRad)
-#define ND_MAX_VEHICLE_SIDESLIP (ndFloat32(1.0f) * ndDegreeToRad)
+//#define ND_MAX_VEHICLE_SIDESLIP (ndFloat32(1.0f) * ndDegreeToRad)
 
 class ndConvexCastVehicle::ndBicycleModelContact: public ndContact
 {
@@ -55,7 +55,7 @@ class ndConvexCastVehicle::ndBicycleModelContact: public ndContact
 ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 	:ndMultiBodyVehicle(gravityMagnitud)
 	,m_solver()
-	,m_sleepCounter(0)
+	//,m_sleepCounter(0)
 {
 }
 
@@ -193,7 +193,7 @@ void ndConvexCastVehicle::CalculateConvexCastTireContacts(ndInt32 threadId)
 
 		virtual ndUnsigned32 OnRayPrecastAction(const ndBody* const body, const ndShapeInstance* const) override
 		{
-			const ndBodyKinematic* const dynBody = ((ndBody*)body)->GetAsBodyKinematic();
+			const ndBodyKinematic* const dynBody = const_cast<ndBody*>(body)->GetAsBodyKinematic();
 			ndModel* const model = dynBody->GetModel();
 			return (!model || (model->GetAsModelArticulation() != *m_self));
 		}
@@ -303,7 +303,8 @@ void ndConvexCastVehicle::CalculateConvexCastTireContacts(ndInt32 threadId)
 				// craete a contact joint
 				const ndInt32 start = scans[i];
 				const ndInt32 pointCount = scans[i + 1] - start;
-				ndBodyKinematic* const body1 = ((ndBody*)caster.m_contacts[start].m_body1)->GetAsBodyKinematic();
+				//ndBodyKinematic* const body1 = ((ndBody*)caster.m_contacts[start].m_body1)->GetAsBodyKinematic();
+				ndBodyKinematic* const body1 = const_cast<ndBodyKinematic*>(caster.m_contacts[start].m_body1)->GetAsBodyKinematic();
 				contact->SetActive(true);
 				contact->m_maxDof = 0;
 				contact->SetBodies(wheelBody, body1);
@@ -390,14 +391,17 @@ void ndConvexCastVehicle::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 	for (ndInt32 i = 0; i < m_savedBody.GetCount(); ++i)
 	{
 		ndBodyDynamic* const body = m_savedBody[i];
-		const ndJacobian& forceTorque = m_savedForceTorque[i];
-		body->m_savedExternalForce = forceTorque.m_linear;
-		body->m_savedExternalTorque = forceTorque.m_angular;
+		const ndVector8& forceTorque = m_savedForceTorque[i];
+		body->m_savedExternalForce = forceTorque.GetLow();
+		body->m_savedExternalTorque = forceTorque.GetHigh();
 	}
 }
 
 void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 {
+	m_savedBody.SetCount(0);
+	m_savedForceTorque.SetCount(0);
+
 	if (!m_skeleton)
 	{
 		return;
@@ -422,20 +426,19 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 
 	ndAssert(GetWorld());
 	ndWorld* const world = GetWorld();
-	m_savedBody.SetCount(0);
-	m_savedForceTorque.SetCount(0);
 
 	m_skeleton->m_owner = world;
 	CalculateConvexCastTireContacts(threadId);
 
+#if 1
 	// apply all external forces to internal bodies
-	m_originaSkeleton = GetRoot()->m_body->GetAsBodyKinematic()->GetSkeleton();
-	auto ApplyExternalForces = [this, timestep, threadId](ndNode* const node)
+	ndSkeletonContainer* const originalSkeleton = GetRoot()->m_body->GetAsBodyKinematic()->GetSkeleton();
+	auto ApplyExternalForces = [this, timestep, threadId, originalSkeleton](ndNode* const node)
 	{
 		if (node->m_body)
 		{
 			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
-			ndAssert(body->GetSkeleton() == *m_originaSkeleton);
+			ndAssert(body->GetSkeleton() == originalSkeleton);
 			body->SetSkeleton(*m_skeleton);
 
 			if (node->m_joint)
@@ -471,14 +474,14 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	// apply reaction impulses to other bodies
 	// apply the impulse to model bodies. 
 	// restore the orginal skeleton
-	auto IntegrateBodyParts = [this, timestep](ndNode* const node)
+	auto IntegrateBodyParts = [this, timestep, originalSkeleton](ndNode* const node)
 	{
 		if (node->m_body)
 		{
 			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
-			body->SetSkeleton(*m_originaSkeleton);
+			body->SetSkeleton(originalSkeleton);
 
-			auto IntegrateStructuralPart = [this, body, timestep]()
+			auto IntegrateStructuralPart = [this, body]()
 			{
 				// for model bodies we just set the net force
 				const ndMatrix inertia(body->CalculateInertiaMatrix());
@@ -486,11 +489,8 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 				const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
 
 				ndUnsigned8 equilibrium = body->m_equilibrium;
-				ndJacobian forceTorque;
-				forceTorque.m_linear = body->m_externalForce;
-				forceTorque.m_angular = body->m_externalTorque;
 				m_savedBody.PushBack(body);
-				m_savedForceTorque.PushBack(forceTorque);
+				m_savedForceTorque.PushBack(ndVector8(body->GetForce(), body->GetTorque()));
 				body->SetForce(force);
 				body->SetTorque(torque);
 				body->m_equilibrium = equilibrium;
@@ -553,4 +553,131 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	NodeIterator(IntegrateBodyParts);
 
 	m_solver.SolverEnd();
+
+#else
+
+	// apply all external forces to internal bodies
+	m_originalSkeleton = GetRoot()->m_body->GetAsBodyKinematic()->GetSkeleton();
+	auto ApplyExternalForces = [this, timestep, threadId](ndNode* const node)
+	{
+		if (node->m_body)
+		{
+			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+			ndAssert(body->GetSkeleton() == *m_originalSkeleton);
+			body->SetSkeleton(*m_skeleton);
+
+			if (node->m_joint)
+			{
+				ndSharedPtr<ndJointBilateralConstraint> joint(node->m_joint);
+				if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
+				{
+					body->GetNotifyCallback()->OnApplyExternalForce(threadId, timestep);
+				}
+				else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
+				{
+					body->GetNotifyCallback()->OnApplyExternalForce(threadId, timestep);
+				}
+				else if (joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
+				{
+					body->GetNotifyCallback()->OnApplyExternalForce(threadId, timestep);
+				}
+			}
+		}
+	};
+	NodeIterator(ApplyExternalForces);
+
+	// update model
+	ndMultiBodyVehicle::Update(timestep, threadId);
+
+	// solve using immediate solver.
+	m_solver.SolverBegin(*m_skeleton, nullptr, 0, world, timestep, threadId);
+
+	// calculate forces
+	m_solver.Solve();
+
+	// integrate tires, and internal drive train components
+	// apply reaction impulses to other bodies
+	// apply the impulse to model bodies. 
+	// restore the orginal skeleton
+	auto IntegrateBodyParts = [this, timestep](ndNode* const node)
+	{
+		if (node->m_body)
+		{
+			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+			body->SetSkeleton(*m_originalSkeleton);
+
+			auto IntegrateStructuralPart = [this, body, timestep]()
+			{
+				// for model bodies we just set the net force
+				const ndMatrix inertia(body->CalculateInertiaMatrix());
+				const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
+				const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
+
+				ndUnsigned8 equilibrium = body->m_equilibrium;
+				m_savedBody.PushBack(body);
+				m_savedForceTorque.PushBack(ndVector8(body->GetForce(), body->GetTorque()));
+				body->SetForce(force);
+				body->SetTorque(torque);
+				body->m_equilibrium = equilibrium;
+			};
+
+			if (node->m_joint)
+			{
+				auto IntegrateInternalPart = [body, timestep]()
+				{
+					const ndMatrix inertia(body->CalculateInertiaMatrix());
+					const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
+					const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
+					body->SetForce(force);
+					body->SetTorque(torque);
+					body->IntegrateExternalForce(timestep);
+					body->IntegrateVelocity(timestep);
+				};
+
+				// internal bodies are full integrared
+				ndSharedPtr<ndJointBilateralConstraint>& joint(node->m_joint);
+				if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
+				{
+					IntegrateInternalPart();
+					// save contact normal force 
+					ndBodyKinematic::ndContactMap::Iterator it(node->m_body->GetAsBodyKinematic()->GetContactMap());
+					const ndVector normalForce(joint->GetForceBody0());
+					for (it.Begin(); it; it++)
+					{
+						ndContact* const contact = it.GetNode()->GetInfo();
+						if (contact->IsActive())
+						{
+							for (ndContactPointList::ndNode* pointNode = contact->GetContactPoints().GetFirst(); pointNode; pointNode = pointNode->GetNext())
+							{
+								ndContactMaterial& point = pointNode->GetInfo();
+								ndFloat32 forceMag = point.m_normal.DotProduct(normalForce).GetScalar();
+								point.m_normal_Force.Push(ndAbs(forceMag));
+							}
+						}
+					}
+				}
+				else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
+				{
+					IntegrateInternalPart();
+				}
+				else if (joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
+				{
+					IntegrateInternalPart();
+				}
+				else
+				{
+					IntegrateStructuralPart();
+				}
+			}
+			else
+			{
+				IntegrateStructuralPart();
+			}
+		}
+	};
+	NodeIterator(IntegrateBodyParts);
+
+	m_solver.SolverEnd();
+
+#endif
 }

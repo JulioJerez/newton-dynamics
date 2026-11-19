@@ -51,10 +51,10 @@ ndFloat32 ndRand()
 //ndFloat32 ndGaussianRandom(ndFloat32 mean, ndFloat32 sigma, ndFloat32 randomVariable)
 ndFloat32 ndStandardNormalGaussian(ndFloat32 randomVariable)
 {
-	//// It seems the standard library normal random is based of the Box–Muller transform
+	//// It seems the standard library normal random is based of the Box-Muller transform
 	//// https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
 	//// this is probably more accurate than Abramowitz and Stegun which is based on the 
-	//// inverse cumulative, however Box–Muller is quite problematic, since it uses memory, 
+	//// inverse cumulative, however Box-Muller is quite problematic, since it uses memory, 
 	//// and more calls to rand and transcendental functions, 
 	//// therefore, I am sticking with inverse cumulative method.
 	//// beside, all my test show that inverse cumulative seems in fact more accurate.
@@ -156,10 +156,10 @@ ndFloat32 ndUniformDistribution::operator()()
 
 D_CORE_API ndFloat32 ndNomalDistribution::NormalGaussian(ndFloat32 uniform)
 {
-	// It seems the standard library normal random is based of the Box–Muller transform
+	// It seems the standard library normal random is based of the Box-Muller transform
 	// https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
 	// this is probably more accurate than Abramowitz and Stegun which is based on the 
-	// inverse cumulative, however Box–Muller is quite problematic, since it uses memory, 
+	// inverse cumulative, however Box-Muller is quite problematic, since it uses memory, 
 	// and more calls to rand and transcendental functions, 
 	// therefore, I am sticking with inverse cumulative method.
 	// beside, all my test show that inverse cumulative seems in fact more accurate.
@@ -211,8 +211,8 @@ D_CORE_API ndFloat32 ndNomalDistribution::NormalGaussian(ndFloat32 uniform)
 			const ndFloat32 d2 = ndFloat32(0.001308f);
 			ndFloat32 numerator = c0 + (c2 * t + c1) * t;
 			ndFloat32 denominator = ndFloat32(1.0f) + ((d2 * t + d1) * t + d0) * t;
-			ndFloat32 r = t - numerator / denominator;
-			return r;
+			ndFloat32 rand = t - numerator / denominator;
+			return rand;
 		};
 
 		ndFloat32 value = ndFloat32(0.0f);

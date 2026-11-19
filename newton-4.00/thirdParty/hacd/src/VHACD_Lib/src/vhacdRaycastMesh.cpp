@@ -78,9 +78,9 @@ namespace nd
 				mVertices = new double[mVcount * 3];
 				for (uint32_t i = 0; i < mVcount; i++)
 				{
-					mVertices[i * 3 + 0] = vertices[0];
-					mVertices[i * 3 + 1] = vertices[1];
-					mVertices[i * 3 + 2] = vertices[2];
+					mVertices[i * 3 + 0] = double(vertices[0]);
+					mVertices[i * 3 + 1] = double(vertices[1]);
+					mVertices[i * 3 + 2] = double(vertices[2]);
 					vertices += 3;
 				}
 				mTcount = tcount;
@@ -121,8 +121,8 @@ namespace nd
 				dir[2] = to[2] - from[2];
 
 				double distance = sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
-				if (distance < 0.0000000001f) return false;
-				double recipDistance = 1.0f / distance;
+				if (distance < double(0.0000000001f)) return false;
+				double recipDistance = double(1.0f) / distance;
 				dir[0] *= recipDistance;
 				dir[1] *= recipDistance;
 				dir[2] *= recipDistance;

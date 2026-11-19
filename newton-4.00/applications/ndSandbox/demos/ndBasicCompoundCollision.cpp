@@ -41,7 +41,7 @@ static void AddSphere(ndDemoEntityManager* const scene)
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeSphere(0.125f)));
 	ndRenderPrimitive::ndDescriptor descriptor(render);
 	descriptor.m_collision = shape;
-	descriptor.m_mapping = ndRenderPrimitive::m_spherical;
+	descriptor.m_mapping = ndRenderPrimitive::m_spherical_uv;
 	descriptor.AddMaterial (render->GetTextureCache()->GetTexture(ndGetWorkingFileName("earthmap.png")));
 
 	ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
@@ -113,7 +113,7 @@ static void AddEmptyBox(ndDemoEntityManager* const scene)
 	
 	ndRenderPrimitive::ndDescriptor descriptor(render);
 	descriptor.m_collision = compoundShapeInstance;
-	descriptor.m_mapping = ndRenderPrimitive::m_box;
+	descriptor.m_mapping = ndRenderPrimitive::m_box_uv;
 	descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("wood_0.png")));
 	
 	ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));

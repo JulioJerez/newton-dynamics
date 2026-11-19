@@ -16,12 +16,12 @@ if (NEWTON_BUILD_TEST)
 	add_subdirectory(ndTest)
 endif()
 
-if (NEWTON_BUILD_ASSET_EDITOR OR NEWTON_BUILD_SANDBOX_DEMOS)
-    if (NEWTON_BUILD_SANDBOX_DEMOS)
+if (NEWTON_BUILD_EDITOR OR NEWTON_BUILD_DEMOS)
+    if (NEWTON_BUILD_DEMOS)
 	    add_subdirectory(ndSandbox)
     endif()
 
-    if (NEWTON_BUILD_ASSET_EDITOR)
+    if (NEWTON_BUILD_EDITOR)
         add_subdirectory(ndNewAsset)
     endif()
 

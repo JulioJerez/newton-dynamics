@@ -438,39 +438,32 @@ ndConvexHull3dAABBTreeNode* ndConvexHull3d::BuildTree (ndConvexHull3dAABBTreeNod
 
 ndInt32 ndConvexHull3d::GetUniquePoints(ndConvexHull3dVertex* const points, ndInt32 count)
 {
-	class CompareVertex
+	auto Compare = [](const ndConvexHull3dVertex& elementA, const ndConvexHull3dVertex& elementB)
 	{
-		public:
-		CompareVertex(void*)
+		for (ndInt32 i = 0; i < 3; ++i)
 		{
-		}
-
-		ndInt32 Compare(const ndConvexHull3dVertex& elementA, const ndConvexHull3dVertex& elementB) const
-		{
-			for (ndInt32 i = 0; i < 3; ++i) 
+			if (elementA[i] < elementB[i])
 			{
-				if (elementA[i] < elementB[i])
-				{
-					return -1;
-				}
-				else if (elementA[i] > elementB[i])
-				{
-					return 1;
-				}
+				return -1;
 			}
-			return 0;
+			else if (elementA[i] > elementB[i])
+			{
+				return 1;
+			}
 		}
+		return 0;
 	};
-
-	ndSort<ndConvexHull3dVertex, CompareVertex>(points, count, nullptr);
+	ndSort(points, count, [Compare](const ndConvexHull3dVertex& elementA, const ndConvexHull3dVertex& elementB)
+	{
+		return Compare(elementA, elementB);
+	});
 
 	ndInt32 indexCount = 0;
-	CompareVertex compareVetex(nullptr);
 	for (ndInt32 i = 1; i < count; ++i) 
 	{
 		for (; i < count; ++i) 
 		{
-			if (compareVetex.Compare(points[indexCount], points[i]))
+			if (Compare(points[indexCount], points[i]))
 			{
 				indexCount++;
 				points[indexCount] = points[i];

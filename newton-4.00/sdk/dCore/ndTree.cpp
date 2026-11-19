@@ -25,7 +25,7 @@
 
 ndRedBackNode *ndRedBackNode::Minimum () const
 {
-	ndRedBackNode* ptr = (ndRedBackNode *)this;
+	ndRedBackNode* ptr = const_cast<ndRedBackNode*>(this);
 	for (; ptr->m_left; ptr = ptr->m_left)
 	{
 	}
@@ -34,7 +34,7 @@ ndRedBackNode *ndRedBackNode::Minimum () const
 
 ndRedBackNode *ndRedBackNode::Maximum () const
 {
-	ndRedBackNode* ptr = (ndRedBackNode *)this;
+	ndRedBackNode* ptr = const_cast<ndRedBackNode*>(this);
 	for (; ptr->m_right; ptr = ptr->m_right)
 	{
 	}
@@ -48,7 +48,7 @@ ndRedBackNode *ndRedBackNode::Prev () const
 		return m_left->Maximum ();
 	}
 
-	ndRedBackNode* node = (ndRedBackNode *)this;
+	ndRedBackNode* node = const_cast<ndRedBackNode*>(this);
 	ndRedBackNode* ptr = m_parent;
 	for (; ptr && node == ptr->m_left; ptr = ptr->m_parent) 
 	{
@@ -64,7 +64,7 @@ ndRedBackNode *ndRedBackNode::Next () const
 		return m_right->Minimum ();
 	}
 
-	ndRedBackNode* node = (ndRedBackNode *)this;
+	ndRedBackNode* node = const_cast<ndRedBackNode*>(this);
 	ndRedBackNode* ptr = m_parent;
 	for (; ptr && node == ptr->m_right; ptr = ptr->m_parent) 
 	{

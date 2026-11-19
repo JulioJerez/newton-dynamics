@@ -41,6 +41,11 @@
 	//#include <GLFW/glfw3native.h>
 #endif
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Weverything"
+#endif
+
 #include <glatter.h>
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
@@ -48,6 +53,10 @@
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 class ndRender;
 class ndRenderTexture;

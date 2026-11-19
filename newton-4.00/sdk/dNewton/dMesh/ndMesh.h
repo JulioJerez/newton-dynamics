@@ -55,10 +55,10 @@ class ndMesh : public ndClassAlloc
 
 	enum ndUvMapingMode
 	{
-		m_box,
-		m_capsule,
-		m_spherical,
-		m_cylindrical
+		m_boxMesh_uv,
+		m_capsuleMesh_uv,
+		m_sphericalMesh_uv,
+		m_cylindricalMesh_uv
 	};
 
 	class ndCurve: public ndList<ndCurveValue>
@@ -87,7 +87,7 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API ndMesh();
 	D_NEWTON_API ndMesh(const ndMesh& src);
-	D_NEWTON_API ndMesh(const ndShapeInstance& src, ndUvMapingMode mapping = m_box);
+	D_NEWTON_API ndMesh(const ndShapeInstance& src, ndUvMapingMode mapping = m_boxMesh_uv);
 
 	D_NEWTON_API virtual ~ndMesh();
 	D_NEWTON_API virtual ndMesh* CreateClone() const;

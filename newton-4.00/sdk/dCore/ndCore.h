@@ -52,6 +52,7 @@
 #include <ndSyncMutex.h>
 #include <ndSemaphore.h>
 #include <ndSharedPtr.h>
+#include <ndGpuDriver.h>
 #include <ndClassAlloc.h>
 #include <ndThreadPool.h>
 #include <ndQuaternion.h>

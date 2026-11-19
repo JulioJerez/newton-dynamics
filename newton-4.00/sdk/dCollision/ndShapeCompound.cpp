@@ -257,7 +257,7 @@ void ndShapeCompound::ndTreeArray::AddNode(ndNodeBase* const node, ndInt32 index
 ndShapeCompound::ndShapeCompound()
 	:ndShape(m_compound)
 	,m_array()
-	,m_treeEntropy(ndFloat32(0.0f))
+	,m_treeEntropy(ndFloat64(0.0f))
 	,m_boxMinRadius(ndFloat32(0.0f))
 	,m_boxMaxRadius(ndFloat32(0.0f))
 	,m_root(nullptr)
@@ -269,7 +269,7 @@ ndShapeCompound::ndShapeCompound()
 ndShapeCompound::ndShapeCompound(const ndShapeCompound& source)
 	:ndShape(source)
 	,m_array()
-	,m_treeEntropy(ndFloat32(0.0f))
+	,m_treeEntropy(ndFloat64(0.0f))
 	,m_boxMinRadius(ndFloat32(0.0f))
 	,m_boxMaxRadius(ndFloat32(0.0f))
 	,m_root(nullptr)
@@ -282,7 +282,7 @@ ndShapeCompound::ndShapeCompound(const ndShapeCompound& source)
 ndShapeCompound::ndShapeCompound(const ndShapeCompound& source, const ndShapeInstance* const parent)
 	:ndShape(source)
 	,m_array()
-	,m_treeEntropy(ndFloat32(0.0f))
+	,m_treeEntropy(ndFloat64(0.0f))
 	,m_boxMinRadius(ndFloat32(0.0f))
 	,m_boxMaxRadius(ndFloat32(0.0f))
 	,m_root(nullptr)
@@ -449,7 +449,7 @@ void ndShapeCompound::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVect
 
 ndVector ndShapeCompound::SupportVertex(const ndVector& dir) const
 {
-	ndVector support(ndVector::m_zero);
+	ndVector supportVector(ndVector::m_zero);
 	ndFloat32 maxDist2 = ndFloat32(-1.0e20f);
 
 	ndAssert(dir.m_w == ndFloat32(0.0f));
@@ -469,7 +469,7 @@ ndVector ndShapeCompound::SupportVertex(const ndVector& dir) const
 			if (dist2 > maxDist2)
 			{
 				maxDist2 = dist2;
-				support = supportPoint;
+				supportVector = supportPoint;
 			}
 		}
 	}
@@ -480,7 +480,7 @@ ndVector ndShapeCompound::SupportVertex(const ndVector& dir) const
 		ndAssert(m_root);
 
 		const ndVector mask(dir < ndVector::m_zero);
-		auto BoxSupport = [this, &dir, &mask](const ndNodeBase* const node)
+		auto BoxSupport = [&dir, &mask](const ndNodeBase* const node)
 		{
 			const ndVector support (node->m_p1.Select(node->m_p0, mask));
 			return support.DotProduct(dir).GetScalar();
@@ -513,7 +513,7 @@ ndVector ndShapeCompound::SupportVertex(const ndVector& dir) const
 				if (dist2 > maxDist2)
 				{
 					maxDist2 = dist2;
-					support = supportPoint;
+					supportVector = supportPoint;
 				}
 				limitingDist2 = ndMax (limitingDist2, dist2);
 			}
@@ -556,7 +556,7 @@ ndVector ndShapeCompound::SupportVertex(const ndVector& dir) const
 			}
 		}
 	}
-	return support;
+	return supportVector;
 }
 
 ndVector ndShapeCompound::SupportVertexSpecialProjectPoint(const ndVector&, const ndVector& dir) const
@@ -879,7 +879,7 @@ void ndShapeCompound::ImproveNodeFitness(ndNodeBase* const node) const
 
 ndFloat64 ndShapeCompound::CalculateEntropy(ndInt32 count, ndNodeBase** array)
 {
-	ndFloat64 cost0 = ndFloat32(1.0e20f);
+	ndFloat64 cost0 = ndFloat64(1.0e20f);
 	ndFloat64 cost1 = cost0;
 	do {
 		cost1 = cost0;
@@ -889,13 +889,13 @@ ndFloat64 ndShapeCompound::CalculateEntropy(ndInt32 count, ndNodeBase** array)
 			ImproveNodeFitness(node);
 		}
 
-		cost0 = ndFloat32(0.0f);
+		cost0 = ndFloat64(0.0f);
 		for (ndInt32 i = 0; i < count; ++i)
 		{
 			ndNodeBase* const node = array[i];
-			cost0 += node->m_area;
+			cost0 += ndFloat64(node->m_area);
 		}
-	} while (cost0 < (cost1 * ndFloat32(0.9999f)));
+	} while (cost0 < (cost1 * ndFloat64(0.9999f)));
 	return cost0;
 }
 
@@ -1010,7 +1010,7 @@ void ndShapeCompound::EndAddRemove()
 		if (nodeCount)
 		{
 			ndFloat64 cost = CalculateEntropy(nodeCount, nodeArray);
-			if ((cost > m_treeEntropy * ndFloat32(2.0f)) || (cost < m_treeEntropy * ndFloat32(0.5f))) 
+			if ((cost > m_treeEntropy * ndFloat64(2.0f)) || (cost < m_treeEntropy * ndFloat64(0.5f))) 
 			{
 				ndInt32 leafNodesCount = 0;
 				ndNodeBase** leafArray = ndAlloca(ndNodeBase*, nodeCount + 12);
@@ -1030,35 +1030,24 @@ void ndShapeCompound::EndAddRemove()
 						ndAssert(leafNodesCount <= (nodeCount + 1));
 					}
 				}
-		
-				class CompareNodes
-				{
-					public:
-					CompareNodes(void*)
-					{
-					}
 
-					ndInt32 Compare(const ndNodeBase* const elementA, const ndNodeBase* const elementB) const
+				ndSort(leafArray, leafNodesCount, [](const ndNodeBase* const elementA, const ndNodeBase* const elementB)
+				{
+					ndFloat32 areaA = elementA->m_area;
+					ndFloat32 areaB = elementB->m_area;
+					if (areaA < areaB)
 					{
-						ndFloat32 areaA = elementA->m_area;
-						ndFloat32 areaB = elementB->m_area;
-						if (areaA < areaB)
-						{
-							return 1;
-						}
-						if (areaA > areaB)
-						{
-							return -1;
-						}
-						return 0;
+						return 1;
 					}
-				};
-				ndSort<ndNodeBase*, CompareNodes>(leafArray, leafNodesCount, nullptr);
+					if (areaA > areaB)
+					{
+						return -1;
+					}
+					return 0;
+				});
 
 				ndInt32 rootIndex = 0;
 				m_root = BuildTopDownBig(&leafArray[0], 0, leafNodesCount - 1, nodeArray, rootIndex);
-
-				//m_root->Sanity();
 				m_treeEntropy = CalculateEntropy(nodeCount, nodeArray);
 			}
 			while (m_root->m_parent) 
@@ -1068,7 +1057,7 @@ void ndShapeCompound::EndAddRemove()
 		}
 		else 
 		{
-			m_treeEntropy = ndFloat32(2.0f);
+			m_treeEntropy = ndFloat64(2.0f);
 		}
 		
 		ndAssert(m_root->m_size.m_w == ndFloat32(0.0f));
@@ -1208,7 +1197,7 @@ void ndShapeCompound::RemoveNode(ndTreeArray::ndNode* const node)
 			{
 				ndAssert(treeNode->m_parent->m_left == treeNode);
 				root->m_left = treeNode->m_parent->m_right;
-				treeNode->m_parent->m_right = NULL;
+				treeNode->m_parent->m_right = nullptr;
 			}
 			root->m_left->m_parent = root;
 		}
@@ -1308,7 +1297,7 @@ void ndShapeCompound::ApplyScale(const ndVector& scale)
 		collision->SetLocalMatrix(ndGetIdentityMatrix());
 		collision->SetGlobalScale(matrix);
 	}
-	m_treeEntropy = ndFloat32(0.0f);
+	m_treeEntropy = ndFloat64(0.0f);
 	EndAddRemove();
 }
 
@@ -1372,7 +1361,8 @@ ndUnsigned64 ndShapeCompound::GetHash(ndUnsigned64 hash) const
 	ndUnsigned64 crc = hash;
 	ndShapeCompound::ndTreeArray::Iterator it(GetTree());
 
-	ndShapeCompound* const compoundShape = (ndShapeCompound*)this;
+	//ndShapeCompound* const compoundShape = (ndShapeCompound*)this;
+	ndShapeCompound* const compoundShape = const_cast<ndShapeCompound*>(this);
 	for (it.Begin(); it; it++)
 	{
 		const ndShapeInstance* const childInstance = compoundShape->GetShapeInstance(it.GetNode());
@@ -1390,7 +1380,8 @@ ndShapeInstance* ndShapeCompound::GetOwner() const
 ndSharedPtr<ndMeshCollisionShape> ndShapeCompound::GetMeshShape() const
 {
 	ndMeshCollisionShapeCompound* const shape = new ndMeshCollisionShapeCompound;
-	ndShapeCompound* const compoundShape = (ndShapeCompound*)this;
+	//ndShapeCompound* const compoundShape = (ndShapeCompound*)this;
+	ndShapeCompound* const compoundShape = const_cast<ndShapeCompound*>(this);
 
 	ndShapeCompound::ndTreeArray::Iterator it(GetTree());
 	for (it.Begin(); it; it++)

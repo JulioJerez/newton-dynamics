@@ -57,6 +57,32 @@ ndDynamicsUpdate::ndDynamicsUpdate(ndWorld* const world)
 {
 }
 
+ndDynamicsUpdate::ndDynamicsUpdate(const ndDynamicsUpdate& copy)
+	:m_velocTol(ndFloat32(1.0e-8f))
+	,m_islands(D_DEFAULT_BUFFER_SIZE)
+	,m_skeletonOrder(D_DEFAULT_BUFFER_SIZE)
+	,m_jointForcesIndex(D_DEFAULT_BUFFER_SIZE)
+	,m_internalForces(D_DEFAULT_BUFFER_SIZE)
+	,m_leftHandSide(D_DEFAULT_BUFFER_SIZE * 4)
+	,m_rightHandSide(D_DEFAULT_BUFFER_SIZE)
+	,m_tempInternalForces(D_DEFAULT_BUFFER_SIZE)
+	,m_bodyIslandOrder(D_DEFAULT_BUFFER_SIZE)
+	,m_jointBodyPairIndexBuffer(D_DEFAULT_BUFFER_SIZE)
+	,m_world(copy.m_world)
+	,m_timestep(ndFloat32(0.0f))
+	,m_invTimestep(ndFloat32(0.0f))
+	,m_firstPassCoef(ndFloat32(0.0f))
+	,m_invStepRK(ndFloat32(0.0f))
+	,m_timestepRK(ndFloat32(0.0f))
+	,m_invTimestepRK(ndFloat32(0.0f))
+	,m_solverPasses(0)
+	,m_activeJointCount(0)
+	,m_activeSkeleton(0)
+	,m_parallelSkeleton(0)
+	,m_unConstrainedBodyCount(0)
+{
+}
+
 ndDynamicsUpdate::~ndDynamicsUpdate()
 {
 	Clear();
@@ -82,33 +108,6 @@ void ndDynamicsUpdate::Clear()
 void ndDynamicsUpdate::SortBodyJointScan()
 {
 	//ND_PROFILE_ZONE();
-	class ndEvaluateKey0
-	{
-		public:
-		ndEvaluateKey0(void* const)
-		{
-		}
-
-		ndInt32 GetKey(const ndDynamicsUpdate::ndJointBodyPairIndex& entry) const
-		{
-			return ndInt32(entry.m_body & ((1 << D_MAX_BODY_RADIX_BIT) - 1));
-		}
-	};
-
-	class ndEvaluateKey1
-	{
-		public:
-		ndEvaluateKey1(void* const)
-		{
-		}
-
-		ndInt32 GetKey(const ndDynamicsUpdate::ndJointBodyPairIndex& entry) const
-		{
-			ndInt32 key = ndInt32(entry.m_body >> D_MAX_BODY_RADIX_BIT);
-			return key & ((1 << D_MAX_BODY_RADIX_BIT) - 1);
-		}
-	};
-
 	ndScene* const scene = m_world->GetScene();
 	ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
 	ndArray<ndJointBodyPairIndex>& bodyJointPairs = GetJointBodyPairIndexBuffer();
@@ -137,12 +136,20 @@ void ndDynamicsUpdate::SortBodyJointScan()
 	scene->ParallelExecute(EnumerateJointBodyPairs, jointCount, scene->OptimalGroupBatch(jointCount));
 
 	scene->GetScratchBuffer().SetCount(bodyJointPairs.GetCount() * ndInt32 (sizeof (ndJointBodyPairIndex)));
-	ndJointBodyPairIndex* const tempBuffer = reinterpret_cast<ndJointBodyPairIndex*>(&scene->GetScratchBuffer()[0]);
+	ndJointBodyPairIndex* tempBuffer0 = &bodyJointPairs[0];
+	ndJointBodyPairIndex* tempBuffer1 = reinterpret_cast<ndJointBodyPairIndex*>(&scene->GetScratchBuffer()[0]);
 
-	ndCountingSort<ndJointBodyPairIndex, ndEvaluateKey0, D_MAX_BODY_RADIX_BIT>(*scene, &bodyJointPairs[0], tempBuffer, ndInt32 (bodyJointPairs.GetCount()), nullptr, nullptr);
-	ndCountingSort<ndJointBodyPairIndex, ndEvaluateKey1, D_MAX_BODY_RADIX_BIT>(*scene, tempBuffer, &bodyJointPairs[0], ndInt32 (bodyJointPairs.GetCount()), nullptr, nullptr);
+	for (ndInt32 i = 0; i < 2; ++i)
+	{
+		ndCountingSort(*scene, tempBuffer0, tempBuffer1, ndInt32(bodyJointPairs.GetCount()), nullptr, D_MAX_BODY_RADIX_BIT, [&i](const ndDynamicsUpdate::ndJointBodyPairIndex& entry)
+		{
+			const ndInt32 key = ndInt32(entry.m_body >> (D_MAX_BODY_RADIX_BIT * i));
+			return key & ((1 << D_MAX_BODY_RADIX_BIT) - 1);
+		});
+		ndSwap(tempBuffer0, tempBuffer1);
+	}
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = 1; i < bodyJointPairs.GetCount(); ++i)
 	{
 		ndInt32 key0 = bodyJointPairs[i - 1].m_body;
@@ -178,7 +185,7 @@ void ndDynamicsUpdate::SortBodyJointScan()
 		bodyJointIndexAcc += count;
 	}
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	const ndArray<ndJointBodyPairIndex>& jointBodyPairIndexBuffer = GetJointBodyPairIndexBuffer();
 	for (ndInt32 i = 0; i < scene->GetActiveBodyArray().GetCount(); ++i)
 	{
@@ -196,39 +203,6 @@ void ndDynamicsUpdate::SortBodyJointScan()
 void ndDynamicsUpdate::SortJointsScan()
 {
 	//ND_PROFILE_ZONE();
-	class ndEvaluateCountRows
-	{
-		public:
-		class ndSortKey
-		{
-			public:
-			ndSortKey(ndInt32 sleep, ndInt32 rows)
-				:m_value(0)
-			{
-				ndAssert(rows > 0);
-				m_upperBit = ndUnsigned32(sleep);
-				m_lowerBit = ndUnsigned32((1 << 6) - rows - 1);
-			}
-
-			union
-			{
-				ndInt32 m_value;
-				struct
-				{
-					ndUnsigned32 m_lowerBit : 6;
-					ndUnsigned32 m_upperBit : 1;
-				};
-			};
-		};
-
-		ndEvaluateCountRows(void* const) {}
-		ndInt32 GetKey(const ndConstraint* const joint) const
-		{
-			const ndSortKey key(joint->m_resting, joint->m_rowCount);
-			return key.m_value;
-		}
-	};
-
 	ndScene* const scene = m_world->GetScene();
 
 	for (ndSkeletonList::ndNode* node = m_world->GetSkeletonList().GetFirst(); node; node = node->GetNext())
@@ -404,7 +378,7 @@ void ndDynamicsUpdate::SortJointsScan()
 	});
 	scene->ParallelExecute(Sort0, numberOfWorkGroups, 1);
 	
-	#ifdef _DEBUG
+	#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		for (ndInt32 i = 0; i < (jointArray.GetCount() - 1); ++i)
 		{
 			const ndConstraint* const joint0 = tempJointBuffer[i];
@@ -421,7 +395,33 @@ void ndDynamicsUpdate::SortJointsScan()
 	m_activeJointCount = movingJointCount;
 	GetTempInternalForces().SetCount(jointArray.GetCount() * 2);
 	GetJointBodyPairIndexBuffer().SetCount(jointArray.GetCount() * 2);
-	ndCountingSort<ndConstraint*, ndEvaluateCountRows, 7>(*scene, tempJointBuffer, &jointArray[0], ndInt32 (jointArray.GetCount()), nullptr, nullptr);
+
+	ndCountingSort(*scene, tempJointBuffer, &jointArray[0], ndInt32(jointArray.GetCount()), nullptr, 7, [](const ndConstraint* const joint)
+	{
+		class ndSortKey
+		{
+			public:
+			ndSortKey(ndInt32 sleep, ndInt32 rows)
+				:m_value(0)
+			{
+				ndAssert(rows > 0);
+				m_upperBit = ndUnsigned32(sleep);
+				m_lowerBit = ndUnsigned32((1 << 6) - rows - 1);
+			}
+
+			union
+			{
+				ndInt32 m_value;
+				struct
+				{
+					ndUnsigned32 m_lowerBit : 6;
+					ndUnsigned32 m_upperBit : 1;
+				};
+			};
+		};
+		const ndSortKey key(joint->m_resting, joint->m_rowCount);
+		return key.m_value;
+	});
 }
 
 void ndDynamicsUpdate::SortJoints()
@@ -447,7 +447,7 @@ void ndDynamicsUpdate::SortJoints()
 	m_leftHandSide.SetCount(rowCount);
 	m_rightHandSide.SetCount(rowCount);
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndAssert(m_activeJointCount <= jointArray.GetCount());
 	for (ndInt32 i = 0; i < ndInt32 (jointArray.GetCount()); ++i)
 	{
@@ -1165,29 +1165,21 @@ void ndDynamicsUpdate::InitSkeletons()
 		m_skeletonOrder.SetCount(0);
 		if (scene->GetThreadCount() > 1)
 		{
-			class ndCompareSkeletons
+			ndSort(&activeSkeletons[0], ndInt32(activeSkeletons.GetCount()), [](const ndSkeletonContainer* const elementA, const ndSkeletonContainer* const elementB)
 			{
-				public:
-				ndCompareSkeletons(void*)
+				const ndInt32 rowsA = elementA->m_isResting ? 0 : elementA->GetTotalJoints();
+				const ndInt32 rowsB = elementB->m_isResting ? 0 : elementB->GetTotalJoints();
+				if (rowsA < rowsB)
 				{
+					return 1;
 				}
+				if (rowsA > rowsB)
+				{
+					return -1;
+				}
+				return 0;
+			});
 
-				ndInt32 Compare(const ndSkeletonContainer* const elementA, const ndSkeletonContainer* const elementB) const
-				{
-					const ndInt32 rowsA = elementA->m_isResting ? 0 : elementA->GetTotalJoints();
-					const ndInt32 rowsB = elementB->m_isResting ? 0 : elementB->GetTotalJoints();
-					if (rowsA < rowsB)
-					{
-						return 1;
-					}
-					if (rowsA > rowsB)
-					{
-						return -1;
-					}
-					return 0;
-				}
-			};
-			ndSort<ndSkeletonContainer*, ndCompareSkeletons>(&activeSkeletons[0], ndInt32(activeSkeletons.GetCount()), nullptr);
 			ndInt32 sum = 0;
 			m_activeSkeleton = 0;
 			for (ndInt32 i = 0; i < ndInt32(activeSkeletons.GetCount()); ++i)

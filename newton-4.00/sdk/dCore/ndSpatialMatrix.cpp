@@ -26,7 +26,7 @@
 
 ndSpatialMatrix ndSpatialMatrix::CholeskyFactorization(ndInt32 rows) const
 {
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = 0; i < rows; ++i)
 	{
 		ndAssert(m_rows[i][i] > ndFloat64(0.0f));
@@ -62,7 +62,7 @@ ndSpatialMatrix ndSpatialMatrix::CholeskyFactorization(ndInt32 rows) const
 		}
 	}
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndSpatialMatrix psdMatrix1(*this);
 	ndCholeskyFactorization(rows, 8, &psdMatrix1[0][0]);
 
@@ -88,7 +88,7 @@ ndSpatialMatrix ndSpatialMatrix::Inverse(ndInt32 rows) const
 	{
 		tmp[i] = m_rows[i];
 		inv[i] = ndSpatialVector::m_zero;
-		inv[i][i] = ndFloat32(1.0f);
+		inv[i][i] = ndFloat64(1.0f);
 	}
 
 	for (ndInt32 i = 0; i < rows; ++i) 
@@ -151,7 +151,7 @@ ndSpatialMatrix ndSpatialMatrix::Inverse(ndInt32 rows) const
 		}
 	}
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = 0; i < rows; ++i)
 	{
 		ndFloat64 sum = ndFloat32(0.0f);
@@ -184,7 +184,7 @@ ndSpatialMatrix ndSpatialMatrix::InversePositiveDefinite(ndInt32 rows) const
 	ndSpatialMatrix inv;
 	for (ndInt32 i = 0; i < rows; ++i)
 	{
-		ndFloat64 sum = ndFloat32(0.0f);
+		ndFloat64 sum = ndFloat64(0.0f);
 		for (ndInt32 k = i; k < rows; ++k)
 		{
 			sum += lowerInverse[k][i] * lowerInverse[k][i];
@@ -193,7 +193,7 @@ ndSpatialMatrix ndSpatialMatrix::InversePositiveDefinite(ndInt32 rows) const
 
 		for (ndInt32 j = i + 1; j < rows; ++j)
 		{
-			sum = ndFloat32(0.0f);
+			sum = ndFloat64(0.0f);
 			for (ndInt32 k = j; k < rows; ++k)
 			{
 				sum += lowerInverse[k][i] * lowerInverse[k][j];
@@ -203,10 +203,10 @@ ndSpatialMatrix ndSpatialMatrix::InversePositiveDefinite(ndInt32 rows) const
 		}
 	}
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt32 i = 0; i < rows; ++i)
 	{
-		ndFloat64 sum = ndFloat32(0.0f);
+		ndFloat64 sum = ndFloat64(0.0f);
 		for (ndInt32 k = 0; k < rows; ++k)
 		{
 			sum += m_rows[i][k] * inv[k][i];
@@ -215,7 +215,7 @@ ndSpatialMatrix ndSpatialMatrix::InversePositiveDefinite(ndInt32 rows) const
 
 		for (ndInt32 j = i + 1; j < rows; ++j)
 		{
-			sum = ndFloat32(0.0f);
+			sum = ndFloat64(0.0f);
 			for (ndInt32 k = 0; k < rows; ++k)
 			{
 				sum += m_rows[i][k] * inv[k][j];

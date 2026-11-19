@@ -163,12 +163,10 @@ void ndIkSolver::GetJacobianDerivatives(ndConstraint* const joint)
 		const ndFloat32 force = rhs->m_jointFeebackForce->GetInitialGuess();
 		rhs->m_force = isBilateral ? ndClamp(force, rhs->m_lowerBoundFrictionCoefficent, rhs->m_upperBoundFrictionCoefficent) : force;
 		
-		ndAssert(constraintParam.m_forceBounds[i].m_normalIndex >= -1);
 		const ndInt32 frictionIndex = constraintParam.m_forceBounds[i].m_normalIndex;
 		const ndInt32 mask = frictionIndex >> 31;
 		rhs->m_normalForceIndex = frictionIndex;
 		rhs->m_normalForceIndexFlat = ~mask & (frictionIndex + baseIndex);
-
 		ndAssert(rhs->SanityCheck());
 	}
 }

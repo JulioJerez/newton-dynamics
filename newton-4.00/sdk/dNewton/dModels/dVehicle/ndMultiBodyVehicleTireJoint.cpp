@@ -15,14 +15,23 @@
 #include "ndMultiBodyVehicle.h"
 #include "ndMultiBodyVehicleTireJoint.h"
 
-static ndTireFrictionModel::ndPacejkaTireModel pacejkaSportLateral(ndFloat32(2.5f), ndFloat32(0.2f), ndFloat32(1.5f), ndFloat32(-0.1f), ndFloat32(0.0f), ndFloat32(0.0f));
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaSportLateral(ndFloat32(4.0f), ndFloat32(0.2f), ndFloat32(1.5f), ndFloat32(-0.1f), ndFloat32(0.0f), ndFloat32(0.0f));
 static ndTireFrictionModel::ndPacejkaTireModel pacejkaSportLongitudinal(ndFloat32(2.0f), ndFloat32(0.5f), ndFloat32(1.65f), ndFloat32(0.8f), ndFloat32(0.0f), ndFloat32(0.0f));
 
-static ndTireFrictionModel::ndPacejkaTireModel pacejkaUtilityLateral(ndFloat32(2.5f), ndFloat32(0.14f), ndFloat32(1.35f), ndFloat32(-0.5f), ndFloat32(0.0f), ndFloat32(0.0f));
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaUtilityLateral(ndFloat32(3.0f), ndFloat32(0.14f), ndFloat32(1.35f), ndFloat32(-0.5f), ndFloat32(0.0f), ndFloat32(0.0f));
 static ndTireFrictionModel::ndPacejkaTireModel pacejkaUtilityLongitudinal(ndFloat32(2.0f), ndFloat32(0.2f), ndFloat32(1.4), ndFloat32(-9.8f), ndFloat32(0.0f), ndFloat32(0.0f));
 
-static ndTireFrictionModel::ndPacejkaTireModel pacejkaTruckLateral(ndFloat32(2.5f), ndFloat32(0.01f), ndFloat32(2.85f), ndFloat32(1.42f), ndFloat32(0.0f), ndFloat32(0.0f));
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaTruckLateral(ndFloat32(2.0f), ndFloat32(0.01f), ndFloat32(2.85f), ndFloat32(1.42f), ndFloat32(0.0f), ndFloat32(0.0f));
 static ndTireFrictionModel::ndPacejkaTireModel pacejkaTruckLongitudinal(ndFloat32(2.0f), ndFloat32(0.5f), ndFloat32(1.65f), ndFloat32(0.8f), ndFloat32(0.0f), ndFloat32(0.0f));
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 ndTireFrictionModel::ndTireFrictionModel()
 	:m_frictionModel(m_pacejkaUtility)
@@ -56,12 +65,10 @@ const char* ndTireFrictionModel::GetLabel(ndFrictionModel frictionModel)
 
 		case ndTireFrictionModel::m_pacejkaCustom:
 			return "pacejkaCustom";
-			break;
 
 		case ndTireFrictionModel::m_coulombCicleOfFriction:
 		default:
 			return "coulombCicleOfFriction";
-			break;
 	}
 }
 
@@ -104,6 +111,14 @@ void ndTireFrictionModel::SetPacejkaCurves(ndFrictionModel frictionModel)
 			m_frictionModel = frictionModel;
 			break;
 
+		case ndTireFrictionModel::m_pacejkaCustom:
+			ndAssert(0);
+			SetPacejkaCurves(pacejkaUtilityLongitudinal, pacejkaUtilityLateral);
+			m_frictionModel = frictionModel;
+			break;
+
+		case ndTireFrictionModel::m_coulomb:
+		case ndTireFrictionModel::m_coulombCicleOfFriction:
 		case ndTireFrictionModel::m_pacejkaUtility:
 		default:
 			SetPacejkaCurves(pacejkaUtilityLongitudinal, pacejkaUtilityLateral);
@@ -126,6 +141,9 @@ void ndTireFrictionModel::GetPacejkaCurves(ndFrictionModel pacejkaStockModel, nd
 			longitudinal = pacejkaTruckLongitudinal;
 			break;
 
+		case ndTireFrictionModel::m_coulomb:
+		case ndTireFrictionModel::m_pacejkaCustom:
+		case ndTireFrictionModel::m_coulombCicleOfFriction:
 		case ndTireFrictionModel::m_pacejkaUtility:
 		default:
 			lateral = pacejkaUtilityLateral;
@@ -148,7 +166,7 @@ void ndTireFrictionModel::PlotPacejkaCurves(const char* const name) const
 	{
 		ndFloat32 fx = m_longitudinalPacejka.Evaluate(x, ndFloat32(1.0f));
 		ndFloat32 fz = m_lateralPacejka.Evaluate(x, ndFloat32(1.0f));
-		fprintf(outFile, "%g; %g; %g\n", fx, fz, x);
+		fprintf(outFile, "%g; %g; %g\n", ndFloat64(fx), ndFloat64(fz), ndFloat64(x));
 	}
 	fclose(outFile);
 }
@@ -195,13 +213,19 @@ void ndTireFrictionModel::ndPacejkaTireModel::CalculateMaxPhi()
 	m_normalizingPhi = maxPhi;
 }
 
+// phi = phi + Sh;
+// F = D * sin(C * atan(B * (1 - E) * phi) + E * atan(B * phi))) + Sv
+// X = B * (1.0 - E) * phi
+// Y = E * atan(B * phi)
+// Z = C * atan (X + Y) 
+// F = D * sin(Z) + Sv
 ndFloat32 ndTireFrictionModel::ndPacejkaTireModel::Evaluate(ndFloat32 phi, ndFloat32 sprungWeight) const
 {
 	ndFloat32 displacedPhi = phi + m_sh;
-	ndFloat32 EaTang = m_e * ndAtan(m_b * displacedPhi);
-	ndFloat32 BEarg = m_b * (ndFloat32(1.0f) - m_e) * displacedPhi;
-	ndFloat32 Carg = m_c * ndAtan(BEarg + EaTang);
-	ndFloat32 unitForce = m_d * ndSin(Carg) + m_sv;
+	ndFloat32 Y = m_e * ndAtan(m_b * displacedPhi);
+	ndFloat32 X = m_b * (ndFloat32(1.0f) - m_e) * displacedPhi;
+	ndFloat32 Z = m_c * ndAtan(X + Y);
+	ndFloat32 unitForce = m_d * ndSin(Z) + m_sv;
 	return sprungWeight * unitForce;
 }
 

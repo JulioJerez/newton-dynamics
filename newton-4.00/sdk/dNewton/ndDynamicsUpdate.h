@@ -75,6 +75,7 @@ class ndDynamicsUpdate : public ndClassAlloc
 
 	public:
 	ndDynamicsUpdate(ndWorld* const world);
+	ndDynamicsUpdate(const ndDynamicsUpdate& copy);
 	virtual ~ndDynamicsUpdate();
 
 	virtual const char* GetStringId() const;

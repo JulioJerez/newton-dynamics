@@ -103,14 +103,29 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 	auto ApplyControls = [this, vehicle, motor, gearJoint, &axis, &buttons]()
 	{
 		ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
+		ndFloat32 brake = axis[ndGameControllerInputs::m_brakePedal];
+		ndFloat32 steerAngle = axis[ndGameControllerInputs::m_steeringWheel];
+		ndFloat32 handBrake = buttons[ndGameControllerInputs::m_handBreakButton] ? ndFloat32(1.0f) : ndFloat32(0.0f);
+
+static int xxxx;
+xxxx++;
+if (xxxx >= 500)
+{
+	throttle = 0.5f;
+	//steerAngle = 0.5f;
+}
+
 		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = motor->GetCurve();
 		ndFloat32 currentRpm = motor->GetRpm();
 		ndFloat32 idleRpm = engineCurve.GetIdleRpm();
 		ndFloat32 desiredRpm = ndMax(idleRpm, throttle * engineCurve.GetRedLineRpm());
 		ndFloat32 torqueFromCurve = engineCurve.GetTorque(currentRpm);
-		ndFloat32 brake = axis[ndGameControllerInputs::m_brakePedal];
-		ndFloat32 steerAngle = axis[ndGameControllerInputs::m_steeringWheel];
-		ndFloat32 handBrake = buttons[ndGameControllerInputs::m_handBreakButton] ? ndFloat32(1.0f) : ndFloat32(0.0f);
+
+if (xxxx >= 500)
+{
+	torqueFromCurve = 100.0f;
+}
+
 
 		if (!m_isPlayer)
 		{

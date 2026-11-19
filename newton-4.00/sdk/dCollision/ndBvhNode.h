@@ -108,9 +108,16 @@ class ndBvhLeafNode : public ndBvhNode
 class ndBottomUpCell
 {
 	public:
-	ndInt32 m_x;
-	ndInt32 m_y;
-	ndInt32 m_z;
+	union
+	{
+		ndInt32 m_index[3];
+		struct
+		{
+			ndInt32 m_x;
+			ndInt32 m_y;
+			ndInt32 m_z;
+		};
+	};
 	ndBvhNode* m_node;
 };
 

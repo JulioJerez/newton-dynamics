@@ -451,29 +451,18 @@ void ndBvhSceneManager::Update(ndThreadPool& threadPool)
 		nodeArray.SetCount(count * 2);
 		ndBvhNode** const src = &nodeArray[0];
 		ndBvhNode** const tmp = &nodeArray[count];
-
-		class ndSortSceneNodeKey
-		{
-			public:
-			ndSortSceneNodeKey(const void* const)
-			{
-				m_keyCode[0] = 0;
-				m_keyCode[1] = 1;
-				m_keyCode[2] = 2;
-				m_keyCode[3] = 2;
-			}
-
-			ndInt32 GetKey(const ndBvhNode* const node) const
-			{
-				ndUnsigned32 code = ndUnsigned32(node->m_isDead * 2 + (((ndBvhNode*)node)->GetAsSceneBodyNode() ? 1 : 0));
-				return m_keyCode[code];
-			}
-
-			ndInt32 m_keyCode[4];
-		};
-
+		ndInt32 keyCode[4];
 		ndUnsigned32 scans[5];
-		ndCountingSortInPlace<ndBvhNode*, ndSortSceneNodeKey, 2>(threadPool, src, tmp, count, scans, nullptr);
+		keyCode[0] = 0;
+		keyCode[1] = 1;
+		keyCode[2] = 2;
+		keyCode[3] = 2;
+
+		ndCountingSortInPlace(threadPool, src, tmp, count, scans, 2, [&keyCode](const ndBvhNode* const node)
+		{
+			ndUnsigned32 code = ndUnsigned32(node->m_isDead * 2 + (((ndBvhNode*)node)->GetAsSceneBodyNode() ? 1 : 0));
+			return keyCode[code];
+		});
 
 		const ndInt32 alivedStart = ndInt32(scans[2]);
 		const ndInt32 deadCount = ndInt32(scans[3]) - alivedStart;
@@ -830,16 +819,9 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 				ndInt32 m_rootNodeIndex;
 			};
 
-			//ndBlockSegment stackPool[32];
 			ndFixSizeArray<ndBlockSegment, 64> stackPool;
 
-			//ndInt32 stack = 1;
 			ndInt32 rootNodeIndex = newParentsDest[k].m_location;
-			//stackPool[0].m_depth = 0;
-			//stackPool[0].m_rootNodeIndex = rootNodeIndex;
-			//stackPool[0].m_start = srcCellNodes[k].m_location;
-			//stackPool[0].m_count = srcCellNodes[k + 1].m_location - srcCellNodes[k].m_location;
-			//ndBlockSegment(ndInt32 start, ndInt32 count, ndInt32 rootNodeIndex, ndInt32 depth)
 			stackPool.PushBack(ndBlockSegment(srcCellNodes[k].m_location, srcCellNodes[k + 1].m_location - srcCellNodes[k].m_location, rootNodeIndex, 0));
 
 			ndBvhNode* const rootNode = parentsArray[rootNodeIndex];
@@ -851,7 +833,6 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 				const ndBlockSegment block(stackPool.Pop());
 				ndAssert(block.m_count > 2);
 
-				//maxStack = ndMax(maxStack, stack);
 				maxStack = ndMax(maxStack, stackPool.GetCount());
 
 				ndVector minP(ndFloat32(1.0e15f));
@@ -892,39 +873,26 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 					class ndCompareContext
 					{
 						public:
+						ndCompareContext(ndFloat32 midPoint, ndInt32 index)
+							:m_midPoint(midPoint)
+							,m_index(index)
+						{
+						}
 						ndFloat32 m_midPoint;
 						ndInt32 m_index;
 					};
 
-					class ndCompareKey
-					{
-						public:
-						ndCompareKey(const void* const context)
-						{
-							const ndCompareContext* const info = (ndCompareContext*)context;
-
-							m_index = info->m_index;
-							m_midPoint = info->m_midPoint;
-						}
-
-						ndInt32 GetKey(const ndBottomUpCell& cell)
-						{
-							const ndBvhNode* const node = cell.m_node;
-							const ndVector p(ndVector::m_half * (node->m_minBox + node->m_maxBox));
-							ndInt32 key = p[m_index] >= m_midPoint;
-							return key;
-						}
-
-						ndFloat32 m_midPoint;
-						ndInt32 m_index;
-					};
-
-					ndCompareContext info;
 					ndUnsigned32 scan[8];
+					ndCompareContext info(median[index] / ndFloat32(block.m_count), index);
+					ndCountingSortInPlace(&m_bvhBuildState.m_cellBuffer0[block.m_start], &m_bvhBuildState.m_cellBuffer1[block.m_start], block.m_count, scan, 2, [&info](const ndBottomUpCell& cell)
+					{
+						const ndBvhNode* const node = cell.m_node;
+						const ndVector p(ndVector::m_half* (node->m_minBox + node->m_maxBox));
+						ndInt32 key = p[info.m_index] >= info.m_midPoint;
+						return key;
+					});
 
-					info.m_index = index;
-					info.m_midPoint = median[index] / ndFloat32(block.m_count);
-					ndCountingSortInPlace<ndBottomUpCell, ndCompareKey, 2>(&m_bvhBuildState.m_cellBuffer0[block.m_start], &m_bvhBuildState.m_cellBuffer1[block.m_start], block.m_count, scan, &info);
+
 					index0 = block.m_start + ndInt32(scan[1]);
 					if (index0 == block.m_start)
 					{
@@ -989,13 +957,6 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 					parent->m_right = nullptr;
 					root->m_left = parent;
 
-					//stackPool[stack].m_count = count0;
-					//stackPool[stack].m_start = block.m_start;
-					//stackPool[stack].m_depth = block.m_depth + 1;
-					//stackPool[stack].m_rootNodeIndex = rootNodeIndex;
-					//stack++;
-					//ndAssert(stack < ndInt32(sizeof(stackPool) / sizeof(stackPool[0])));
-					//ndBlockSegment(ndInt32 start, ndInt32 count, ndInt32 rootNodeIndex, ndInt32 depth)
 					stackPool.PushBack(ndBlockSegment(block.m_start, count0, rootNodeIndex, block.m_depth + 1));
 					rootNodeIndex++;
 				}
@@ -1049,13 +1010,6 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 					parent->m_right = nullptr;
 					root->m_right = parent;
 
-					//stackPool[stack].m_start = index0;
-					//stackPool[stack].m_count = count1;
-					//stackPool[stack].m_depth = block.m_depth + 1;
-					//stackPool[stack].m_rootNodeIndex = rootNodeIndex;
-					//stack++;
-					//rootNodeIndex++;
-					//ndAssert(stack < ndInt32(sizeof(stackPool) / sizeof(stackPool[0])));
 					stackPool.PushBack(ndBlockSegment(index0, count1, rootNodeIndex, block.m_depth + 1));
 					rootNodeIndex++;
 
@@ -1064,7 +1018,7 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 			rootNode->m_bhvLinked = 0;
 			depth = maxStack;
 		}
-		#ifdef _DEBUG
+		#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		else if (nodesCount == 0)
 		{
 			ndInt32 index = srcCellNodes[k].m_location;
@@ -1088,19 +1042,6 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 void ndBvhSceneManager::BuildBvhTreeSetNodesDepth(ndThreadPool& threadPool)
 {
 	ND_PROFILE_ZONE();
-	class ndSortGetDethpKey
-	{
-		public:
-		ndSortGetDethpKey(const void* const)
-		{
-		}
-
-		ndInt32 GetKey(const ndBvhInternalNode* const node) const
-		{
-			return node->m_depthLevel;
-		}
-	};
-
 	ndBvhNodeArray& nodeArray = m_workingArray;
 
 	ndInt32 sceneNodeCount = ndInt32(nodeArray.GetCount()) / 2 - 1;
@@ -1108,7 +1049,10 @@ void ndBvhSceneManager::BuildBvhTreeSetNodesDepth(ndThreadPool& threadPool)
 	ndBvhInternalNode** tmpBuffer = (ndBvhInternalNode**)&m_bvhBuildState.m_tempNodeBuffer[0];
 
 	ndUnsigned32 scans[257];
-	ndCountingSortInPlace<ndBvhInternalNode*, ndSortGetDethpKey, 8>(threadPool, &view[0], tmpBuffer, sceneNodeCount, scans, nullptr);
+	ndCountingSortInPlace(threadPool, &view[0], tmpBuffer, sceneNodeCount, scans, 8, [](const ndBvhInternalNode* const node)
+	{
+		return node->m_depthLevel;
+	});
 
 	nodeArray.m_scansCount = 0;
 	for (ndInt32 i = 1; (i < 257) && (ndInt32(scans[i]) < sceneNodeCount); ++i)
@@ -1133,9 +1077,8 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 	class ndGridClassifier
 	{
 		public:
-		ndGridClassifier(void* const data)
+		ndGridClassifier(const ndBuildBvhTreeBuildState* const info)
 		{
-			const ndBuildBvhTreeBuildState* const info = (ndBuildBvhTreeBuildState*)data;
 			m_size = info->m_size;
 			m_origin = info->m_origin;
 			m_invSize = ndVector::m_triplexMask & ndVector(ndFloat32(1.0f) / m_size.m_x);
@@ -1178,74 +1121,13 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 		ndInt32 m_code[5];
 	};
 
-	class ndSortCell_x
-	{
-		public:
-		ndSortCell_x(const void* const shift)
-		{
-			m_shift = *((ndInt32*)shift);
-		}
-
-		ndInt32 GetKey(const ndBottomUpCell& cell) const
-		{
-			ndInt32 val = cell.m_x >> m_shift;
-			return val & 0xff;
-		}
-
-		ndInt32 m_shift;
-	};
-
-	class ndSortCell_y
-	{
-		public:
-		ndSortCell_y(const void* const shift)
-		{
-			m_shift = *((ndInt32*)shift);
-		}
-
-		ndInt32 GetKey(const ndBottomUpCell& cell) const
-		{
-			ndInt32 val = cell.m_y >> m_shift;
-			return val & 0xff;
-		}
-
-		ndInt32 m_shift;
-	};
-
-	class ndSortCell_z
-	{
-		public:
-		ndSortCell_z(const void* const shift)
-		{
-			m_shift = *((ndInt32*)shift);
-		}
-
-		ndInt32 GetKey(const ndBottomUpCell& cell) const
-		{
-			ndInt32 val = cell.m_z >> m_shift;
-			return val & 0xff;
-		}
-
-		ndInt32 m_shift;
-	};
-
-	class ndSortCellCount
-	{
-		public:
-		ndSortCellCount(const void* const)
-		{
-		}
-
-		ndInt32 GetKey(const ndCellScanPrefix& cell) const
-		{
-			return ndInt32 (cell.m_cellTest);
-		}
-	};
-
 	ndUnsigned32 prefixScan[8];
-	ndInt32 maxGrids[D_MAX_THREADS_COUNT][3];
+	const ndGridClassifier classifier(&m_bvhBuildState);
+	ndCountingSortInPlace(threadPool, m_bvhBuildState.m_srcArray, m_bvhBuildState.m_tmpArray, m_bvhBuildState.m_leafNodesCount, prefixScan, 2, [&classifier](const ndBvhNode* const node)
+	{
+		return classifier.GetKey(node);
+	});
 
-	ndCountingSortInPlace<ndBvhNode*, ndGridClassifier, 2>(threadPool, m_bvhBuildState.m_srcArray, m_bvhBuildState.m_tmpArray, m_bvhBuildState.m_leafNodesCount, prefixScan, &m_bvhBuildState);
 	ndInt32 insideCellsCount = ndInt32(prefixScan[m_insideCell + 1] - prefixScan[m_insideCell]);
 	if (insideCellsCount)
 	{
@@ -1262,6 +1144,7 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 		m_bvhBuildState.m_srcArray += linkedNodes;
 		m_bvhBuildState.m_leafNodesCount -= linkedNodes;
 
+		ndInt32 maxGrids[D_MAX_THREADS_COUNT][3];
 		auto MakeGrids = ndMakeObject::ndFunction([this, &maxGrids, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			ND_PROFILE_ZONE_NAMED("MakeGrids");
@@ -1310,26 +1193,20 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 		ndAssert(maxGrids[0][0] < 0x7fffffff);
 		ndAssert(maxGrids[0][1] < 0x7fffffff);
 		ndAssert(maxGrids[0][2] < 0x7fffffff);
-		ndInt64 shift = 0;
-		do 
+		for (ndInt32 i = 0; i < 3; ++i)
 		{
-			ndCountingSort<ndBottomUpCell, ndSortCell_x, 8>(threadPool, m_bvhBuildState.m_cellBuffer0, m_bvhBuildState.m_cellBuffer1, nullptr, &shift);
-			shift += 8;
-		} while (ndInt64(maxGrids[0][0]) > ndInt64(1) << shift);
+			ndInt64 shift = 0;
+			do 
+			{
+				ndCountingSort(threadPool, m_bvhBuildState.m_cellBuffer0, m_bvhBuildState.m_cellBuffer1, nullptr, 8, [&i, &shift](const ndBottomUpCell& cell)
+				{
+					ndInt32 val = cell.m_index[i] >> shift;
+					return val & 0xff;
+				});
 
-		shift = 0;
-		do 
-		{
-			ndCountingSort<ndBottomUpCell, ndSortCell_y, 8>(threadPool, m_bvhBuildState.m_cellBuffer0, m_bvhBuildState.m_cellBuffer1, nullptr, &shift);
-			shift += 8;
-		} while (ndInt64(maxGrids[0][1]) > ndInt64(1) << shift);
-
-		shift = 0;
-		do 
-		{
-			ndCountingSort<ndBottomUpCell, ndSortCell_z, 8>(threadPool, m_bvhBuildState.m_cellBuffer0, m_bvhBuildState.m_cellBuffer1, nullptr, &shift);
-			shift += 8;
-		} while (ndInt64(maxGrids[0][2]) > ndInt64(1) << shift);
+				shift += 8;
+			} while (ndInt64(maxGrids[0][0]) > ndInt64(1) << shift);
+		}
 
 		ndBottomUpCell sentinelCell;
 		sentinelCell.m_x = ndUnsigned32(-1);
@@ -1358,7 +1235,10 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 
 		m_bvhBuildState.m_cellCounts0[0].m_cellTest = 0;
 		m_bvhBuildState.m_cellCounts0[0].m_location = 0;
-		ndCountingSort<ndCellScanPrefix, ndSortCellCount, 1>(threadPool, m_bvhBuildState.m_cellCounts0, m_bvhBuildState.m_cellCounts1, prefixScan, nullptr);
+		ndCountingSort(threadPool, m_bvhBuildState.m_cellCounts0, m_bvhBuildState.m_cellCounts1, prefixScan, 1, [](const ndCellScanPrefix& cell)
+		{
+			return ndInt32(cell.m_cellTest);
+		});
 
 		ndUnsigned32 sum = 0;
 		const ndInt32 batchCount = ndInt32(prefixScan[1] - 1);
@@ -1374,7 +1254,6 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 			ndInt32 subTreeDepth = BuildSmallBvhTree(threadPool, m_bvhBuildState.m_parentsArray, batchCount);
 			m_bvhBuildState.m_depthLevel += subTreeDepth;
 
-			//ndAtomic<ndInt32> iterator2(0);
 			auto EnumerateSmallBvh = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 			{
 				ND_PROFILE_ZONE_NAMED("EnumerateSmallBvh");

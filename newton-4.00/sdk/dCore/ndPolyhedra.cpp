@@ -33,8 +33,8 @@
 
 #define D_LOCAL_BUFFER_SIZE  1024
 
-#define ndPointerToInt(x) ((size_t)x)
-#define ndIntToPointer(x) ((void*)(size_t(x)))
+//#define ndPointerToInt(x) ((size_t)x)
+//#define ndIntToPointer(x) ((void*)(size_t(x)))
 
 class ndDiagonalEdge
 {
@@ -60,13 +60,14 @@ class ndEdgeCollapseEdgeHandle
 		:m_edge(dataHandle.m_edge)
 		,m_inList(1)
 	{
-		ndEdgeCollapseEdgeHandle* const handle = (ndEdgeCollapseEdgeHandle *)ndIntToPointer (m_edge->m_userData);
+		//ndEdgeCollapseEdgeHandle* const handle = (ndEdgeCollapseEdgeHandle *)ndIntToPointer (m_edge->m_userData);
+		ndEdgeCollapseEdgeHandle* const handle = reinterpret_cast<ndEdgeCollapseEdgeHandle*>(m_edge->m_userData);
 		if (handle) 
 		{
 			ndAssert (handle != this);
 			handle->m_edge = nullptr;
 		}
-		m_edge->m_userData = ndUnsigned64 (ndPointerToInt(this));
+		m_edge->m_userData = ndUnsigned64 (this);
 	}
 
 	~ndEdgeCollapseEdgeHandle ()
@@ -75,10 +76,12 @@ class ndEdgeCollapseEdgeHandle
 		{
 			if (m_edge) 
 			{
-				ndEdgeCollapseEdgeHandle* const handle = (ndEdgeCollapseEdgeHandle *)ndIntToPointer (m_edge->m_userData);
+				//ndEdgeCollapseEdgeHandle* const handle = (ndEdgeCollapseEdgeHandle *)ndIntToPointer (m_edge->m_userData);
+				ndEdgeCollapseEdgeHandle* const handle = reinterpret_cast<ndEdgeCollapseEdgeHandle*>(m_edge->m_userData);
 				if (handle == this) 
 				{
-					m_edge->m_userData = ndPointerToInt (nullptr);
+					//m_edge->m_userData = ndPointerToInt (nullptr);
+					m_edge->m_userData = 0;
 				}
 			}
 		}
@@ -185,7 +188,7 @@ ndPolyhedra::ndPolyhedra (const ndPolyhedra &polyhedra)
 				ptr = ptr->m_next;
 			} while (ptr != edge);
 
-			ndEdge* const face = AddFace (indexCount, index, (ndInt64*) user);
+			ndEdge* const face = AddFace (indexCount, index, reinterpret_cast<ndInt64*>(user));
 			if (face) 
 			{
 				ptr = face;
@@ -264,7 +267,8 @@ void ndPolyhedra::SavePLY(const char* const fileName, const ndFloat64* const ver
 	fprintf(file, "end_header\n");
 
 	mark = copy.IncLRU();
-	const ndInt8* const points = (ndInt8*)vertexArray;
+	//const ndInt8* const points = reinterpret_cast<ndInt8*>(vertexArray);
+	const ndInt8* const points = reinterpret_cast<ndInt8*>(const_cast<ndFloat64*>(vertexArray));
 	for (iter.Begin(); iter; iter++) 
 	{
 		ndEdge* const vertex = &iter.GetNode()->GetInfo();
@@ -278,7 +282,8 @@ void ndPolyhedra::SavePLY(const char* const fileName, const ndFloat64* const ver
 			} while (edge != vertex);
 			ndInt32 index = edge->m_incidentVertex * strideInBytes;
 
-			const ndFloat64* const p = (ndFloat64*)&points[index];
+			//const ndFloat64* const p = (ndFloat64*)&points[index];
+			const ndFloat64* const p = reinterpret_cast<ndFloat64*>(const_cast<ndInt8*>(&points[index]));
 			ndBigVector point(p[0], p[1], p[2], ndFloat64(0.0f));
 			fprintf(file, "%f %f %f\n", point.m_x, point.m_y, point.m_z);
 		}
@@ -1071,7 +1076,8 @@ ndEdge* ndPolyhedra::CollapseEdge(ndEdge* const edge)
 
 void ndPolyhedra::RemoveHalfEdge (ndEdge* const edge)
 {
-	ndEdgeCollapseEdgeHandle* const handle = (ndEdgeCollapseEdgeHandle *) ndIntToPointer (edge->m_userData);
+	//ndEdgeCollapseEdgeHandle* const handle = (ndEdgeCollapseEdgeHandle *) ndIntToPointer (edge->m_userData);
+	ndEdgeCollapseEdgeHandle* const handle = reinterpret_cast<ndEdgeCollapseEdgeHandle*>(edge->m_userData);
 	if (handle) 
 	{ 
 		handle->m_edge = nullptr;
@@ -1094,7 +1100,7 @@ ndEdge* ndPolyhedra::FindEarTip (ndEdge* const face, const ndFloat64* const pool
 	}
 	d0 = d0.Scale (ndFloat64 (1.0f) / val);
 
-	ndFloat64 minAngle = ndFloat32 (10.0f);
+	ndFloat64 minAngle = ndFloat64 (10.0f);
 	do 
 	{
 		ndBigVector p2 (ndBigVector::m_triplexMask & ndBigVector(&pool [ptr->m_next->m_incidentVertex * stride]));
@@ -1109,7 +1115,7 @@ ndEdge* ndPolyhedra::FindEarTip (ndEdge* const face, const ndFloat64* const pool
 		{
 			val1 = ndFloat64 (1.0e-10f);
 		}
-		d1 = d1.Scale (ndFloat32 (1.0f) / val1);
+		d1 = d1.Scale (ndFloat64 (1.0f) / val1);
 		ndBigVector n (d0.CrossProduct(d1));
 
 		ndFloat64 angle = normal.DotProduct(n & ndBigVector::m_triplexMask).GetScalar();
@@ -1128,7 +1134,7 @@ ndEdge* ndPolyhedra::FindEarTip (ndEdge* const face, const ndFloat64* const pool
 		ptr = ptr->m_next;
 	} while (ptr != face);
 
-	if (minAngle > ndFloat32 (0.1f)) 
+	if (minAngle > ndFloat64 (0.1f)) 
 	{
 		return heap[0];
 	}
@@ -1169,7 +1175,7 @@ ndEdge* ndPolyhedra::FindEarTip (ndEdge* const face, const ndFloat64* const pool
 					{
 						//side = ((p - p2) * p02) % normal;
 						side = normal.DotProduct((p - q2).CrossProduct(p02)).GetScalar();
-						if (side < ndFloat32 (0.05f)) 
+						if (side < ndFloat64 (0.05f)) 
 						{
 							break;
 						}
@@ -1197,7 +1203,7 @@ ndEdge* ndPolyhedra::TriangulateFace (ndEdge* const faceIn, const ndFloat64* con
 	{
 		if (faceNormalOut) 
 		{
-			*faceNormalOut = ndBigVector (ndFloat32 (0.0f)); 
+			*faceNormalOut = ndBigVector (ndFloat64 (0.0f)); 
 		}
 		return face;
 	}
@@ -1415,15 +1421,15 @@ void ndPolyhedra::RefineTriangulation (const ndFloat64* const vertex, ndInt32 st
 	ndEdge* const face = perimeter[0];
 	ndInt32 i0 = face->m_incidentVertex * stride;
 	ndInt32 i1 = face->m_next->m_incidentVertex * stride;
-	ndBigVector p0 (vertex[i0], vertex[i0 + 1], vertex[i0 + 2], ndFloat32 (0.0f));
-	ndBigVector p1 (vertex[i1], vertex[i1 + 1], vertex[i1 + 2], ndFloat32 (0.0f));
+	ndBigVector p0 (vertex[i0], vertex[i0 + 1], vertex[i0 + 2], ndFloat64 (0.0f));
+	ndBigVector p1 (vertex[i1], vertex[i1 + 1], vertex[i1 + 2], ndFloat64 (0.0f));
 
 	ndBigVector p1p0 (p1 - p0);
 	ndFloat64 mag2 = p1p0.DotProduct(p1p0).GetScalar();
-	for (ndEdge* ptr = face->m_next->m_next; mag2 < ndFloat32 (1.0e-12f); ptr = ptr->m_next) 
+	for (ndEdge* ptr = face->m_next->m_next; mag2 < ndFloat64 (1.0e-12f); ptr = ptr->m_next) 
 	{
 		ndInt32 i2 = ptr->m_incidentVertex * stride;
-		ndBigVector p2 (vertex[i2], vertex[i2 + 1], vertex[i2 + 2], ndFloat32 (0.0f));
+		ndBigVector p2 (vertex[i2], vertex[i2 + 1], vertex[i2 + 2], ndFloat64 (0.0f));
 		p1p0 = p2 - p0;
 		mag2 = p1p0.DotProduct(p1p0).GetScalar();
 	}
@@ -1477,7 +1483,7 @@ void ndPolyhedra::RefineTriangulation (const ndFloat64* const vertex, ndInt32 st
 
 			ndFloat64 error;
 			ndFloat64 det = Determinant3x3 (circleTest, &error);
-			if (det < ndFloat32 (0.0f)) 
+			if (det < ndFloat64 (0.0f)) 
 			{
 				ndEdge* frontFace0 = edge->m_prev;
 				ndEdge* backFace0 = edge->m_twin->m_prev;
@@ -1591,7 +1597,7 @@ void ndPolyhedra::RefineTriangulation (const ndFloat64* const vertex, ndInt32 st
 		edgePerimeters[perimeterCount] = edgePerimeters[0];
 
 		ndBigVector normal (FaceNormal(edgePerimeters[0], vertex, ndInt32 (stride * sizeof (ndFloat64))));
-		if (normal.DotProduct(normal).GetScalar() > ndFloat32 (1.0e-12f)) 
+		if (normal.DotProduct(normal).GetScalar() > ndFloat64 (1.0e-12f)) 
 		{
 			RefineTriangulation (vertex, stride, normal, perimeterCount, edgePerimeters);
 		}
@@ -1705,19 +1711,20 @@ void ndPolyhedra::Triangulate (const ndFloat64* const vertex, ndInt32 strideInBy
 
 				if (leftOver) 
 				{
-					ndInt32* const index = (ndInt32 *) &heap[0];
-					ndInt64* const data = (ndInt64 *)&index[count];
-					ndInt32 i = 0;
-					ndEdge* ptr1 = edge;
-					do 
-					{
-						index[i] = ptr1->m_incidentVertex;
-						data[i] = ndInt64 (ptr1->m_userData);
-						i ++;
-						ptr1 = ptr1->m_next;
-					} while (ptr1 != edge);
-					leftOver->AddFace(i, index, data);
-
+					// it seem some is really wrong with this casting
+					ndAssert(0);
+					//ndInt32* const index = (ndInt32 *) &heap[0];
+					//ndInt64* const data = (ndInt64 *)&index[count];
+					//ndInt32 i = 0;
+					//ndEdge* ptr1 = edge;
+					//do 
+					//{
+					//	index[i] = ptr1->m_incidentVertex;
+					//	data[i] = ndInt64 (ptr1->m_userData);
+					//	i ++;
+					//	ptr1 = ptr1->m_next;
+					//} while (ptr1 != edge);
+					//leftOver->AddFace(i, index, data);
 				} 
 				else 
 				{
@@ -1784,7 +1791,7 @@ bool ndPolyhedra::IsFaceConvex(ndEdge* const face, const ndFloat64* const vertex
 		ndBigVector e1(p2 - p1);
 		ndBigVector cornerNormal(e1.CrossProduct(e0));
 		ndFloat64 project(normal.DotProduct(cornerNormal).GetScalar());
-		if (project < ndFloat32(0.0f)) 
+		if (project < ndFloat64(0.0f)) 
 		{
 			return false;
 		}
@@ -1829,7 +1836,7 @@ void ndPolyhedra::RemoveOuterColinearEdges (ndPolyhedra& flatFace, const ndFloat
 		ndBigVector p0 (ndBigVector::m_triplexMask & ndBigVector(&vertex[ptr->m_incidentVertex * stride]) );
 		ndBigVector p1 (ndBigVector::m_triplexMask & ndBigVector(&vertex[ptr->m_next->m_incidentVertex * stride]));
 		ndBigVector e0 ((p1 - p0));
-		e0 = e0.Scale (ndFloat32(1.0f) / sqrt (e0.DotProduct(e0).GetScalar() + ndFloat32 (1.0e-12f)));
+		e0 = e0.Scale (ndFloat64(1.0f) / sqrt (e0.DotProduct(e0).GetScalar() + ndFloat64 (1.0e-12f)));
 		ndInt32 ignoreTest = 1;
 		do 
 		{
@@ -1837,9 +1844,9 @@ void ndPolyhedra::RemoveOuterColinearEdges (ndPolyhedra& flatFace, const ndFloat
 			ndBigVector p2 (ndBigVector::m_triplexMask & ndBigVector(&vertex[ptr->m_next->m_next->m_incidentVertex * stride]));
 			ndBigVector e1 (p2 - p1);
 			//e1 = e1.Scale (dRsqrt (e1.DotProduct3(e1) + ndFloat32 (1.0e-12f)));
-			e1 = e1.Scale(ndFloat32(1.0f) / sqrt(e1.DotProduct(e1).GetScalar() + ndFloat32(1.0e-12f)));
+			e1 = e1.Scale(ndFloat64(1.0f) / sqrt(e1.DotProduct(e1).GetScalar() + ndFloat64(1.0e-12f)));
 			ndFloat64 dot = e1.DotProduct(e0).GetScalar();
-			if (dot > ndFloat32 (ndFloat32 (0.9999f))) 
+			if (dot > ndFloat64 (0.9999f)) 
 			{
 				for (ndEdge* interiorEdge = ptr->m_next->m_twin->m_next; interiorEdge != ptr->m_twin; interiorEdge = ptr->m_next->m_twin->m_next) 
 				{
@@ -1919,10 +1926,10 @@ void ndPolyhedra::RemoveInteriorColinearEdges(ndPolyhedra& flatFace, const ndFlo
 					
 					ndBigVector e0(p1 - p0);
 					ndBigVector e1(p2 - p1);
-					e0 = e0.Scale(ndFloat32 (1.0f) / sqrt(e0.DotProduct(e0).GetScalar() + ndFloat32(1.0e-12f)));
-					e1 = e1.Scale(ndFloat32 (1.0f) / sqrt(e1.DotProduct(e1).GetScalar() + ndFloat32(1.0e-12f)));
+					e0 = e0.Scale(ndFloat64 (1.0f) / sqrt(e0.DotProduct(e0).GetScalar() + ndFloat64(1.0e-12f)));
+					e1 = e1.Scale(ndFloat64 (1.0f) / sqrt(e1.DotProduct(e1).GetScalar() + ndFloat64(1.0e-12f)));
 					ndFloat64 dot = e1.DotProduct(e0).GetScalar();
-					if (dot > ndFloat32(0.9999f)) 
+					if (dot > ndFloat64(0.9999f)) 
 					{
 						ndInt32 v = edge->m_twin->m_incidentVertex;
 						ndEdge* const nextEdge = edge->m_twin->m_next;
@@ -2156,7 +2163,7 @@ ndEdge* ndPolyhedra::OptimizeCollapseEdge (ndEdge* const edge)
 	ndInt32 v0 = edge->m_incidentVertex;
 	ndInt32 v1 = edge->m_twin->m_incidentVertex;
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndPolyhedra::ndPairKey TwinKey (v1, v0);
 	ndPolyhedra::ndNode* const node = Find (TwinKey.GetVal());
 	ndEdge* const twin1 = node ? &node->GetInfo() : nullptr;
@@ -2288,7 +2295,7 @@ ndFloat64 ndPolyhedra::EdgePenalty (const ndBigVector* const pool, ndEdge* const
 	ndInt32 i0 = edge->m_incidentVertex;
 	ndInt32 i1 = edge->m_next->m_incidentVertex;
 
-	ndFloat32 maxPenalty = ndFloat32 (1.0e14f);
+	ndFloat64 maxPenalty = ndFloat64 (1.0e14f);
 
 	const ndBigVector& p0 = pool[i0];
 	const ndBigVector& p1 = pool[i1];
@@ -2346,7 +2353,7 @@ ndFloat64 ndPolyhedra::EdgePenalty (const ndBigVector* const pool, ndEdge* const
 	ndInt32 faceB = edge->m_twin->m_incidentFace;
 
 	i0 = edge->m_twin->m_incidentVertex;
-	ndBigVector p (pool[i0].m_x, pool[i0].m_y, pool[i0].m_z, ndFloat32 (0.0f));
+	ndBigVector p (pool[i0].m_x, pool[i0].m_y, pool[i0].m_z, ndFloat64 (0.0f));
 
 	bool penalty = false;
 	ndEdge* ptr = edge;
@@ -2379,13 +2386,13 @@ ndFloat64 ndPolyhedra::EdgePenalty (const ndBigVector* const pool, ndEdge* const
 		ptr = ptr->m_twin->m_next;
 	} while (ptr != edge);
 
-	ndFloat64 aspect = ndFloat32 (0.0f);
+	ndFloat64 aspect = ndFloat64 (0.0f);
 	if (!penalty) 
 	{
 		ndInt32 k0 = edge->m_twin->m_incidentVertex;
 		ndBigVector q0 (pool[k0]);
 
-		aspect = ndFloat32 (1.0f);
+		aspect = ndFloat64 (1.0f);
 		for (ndEdge* ptr1 = edge->m_twin->m_next->m_twin->m_next; ptr1 != edge; ptr1 = ptr1->m_twin->m_next) 
 		{
 			if (ptr1->m_incidentFace > 0) 
@@ -2416,7 +2423,7 @@ ndFloat64 ndPolyhedra::EdgePenalty (const ndBigVector* const pool, ndEdge* const
 				}
 			}
 		}
-		aspect = ndFloat32 (1.0f) - aspect;
+		aspect = ndFloat64 (1.0f) - aspect;
 	}
 	return aspect * aspect * dist;
 }
@@ -2429,7 +2436,7 @@ bool ndPolyhedra::Optimize (const ndFloat64* const array, ndInt32 strideInBytes,
 	ndAssert (SanityCheck ());
 #endif
 
-	ndFloat32 progressDen = ndFloat32 (1.0f) / (ndFloat32)GetEdgeCount();
+	ndFloat32 progressDen = ndFloat32 (1.0f) / ndFloat32(GetEdgeCount());
 	ndInt32 edgeCount = GetEdgeCount() * 4 + D_LOCAL_BUFFER_SIZE * 16;
 	ndInt32 maxVertexIndex = GetLastVertexIndex();
 	
@@ -2451,7 +2458,7 @@ bool ndPolyhedra::Optimize (const ndFloat64* const array, ndInt32 strideInBytes,
 	memset (&vertexMetrics[0], 0, maxVertexIndex * sizeof (ndVertexCollapseVertexMetric));
 	CalculateAllMetrics (&vertexMetrics[0], &vertexPool[0]);
 
-	const ndFloat64 maxCost = ndFloat32 (1.0e-3f);
+	const ndFloat64 maxCost = ndFloat64 (1.0e-3f);
 	ndFloat64 tol2 = tol * tol;
 	ndFloat64 distTol = ndMax (tol2, ndFloat64 (1.0e-12f));
 	Iterator iter (*this);
@@ -2494,7 +2501,7 @@ bool ndPolyhedra::Optimize (const ndFloat64* const array, ndInt32 strideInBytes,
 				{
 					interPasses = 0;
 					faceCount = GetFaceCount();
-					progress = ReportProgress(ndFloat32(1.0f) - (ndFloat32)GetEdgeCount() * progressDen);
+					progress = ReportProgress(ndFloat32(1.0f) - ndFloat32(GetEdgeCount()) * progressDen);
 				}
 
 				if (bigHeapArray.GetCount() > (bigHeapArray.GetMaxCount() - 100)) 
@@ -2643,7 +2650,7 @@ ndEdge* ndPolyhedra::BestEdgePolygonizeFace(const ndBigVector& normal, ndEdge* c
 		ndFloat64 test0 = r.DotProduct(normal.CrossProduct(p1 - p0)).GetScalar();
 		ndFloat64 test1 = r.DotProduct((p2 - p0).CrossProduct(normal)).GetScalar();
 		
-		if ((test0 > 0.0f) && (test1 > 0.0f)) 
+		if ((test0 > ndFloat64(0.0f)) && (test1 > ndFloat64(0.0f)))
 		{
 			break;
 		}
@@ -2774,10 +2781,10 @@ bool ndPolyhedra::PolygonizeFace(ndEdge* const face, const ndFloat64* const pool
 			{
 				ndBigVector p2(ndBigVector::m_triplexMask & ndBigVector(&pool[ptr->m_next->m_incidentVertex * stride]));
 				ndBigVector e1(p2 - p1);
-				e1 = e1.Scale(ndFloat64(1.0f) / sqrt(e1.DotProduct(e1).GetScalar() + ndFloat32(1.0e-24f)));
+				e1 = e1.Scale(ndFloat64(1.0f) / sqrt(e1.DotProduct(e1).GetScalar() + ndFloat64(1.0e-24f)));
 				ndFloat64 dot = normal2.DotProduct(e0.CrossProduct(e1)).GetScalar();
 				
-				if (dot > ndFloat32(5.0e-3f)) 
+				if (dot > ndFloat64(5.0e-3f)) 
 				{
 					isConvex = 0;
 					break;
@@ -2925,9 +2932,9 @@ void ndPolyhedra::RemoveInteriorEdges (ndPolyhedra& buildConvex, const ndFloat64
 
 					ndBigVector normal(FaceNormal(edge, vertex, strideInBytes));
 					ndFloat64 mag2 = normal.DotProduct(normal).GetScalar();
-					if (mag2 < ndFloat32(1.0e-14f))
+					if (mag2 < ndFloat64(1.0e-14f))
 					{
-						mag2 = ndFloat32(1.0e-14f);
+						mag2 = ndFloat64(1.0e-14f);
 					}
 					normal = normal.Scale(ndFloat64(1.0f) / sqrt(mag2));
 
@@ -2956,10 +2963,10 @@ void ndPolyhedra::RemoveInteriorEdges (ndPolyhedra& buildConvex, const ndFloat64
 					{
 						ndBigVector p2(ndBigVector::m_triplexMask & ndBigVector(&vertex[ptr->m_next->m_incidentVertex * stride]));
 						ndBigVector e1(p2 - p1);
-						e1 = e1.Scale(ndFloat64(1.0f) / sqrt(e1.DotProduct(e1).GetScalar() + ndFloat32(1.0e-24f)));
+						e1 = e1.Scale(ndFloat64(1.0f) / sqrt(e1.DotProduct(e1).GetScalar() + ndFloat64(1.0e-24f)));
 						ndFloat64 dot = normal2.DotProduct(e0.CrossProduct(e1)).GetScalar();
 
-						if (dot > ndFloat32(5.0e-3f)) 
+						if (dot > ndFloat64(5.0e-3f)) 
 						{
 							isConvex = 0;
 							break;
@@ -3078,9 +3085,9 @@ void ndPolyhedra::ConvexPartition (const ndFloat64* const vertex, ndInt32 stride
 	if (GetCount()) 
 	{
 		Triangulate (vertex, strideInBytes, leftOversOut);
-		DeleteDegenerateFaces (vertex, strideInBytes, ndFloat32 (1.0e-5f));
-		Optimize (vertex, strideInBytes, ndFloat32 (1.0e-3f));
-		DeleteDegenerateFaces (vertex, strideInBytes, ndFloat32 (1.0e-5f));
+		DeleteDegenerateFaces (vertex, strideInBytes, ndFloat64 (1.0e-5f));
+		Optimize (vertex, strideInBytes, ndFloat64 (1.0e-3f));
+		DeleteDegenerateFaces (vertex, strideInBytes, ndFloat64 (1.0e-5f));
 
 		if (GetCount()) 
 		{
@@ -3129,12 +3136,12 @@ ndMatrix ndPolyhedra::CalculateSphere(ndBigVector& size, const ndFloat64* const 
 				ptr = ptr->m_twin->m_next;
 			} while (ptr != edge);
 			ndInt32 incidentVertex = edge->m_incidentVertex * stride;
-			pool[vertexCountIndex] = ndBigVector(vertex[incidentVertex + 0], vertex[incidentVertex + 1], vertex[incidentVertex + 2], ndFloat32(0.0f));
+			pool[vertexCountIndex] = ndBigVector(vertex[incidentVertex + 0], vertex[incidentVertex + 1], vertex[incidentVertex + 2], ndFloat64(0.0f));
 			vertexCountIndex++;
 		}
 	}
 	ndAssert(vertexCountIndex <= vertexCount);
-	ndConvexHull3d convexHull(&pool[0].m_x, sizeof(ndBigVector), vertexCountIndex, 0.0f);
+	ndConvexHull3d convexHull(&pool[0].m_x, sizeof(ndBigVector), vertexCountIndex, ndFloat64(0.0f));
 
 	size = ndBigVector::m_zero;
 	ndMatrix sphere(ndGetIdentityMatrix());
@@ -3189,7 +3196,7 @@ ndMatrix ndPolyhedra::CalculateSphere(ndBigVector& size, const ndFloat64* const 
 		sphere.m_front = ndVector(ndFloat32(Ixx), ndFloat32(Ixy), ndFloat32(Ixz), ndFloat32(0.0f));
 		sphere.m_up    = ndVector(ndFloat32(Ixy), ndFloat32(Iyy), ndFloat32(Iyz), ndFloat32(0.0f));
 		sphere.m_right = ndVector(ndFloat32(Ixz), ndFloat32(Iyz), ndFloat32(Izz), ndFloat32(0.0f));
-		const ndVector eigenValues(sphere.EigenVectors());
+		//const ndVector eigenValues(sphere.EigenVectors());
 
 		ndVector minVal(ndFloat32(1e15f));
 		ndVector maxVal(ndFloat32(-1e15f));

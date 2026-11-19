@@ -26,15 +26,7 @@
 
 #if defined(__clang__)
     #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wcast-qual"
-    #pragma clang diagnostic ignored "-Wcast-align"
-    #pragma clang diagnostic ignored "-Wcast-align"
-    #pragma clang diagnostic ignored "-Wswitch-enum"
-    #pragma clang diagnostic ignored "-Wunused-macros"
-    #pragma clang diagnostic ignored "-Wswitch-default"
-    #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
-    #pragma clang diagnostic ignored "-Wdeclaration-after-statement"
-    #pragma clang diagnostic ignored "-Wtautological-type-limit-compare"
+    #pragma clang diagnostic ignored "-Weverything"
 #endif
 
 #include  "miniz.h"

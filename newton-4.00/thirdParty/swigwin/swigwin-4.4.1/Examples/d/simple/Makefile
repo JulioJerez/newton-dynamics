@@ -1,1 +1,0 @@
-include $(SRCDIR)../example.mk

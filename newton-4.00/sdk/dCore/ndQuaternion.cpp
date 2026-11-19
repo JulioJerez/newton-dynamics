@@ -69,8 +69,7 @@ ndQuaternion::ndQuaternion(const ndMatrix& matrix)
 		ptr[k] = (matrix[i][k] + matrix[k][i]) * trace;
 	}
 
-#ifdef _DEBUG
-
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndMatrix tmp (ndCalculateMatrix(*this, matrix.m_posit));
 	ndMatrix unitMatrix (tmp * matrix.OrthoInverse());
 	for (ndInt32 i = 0; i < 4; ++i) 

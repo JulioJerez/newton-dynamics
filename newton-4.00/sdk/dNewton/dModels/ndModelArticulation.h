@@ -132,8 +132,8 @@ class ndModelArticulation: public ndModel
 	void NodeIterator(Function func);
 
 	protected:
-	D_COLLISION_API virtual void OnAddToWorld() override;
-	D_COLLISION_API virtual void OnRemoveFromWorld() override;
+	D_NEWTON_API virtual void OnAddToWorld() override;
+	D_NEWTON_API virtual void OnRemoveFromWorld() override;
 	
 	ndString m_name;
 	ndNode* m_rootNode;

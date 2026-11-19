@@ -881,9 +881,9 @@ ndInt32 ndMeshEffect::PlaneClip(const ndMeshEffect& convexMesh, const ndEdge* co
 	for (ndInt32 i = 0; i < pointCount; ++i)
 	{
 		test[i] = plane.Evalue(m_points.m_vertex[i]);
-		if (fabs(test[i]) < ndFloat32(1.0e-5f))
+		if (fabs(test[i]) < ndFloat64(1.0e-5f))
 		{
-			test[i] = ndFloat32(0.0f);
+			test[i] = ndFloat64(0.0f);
 		}
 	}
 
@@ -893,8 +893,8 @@ ndInt32 ndMeshEffect::PlaneClip(const ndMeshEffect& convexMesh, const ndEdge* co
 	for (iter.Begin(); iter && !(positive && negative); iter++)
 	{
 		ndEdge* const edge = &(*iter);
-		positive += test[edge->m_incidentVertex] > ndFloat32(0.0f);
-		negative += test[edge->m_incidentVertex] < ndFloat32(0.0f);
+		positive += test[edge->m_incidentVertex] > ndFloat64(0.0f);
+		negative += test[edge->m_incidentVertex] < ndFloat64(0.0f);
 	}
 	if (positive && !negative)
 	{
@@ -982,7 +982,7 @@ ndInt32 ndMeshEffect::PlaneClip(const ndMeshEffect& convexMesh, const ndEdge* co
 			ndFloat64 side0 = test[edge->m_prev->m_incidentVertex];
 			ndFloat64 side1 = test[edge->m_incidentVertex];
 
-			if ((side0 < ndFloat32(0.0f)) && (side1 > ndFloat64(0.0f)))
+			if ((side0 < ndFloat64(0.0f)) && (side1 > ndFloat64(0.0f)))
 			{
 				ndBigVector dp(m_points.m_vertex[edge->m_incidentVertex] - m_points.m_vertex[edge->m_prev->m_incidentVertex]);
 				ndAssert(dp.m_w == ndFloat32(0.0f));
@@ -1000,7 +1000,7 @@ ndInt32 ndMeshEffect::PlaneClip(const ndMeshEffect& convexMesh, const ndEdge* co
 			ndFloat64 side0 = test[edge->m_incidentVertex];
 			ndFloat64 side1 = test[edge->m_next->m_incidentVertex];
 
-			if ((side0 > ndFloat32(0.0f)) || (side1 > ndFloat64(0.0f)))
+			if ((side0 > ndFloat64(0.0f)) || (side1 > ndFloat64(0.0f)))
 			{
 				edge->m_mark = colorMark;
 			}
@@ -1011,7 +1011,7 @@ ndInt32 ndMeshEffect::PlaneClip(const ndMeshEffect& convexMesh, const ndEdge* co
 			ndEdge* const edge = &(*iter);
 			ndFloat64 side0 = test[edge->m_incidentVertex];
 			ndFloat64 side1 = test[edge->m_next->m_incidentVertex];
-			if ((side0 == ndFloat32(0.0f)) && (side1 == ndFloat64(0.0f)))
+			if ((side0 == ndFloat64(0.0f)) && (side1 == ndFloat64(0.0f)))
 			{
 				ndEdge* ptr = edge->m_next;
 				do
@@ -1207,7 +1207,7 @@ ndMeshEffect* ndMeshEffect::ConvexMeshIntersection(const ndMeshEffect* const con
 ndMeshEffect* ndMeshEffect::InverseConvexMeshIntersection(const ndMeshEffect* const) const
 {
 	ndAssert(0);
-	return 0;
+	return nullptr;
 #if 0
 	ndMeshEffect concaveMesh(*convexMeshSrc);
 	concaveMesh.ConvertToPolygons();

@@ -137,32 +137,23 @@ void ndDelaunayTetrahedralization::SortVertexArray ()
 		}
 	}
 
-	class CompareVertex
+	ndSort(points, m_count, [](const ndConvexHull4dVector& elementA, const ndConvexHull4dVector& elementB)
 	{
-		public:
-		CompareVertex(void*)
+		if (elementA.m_index < elementB.m_index)
 		{
+			return -1;
 		}
-
-		ndInt32 Compare(const ndConvexHull4dVector& elementA, const ndConvexHull4dVector& elementB) const
+		else if (elementA.m_index > elementB.m_index)
 		{
-			if (elementA.m_index < elementB.m_index)
-			{
-				return -1;
-			}
-			else if (elementA.m_index > elementB.m_index)
-			{
-				return 1;
-			}
-			return 0;
+			return 1;
 		}
-	};
-	ndSort<ndConvexHull4dVector, CompareVertex>(points, m_count, nullptr);
+		return 0;
+	});
 }
 
 void ndDelaunayTetrahedralization::RemoveUpperHull ()
 {
-	ndNode* nextNode = NULL;
+	ndNode* nextNode = nullptr;
 	for (ndNode* node = GetFirst(); node; node = nextNode) 
 	{
 		nextNode = node->GetNext();
@@ -190,7 +181,7 @@ void ndDelaunayTetrahedralization::DeleteFace (ndNode* const node)
 			{
 				if (twinTetra->m_faces[j].m_twin == node) 
 				{
-					twinTetra->m_faces[j].m_twin = NULL;
+					twinTetra->m_faces[j].m_twin = nullptr;
 					break;
 				}
 			}

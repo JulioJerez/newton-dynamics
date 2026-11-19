@@ -27,7 +27,15 @@
 #include "ndBodyDynamic.h"
 #include "ndMeshComponents.h"
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
 ndVector ndBodyDynamic::m_sleepAccelTestScale2(ndFloat32 (0.0625f));
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 ndBodyDynamic::ndBodyDynamic()
 	:ndBodyKinematic()
@@ -343,7 +351,7 @@ ndJacobian ndBodyDynamic::IntegrateForceAndToque(const ndVector& force, const nd
 	velocStep.m_angular = matrix.RotateVector(m_inertiaPrincipalAxis.RotateVector(gradientStep));
 	velocStep.m_linear = force.Scale(m_invMass.m_w) * timestep;
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	const ndFloat32 maxLinear2 = m_maxLinearStep * m_maxLinearStep;
 	const ndFloat32 maxAngular2 = m_maxAngleStep * m_maxAngleStep;
 
@@ -405,7 +413,7 @@ void ndBodyDynamic::EvaluateSleepState(ndFloat32 freezeSpeed2, ndFloat32 freezeA
 		
 		ndInt32 count = ndInt32(m_weigh);
 
-		#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		ndInt32 checkConnection = 0;
 		ndContactMap::Iterator it(m_contactList);
 		for (it.Begin(); it; it++)
@@ -423,7 +431,7 @@ void ndBodyDynamic::EvaluateSleepState(ndFloat32 freezeSpeed2, ndFloat32 freezeA
 			checkConnection += node->GetInfo()->IsActive() ? 1 : 0;
 		}
 		//ndAssert(count == checkConnection);
-		#endif
+#endif
 
 		const ndVector maxAccNorm2 ((count > 1) ? m_sleepAccelTest2 : m_sleepAccelTest2 * m_sleepAccelTestScale2);
 
@@ -469,7 +477,8 @@ void ndBodyDynamic::EvaluateSleepState(ndFloat32 freezeSpeed2, ndFloat32 freezeA
 void ndBodyDynamic::InitSurrogateBody(ndBodyKinematic* const surrogate) const
 {
 	ndBodyKinematic::InitSurrogateBody(surrogate);
-	ndBodyDynamic* const dst = ((ndBodyDynamic*)surrogate)->GetAsBodyDynamic();
+	//ndBodyDynamic* const dst = ((ndBodyDynamic*)surrogate)->GetAsBodyDynamic();
+	ndBodyDynamic* const dst = surrogate->GetAsBodyDynamic();
 	
 	dst->m_externalForce = m_externalForce;
 	dst->m_externalTorque = m_externalTorque;
@@ -489,7 +498,7 @@ void ndBodyDynamic::Serialize(ndMesh* const node) const
 void ndBodyDynamic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
 {
 	ndBodyKinematic::Serialize(meshBody);
-	ndMeshBodyDynamic* const dynamicMeshBody = (ndMeshBodyDynamic*)*meshBody;
+	ndMeshBodyDynamic* const dynamicMeshBody = static_cast<ndMeshBodyDynamic*>(*meshBody);
 	dynamicMeshBody->m_intrinsicDamping = m_dampCoef;
 }
 
@@ -497,7 +506,7 @@ void ndBodyDynamic::Deserialize(const ndMeshBody* const meshBody)
 {
 	ndBodyKinematic::Deserialize(meshBody);
 
-	ndMeshBodyDynamic* const dynamic = (ndMeshBodyDynamic*)meshBody;
+	ndMeshBodyDynamic* const dynamic = static_cast<ndMeshBodyDynamic*>(const_cast<ndMeshBody*>(meshBody));
 	m_dampCoef = dynamic->m_intrinsicDamping;
 }
 

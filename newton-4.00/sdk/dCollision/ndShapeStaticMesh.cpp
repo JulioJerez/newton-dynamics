@@ -131,29 +131,20 @@ void ndPatchMesh::GetFacesPatch(ndPolygonMeshDesc* const data)
 		}
 	}
 
-	class CompareKey
+	ndSort(&egdeArray[0], egdeArray.GetCount(), [](const ndFaceEdge& elementA, const ndFaceEdge& elementB)
 	{
-		public:
-		CompareKey(void* const)
+		ndInt32 indexA = elementA.m_key;
+		ndInt32 indexB = elementB.m_key;
+		if (indexA < indexB)
 		{
+			return -1;
 		}
-
-		ndInt32 Compare(const ndFaceEdge& elementA, const ndFaceEdge& elementB) const
+		else if (indexA > indexB)
 		{
-			ndInt32 indexA = elementA.m_key;
-			ndInt32 indexB = elementB.m_key;
-			if (indexA < indexB)
-			{
-				return -1;
-			}
-			else if (indexA > indexB)
-			{
-				return 1;
-			}
-			return 0;
+			return 1;
 		}
-	};
-	ndSort<ndFaceEdge, CompareKey>(&egdeArray[0], egdeArray.GetCount(), nullptr);
+		return 0;
+	});
 
 	for (ndInt32 i = 0; i < egdeArray.GetCount() - 1; ++i)
 	{

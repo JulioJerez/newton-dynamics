@@ -17,8 +17,6 @@
 #include "ndRenderTransformModifier.h"
 #include "ndRenderPrimitiveImplement.h"
 
-#define ND_STACK_DEPTH 512
-
 ndTransform::ndTransform()
 	:m_position(ndVector::m_wOne)
 	,m_rotation()
@@ -145,7 +143,7 @@ const ndRenderSceneNodeInstance* ndRenderSceneNode::GetAsInstance() const
 
 ndRenderSceneNode* ndRenderSceneNode::GetParent() const
 {
-	return (ndRenderSceneNode*) *m_parent;
+	return const_cast<ndRenderSceneNode*>(*m_parent);
 }
 
 ndRenderSceneNode* ndRenderSceneNode::GetRoot() const
@@ -155,7 +153,7 @@ ndRenderSceneNode* ndRenderSceneNode::GetRoot() const
 	{
 		self = *self->m_parent;
 	}
-	return (ndRenderSceneNode*)self;
+	return const_cast<ndRenderSceneNode*>(self);
 }
 
 const ndList<ndSharedPtr<ndRenderSceneNode>>& ndRenderSceneNode::GetChildren() const
@@ -234,7 +232,7 @@ ndRenderSceneCamera* ndRenderSceneNode::FindCameraNode()
 
 const ndRenderSceneCamera* ndRenderSceneNode::FindCameraNode() const
 {
-	ndRenderSceneNode* const self = (ndRenderSceneNode*)this;
+	ndRenderSceneNode* const self = const_cast<ndRenderSceneNode*>(this);
 	for (ndRenderSceneNode* node = self->IteratorFirst(); node; node = node->IteratorNext())
 	{
 		ndRenderSceneCamera* const camera = node->GetAsCamera();
@@ -289,7 +287,7 @@ ndSharedPtr<ndRenderPrimitive> ndRenderSceneNode::GetPrimitive() const
 
 ndRender* ndRenderSceneNode::GetOwner() const
 {
-	return (ndRender*)*m_owner;
+	return const_cast<ndRender*>(*m_owner);
 }
 
 ndMatrix ndRenderSceneNode::GetMatrix() const
@@ -404,7 +402,7 @@ ndSharedPtr<ndRenderSceneNode> ndRenderSceneNode::GetSharedPtr() const
 
 ndRenderSceneNode* ndRenderSceneNode::FindByName(const ndString& name) const
 {
-	ndRenderSceneNode* const self = (ndRenderSceneNode*)this;
+	ndRenderSceneNode* const self = const_cast<ndRenderSceneNode*>(this);
 	for (ndRenderSceneNode* node = self->IteratorFirst(); node; node = node->IteratorNext())
 	{
 		if (name == node->m_name)
@@ -423,7 +421,7 @@ ndRenderSceneNode* ndRenderSceneNode::FindByClosestMatch(const ndString& name) c
 		ndString lowerCaseName(name);
 		lowerCaseName.ToLower();
 
-		ndRenderSceneNode* const self = (ndRenderSceneNode*)this;
+		ndRenderSceneNode* const self = const_cast<ndRenderSceneNode*>(this);
 		for (ndRenderSceneNode* node = self->IteratorFirst(); node; node = node->IteratorNext())
 		{
 			ndString nodeName(node->m_name);

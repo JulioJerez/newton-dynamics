@@ -87,20 +87,20 @@ class ndRenderPrimitive : public ndContainersFreeListAlloc<ndRenderPrimitive>
 	{
 		m_simplePrimitve,
 		m_instancePrimitve,
-		m_debugFlatShaded,
-		m_debugWireFrame,
-		m_debugHiddenLines,
-		m_debugPointArray,
-		m_debugLineArray,
-		m_debugTriangleArray,
+		m_debugMeshFlatShaded,
+		m_debugMeshWireFrame,
+		m_debugMeshHiddenLines,
+		m_debugMeshPointArray,
+		m_debugMeshLineArray,
+		m_debugMeshTriangleArray,
 	};
 
 	enum ndUvMapingMode
 	{
-		m_box,
-		m_capsule,
-		m_spherical,
-		m_cylindrical
+		m_box_uv,
+		m_capsule_uv,
+		m_spherical_uv,
+		m_cylindrical_uv
 	};
 
 	class ndDescriptor

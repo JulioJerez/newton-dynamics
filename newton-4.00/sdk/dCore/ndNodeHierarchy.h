@@ -118,7 +118,7 @@ ndNodeHierarchy<T>::~ndNodeHierarchy ()
 template<class T>
 T* ndNodeHierarchy<T>::CreateClone() const
 {
-	return (T*) new ndNodeHierarchy<T>(*this);
+	return const_cast<T*>(static_cast<const T*>(new ndNodeHierarchy<T>(*this)));
 }
 
 template<class T>
@@ -151,31 +151,31 @@ void ndNodeHierarchy<T>::Detach()
 template<class T>
 T* ndNodeHierarchy<T>::GetFirstChild () const
 {
-	return (T*)m_firstChild;
+	return const_cast<T*>(static_cast<const T*>(m_firstChild));
 }
 
 template<class T>
 T* ndNodeHierarchy<T>::GetLastChild() const
 {
-	return (T*)m_lastChild;
+	return const_cast<T*>(static_cast<const T*>(m_lastChild));
 }
 
 template<class T>
 T* ndNodeHierarchy<T>::GetNext() const
 {
-	return (T*)m_next;
+	return const_cast<T*>(static_cast<const T*>(m_next));
 }
 
 template<class T>
 T* ndNodeHierarchy<T>::GetPrev() const
 {
-	return (T*)m_prev;
+	return const_cast<T*>(static_cast<const T*>(m_prev));
 }
 
 template<class T>
 T* ndNodeHierarchy<T>::GetParent () const
 {
-	return (T*) m_parent;
+	return const_cast<T*>(static_cast<const T*>(m_parent));
 }
 
 template<class T>

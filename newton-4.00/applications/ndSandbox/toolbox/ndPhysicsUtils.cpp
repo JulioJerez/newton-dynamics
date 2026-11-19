@@ -131,28 +131,28 @@ ndSharedPtr<ndBody> CreateRigidbody(
 ndSharedPtr<ndBody> CreateBox(ndDemoEntityManager* const scene, const ndMatrix& location, ndFloat32 mass, ndFloat32 sizex, ndFloat32 sizey, ndFloat32 sizez, const char* const textName)
 {
 	ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeBox(sizex, sizey, sizez)));
-	ndSharedPtr<ndBody> body(CreateRigidbody(scene, shape, location, mass, textName, ndRenderPrimitive::m_box));
+	ndSharedPtr<ndBody> body(CreateRigidbody(scene, shape, location, mass, textName, ndRenderPrimitive::m_box_uv));
 	return body;
 }
 
 ndSharedPtr<ndBody> CreateSphere(ndDemoEntityManager* const scene, const ndMatrix& location, ndFloat32 mass, ndFloat32 radius, const char* const textName)
 {
 	ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeSphere(radius)));
-	ndSharedPtr<ndBody> body(CreateRigidbody(scene, shape, location, mass, textName, ndRenderPrimitive::m_spherical));
+	ndSharedPtr<ndBody> body(CreateRigidbody(scene, shape, location, mass, textName, ndRenderPrimitive::m_spherical_uv));
 	return body;
 }
 
 ndSharedPtr<ndBody> CreateCapsule(ndDemoEntityManager* const scene, const ndMatrix& location, ndFloat32 mass, ndFloat32 radius0, ndFloat32 radius1, ndFloat32 high, const char* const textName)
 {
 	ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeCapsule(radius0, radius1, high)));
-	ndSharedPtr<ndBody> body(CreateRigidbody(scene, shape, location, mass, textName, ndRenderPrimitive::m_capsule));
+	ndSharedPtr<ndBody> body(CreateRigidbody(scene, shape, location, mass, textName, ndRenderPrimitive::m_capsule_uv));
 	return body;
 }
 
 ndSharedPtr<ndBody> CreateCylinder(ndDemoEntityManager* const scene, const ndMatrix& location, ndFloat32 mass, ndFloat32 radius0, ndFloat32 radius1, ndFloat32 high, const char* const textName)
 {
 	ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeCylinder(radius0, radius1, high)));
-	ndSharedPtr<ndBody> body(CreateRigidbody(scene, shape, location, mass, textName, ndRenderPrimitive::m_cylindrical));
+	ndSharedPtr<ndBody> body(CreateRigidbody(scene, shape, location, mass, textName, ndRenderPrimitive::m_cylindrical_uv));
 	return body;
 }
 
@@ -223,7 +223,7 @@ ndSharedPtr<ndBody> AddConvexHull(ndDemoEntityManager* const scene, const ndMatr
 	}
 
 	ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeConvexHull(ndInt32(points.GetCount()), sizeof(ndVector), 0.0f, &points[0].m_x)));
-	ndSharedPtr<ndBody> body(CreateRigidbody(scene, shape, location, mass, textName, ndRenderPrimitive::m_box));
+	ndSharedPtr<ndBody> body(CreateRigidbody(scene, shape, location, mass, textName, ndRenderPrimitive::m_box_uv));
 
 	ndPhysicsWorld* const world = scene->GetWorld();
 	world->AddBody(body);
@@ -244,7 +244,7 @@ void AddCapsuleStacks(ndDemoEntityManager* const scene, const ndMatrix& location
 	ndRenderPrimitive::ndDescriptor descriptor(render);
 	descriptor.m_collision = shape;
 	descriptor.m_stretchMaping = false;
-	descriptor.m_mapping = ndRenderPrimitive::m_spherical;
+	descriptor.m_mapping = ndRenderPrimitive::m_spherical_uv;
 	descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("marble.png")));
 	ndSharedPtr<ndRenderSceneNode>root(new ndRenderSceneNodeInstance(location, descriptor));
 	scene->AddEntity(root);

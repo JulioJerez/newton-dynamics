@@ -84,11 +84,11 @@ void ndJointCylinder::SetLimitsAngle(ndFloat32 minLimit, ndFloat32 maxLimit)
 #ifdef _DEBUG
 	if (minLimit > 0.0f)
 	{
-		ndTrace(("warning: %s minLimit %f larger than zero\n", __FUNCTION__, minLimit))
+		ndTrace(("warning: %s minLimit %f larger than zero\n", __FUNCTION__, ndFloat64(minLimit)))
 	}
 	if (maxLimit < 0.0f)
 	{
-		ndTrace(("warning: %s m_maxLimit %f smaller than zero\n", __FUNCTION__, maxLimit))
+		ndTrace(("warning: %s m_maxLimit %f smaller than zero\n", __FUNCTION__, ndFloat64(maxLimit)))
 	}
 #endif
 
@@ -327,8 +327,8 @@ void ndJointCylinder::ApplyBaseRows(ndConstraintDescritor& desc, const ndMatrix&
 	AddAngularRowJacobian(desc, matrix1.m_right, angle2);
 	
 	// save the current joint Omega
-	const ndVector omega0(m_body0->GetOmega());
-	const ndVector omega1(m_body1->GetOmega());
+	//const ndVector omega0(m_body0->GetOmega());
+	//const ndVector omega1(m_body1->GetOmega());
 	
 	//// the joint angle can be determined by getting the angle between any two non parallel vectors
 	//const ndFloat32 deltaAngle = ndAnglesAdd(-CalculateAngle(matrix0.m_up, matrix1.m_up, matrix1.m_front), -m_angle);

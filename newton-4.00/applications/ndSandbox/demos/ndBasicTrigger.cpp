@@ -34,7 +34,7 @@ static void AddTrigger(ndDemoEntityManager* const scene)
 	// make a transparent visual mesh
 	ndRenderPrimitive::ndDescriptor descriptor(*scene->GetRenderer());
 	descriptor.m_collision = shape;
-	descriptor.m_mapping = ndRenderPrimitive::m_box;
+	descriptor.m_mapping = ndRenderPrimitive::m_box_uv;
 	ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(scene->GetRenderer()->GetTextureCache()->GetTexture(ndGetWorkingFileName("metal_30.png")));
 	material.m_opacity = ndFloat32(0.3f);
 	
@@ -104,7 +104,7 @@ static void AddCompound(ndDemoEntityManager* const scene, const ndMatrix& origin
 	}
 	compound->EndAddRemove();
 
-	ndSharedPtr<ndBody> body (CreateRigidbody(scene, shape, origin, mass, "wood_0.png", ndRenderPrimitive::m_box));
+	ndSharedPtr<ndBody> body (CreateRigidbody(scene, shape, origin, mass, "wood_0.png", ndRenderPrimitive::m_box_uv));
 
 	ndPhysicsWorld* const world = scene->GetWorld();
 	world->AddBody(body);

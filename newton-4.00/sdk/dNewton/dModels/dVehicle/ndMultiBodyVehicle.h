@@ -150,12 +150,12 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	bool CalculateNormalizedAlgniningTorque(ndMultiBodyVehicleTireJoint* const tire, ndFloat32 sideSlipTangent) const;
 	bool CoulombFrictionCircleTireModel(ndMultiBodyVehicleTireJoint* const tire, ndContactMaterial& contactPoint) const;
 
-	virtual void OnAddToWorld() override;
-	virtual void OnRemoveFromWorld() override;
+	D_NEWTON_API virtual void OnAddToWorld() override;
+	D_NEWTON_API virtual void OnRemoveFromWorld() override;
 
 	ndMatrix m_localFrame;
 	ndWeakPtr<ndBodyDynamic> m_chassis;
-	ndSharedPtr<ndShapeWheel> m_tireShape;
+	ndSharedPtr<ndShape> m_tireShape;
 	ndWeakPtr<ndMultiBodyVehicleMotor> m_motor;
 	ndWeakPtr<ndMultiBodyVehicleGearBox> m_gearBox;
 	ndList<ndMultiBodyVehicleTireJoint*> m_tireList;

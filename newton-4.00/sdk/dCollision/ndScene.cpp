@@ -62,6 +62,7 @@ ndScene::ndScene()
 	,m_newPairs(1024)
 	,m_lock()
 	,m_rootNode(nullptr)
+	,m_gpuContext(nullptr)
 	,m_sentinelBody(nullptr)
 	,m_contactNotifyCallback(nullptr)
 	,m_timestep(ndFloat32 (0.0f))
@@ -104,6 +105,9 @@ ndScene::ndScene(const ndScene& src)
 {
 	ndScene* const stealData = (ndScene*)&src;
 
+	// each world have to have its own sentinel
+	m_sentinelBody = new ndBodySentinel(this);
+
 	SetThreadCount(src.GetThreadCount());
 
 	m_scratchBuffer.Swap(stealData->m_scratchBuffer);
@@ -111,7 +115,7 @@ ndScene::ndScene(const ndScene& src)
 	m_activeConstraintArray.Swap(stealData->m_activeConstraintArray);
 
 	ndSwap(m_rootNode, stealData->m_rootNode);
-	ndSwap(m_sentinelBody, stealData->m_sentinelBody);
+	//ndSwap(m_sentinelBody, stealData->m_sentinelBody);
 	ndSwap(m_contactNotifyCallback, stealData->m_contactNotifyCallback);
 
 	m_sentinelBody->m_scene = this;
@@ -237,8 +241,19 @@ void ndScene::SetTimestep(ndFloat32 timestep)
 
 ndBodyKinematic* ndScene::GetSentinelBody() const
 {
-	return m_sentinelBody;
+	return const_cast<ndBodyKinematic *>(*m_sentinelBody);
 }
+
+ndSharedPtr<ndGpuDriver> ndScene::GetGpuContext() const
+{
+	return m_gpuContext;
+}
+
+void ndScene::SetGpuContext(ndSharedPtr<ndGpuDriver> driver)
+{
+	m_gpuContext = driver;
+}
+
 
 void ndScene::Sync()
 {
@@ -1300,11 +1315,12 @@ void ndScene::Cleanup()
 	m_frameNumber = 0;
 	m_subStepNumber = 0;
 
-	if (m_sentinelBody)
-	{
-		delete m_sentinelBody;
-		m_sentinelBody = nullptr;
-	}
+	m_sentinelBody = ndSharedPtr<ndBodyKinematic>(nullptr);
+	//if (m_sentinelBody)
+	//{
+	//	delete m_sentinelBody;
+	//	m_sentinelBody = nullptr;
+	//}
 
 	m_bvhSceneManager.CleanUp();
 	m_contactArray.DeleteAllContacts();
@@ -1484,7 +1500,7 @@ void ndScene::UpdateBodyList()
 	if (m_bodyList.UpdateView())
 	{
 		ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
-		view.PushBack(m_sentinelBody);
+		view.PushBack(*m_sentinelBody);
 	}
 }
 
@@ -1548,18 +1564,6 @@ void ndScene::InitBodyArray()
 	ParallelExecute(BuildBodyArray, count, OptimalGroupBatch(count));
 
 	ndUnsigned32 scans[4];
-	class ndSortCompactKey
-	{
-		public:
-		ndSortCompactKey(const void* const)
-		{
-		}
-
-		ndInt32 GetKey(const ndBodyKinematic* const body) const
-		{
-			return body->m_sceneEquilibrium;
-		}
-	};
 
 	ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
 	ndInt32 movingBodyCount = 0;
@@ -1567,7 +1571,10 @@ void ndScene::InitBodyArray()
 	if (sceneBodyCount)
 	{
 		m_sceneBodyArray.SetCount(sceneBodyCount);
-		ndCountingSort<ndBodyKinematic*, ndSortCompactKey, 1>(*this, &view[0], &m_sceneBodyArray[0], sceneBodyCount, scans, nullptr);
+		ndCountingSort(*this, &view[0], &m_sceneBodyArray[0], sceneBodyCount, scans, 1, [](const ndBodyKinematic* const body)
+		{
+			return body->m_sceneEquilibrium;
+		});
 		movingBodyCount = ndInt32(scans[1] - scans[0]);
 		m_sceneBodyArray.SetCount(movingBodyCount);
 	}
@@ -1616,7 +1623,7 @@ void ndScene::InitBodyArray()
 		}
 	}
 	
-	ndBodyKinematic* const sentinelBody = m_sentinelBody;
+	ndBodyKinematic* const sentinelBody = *m_sentinelBody;
 	sentinelBody->PrepareStep(ndInt32(GetActiveBodyArray().GetCount()) - 1);
 	
 	sentinelBody->m_isStatic = 1;
@@ -1712,36 +1719,26 @@ void ndScene::DeleteDeadContacts()
 		m_dead,
 	};
 
-	class ndJointActive
-	{
-		public:
-		ndJointActive(void* const)
-		{
-			m_code[0] = m_active;
-			m_code[1] = m_inactive;
-			m_code[2] = m_dead;
-			m_code[3] = m_dead;
-		}
-
-		ndInt32 GetKey(const ndContact* const contact) const
-		{
-			const ndUnsigned32 inactive = ndUnsigned32(!contact->IsActive() | (contact->m_maxDof ? 0 : 1));
-			const ndUnsigned32 idDead = contact->m_isDead;
-			return m_code[idDead * 2 + inactive];
-		}
-		ndInt32 m_code[4];
-	};
 	ndUnsigned32 prefixScan[5];
-
 	ndScopeSpinLock lock(m_contactArray.GetLock());
 	m_contactArray.SetCount(m_newPairs.GetCount() + m_contactArray.GetCount());
 	if (m_contactArray.GetCount())
 	{
 		ND_PROFILE_ZONE();
 		ndContact** const tmpJointsArray = (ndContact**)&m_scratchBuffer[0];
-		ndCountingSort<ndContact*, ndJointActive, 2>(*this, tmpJointsArray, &m_contactArray[0], ndInt32(m_contactArray.GetCount()), prefixScan, nullptr);
+		ndInt32 code[4];
+		code[0] = m_active;
+		code[1] = m_inactive;
+		code[2] = m_dead;
+		code[3] = m_dead;
+		ndCountingSort(*this, tmpJointsArray, &m_contactArray[0], ndInt32(m_contactArray.GetCount()), prefixScan, 2, [&code](const ndContact* const contact)
+		{
+			const ndUnsigned32 inactive = ndUnsigned32(!contact->IsActive() | (contact->m_maxDof ? 0 : 1));
+			const ndUnsigned32 idDead = contact->m_isDead;
+			return code[idDead * 2 + inactive];
+		});
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		for (ndInt32 i = ndInt32(m_contactArray.GetCount()) - 1; i >= 0; --i)
 		{
 			ndContact* const contact = m_contactArray[i];
@@ -1807,7 +1804,7 @@ bool ndScene::ValidateScene()
 
 	ndInt32 index = 0;
 	const ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
-	if (view[view.GetCount() - 1] != m_sentinelBody)
+	if (view[view.GetCount() - 1] != *m_sentinelBody)
 	{
 		return false;
 	}
@@ -1827,7 +1824,7 @@ bool ndScene::ValidateScene()
 		return false;
 	}
 
-	filter.Insert(m_sentinelBody, m_sentinelBody);
+	filter.Insert(*m_sentinelBody, *m_sentinelBody);
 	for (ndJointList::ndNode* node = GetWorld()->GetJointList().GetFirst(); node; node = node->GetNext())
 	{
 		const ndConstraint* const joint = *node->GetInfo();

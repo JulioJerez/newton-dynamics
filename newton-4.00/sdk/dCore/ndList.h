@@ -125,7 +125,8 @@ class ndList: public ndClassAlloc
 		Iterator (const ndList<T, allocator> &me)
 		{
 			m_ptr = nullptr;
-			m_list = (ndList *)&me;
+			//m_list = (ndList *)&me;
+			m_list = const_cast<ndList*>(&me);
 		}
 
 		~Iterator ()

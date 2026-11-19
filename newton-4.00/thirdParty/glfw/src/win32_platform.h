@@ -49,8 +49,8 @@
 #endif
 
 #if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundef"
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Weverything"
 #endif
 
 

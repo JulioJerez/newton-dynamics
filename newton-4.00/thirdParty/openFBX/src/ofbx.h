@@ -91,7 +91,8 @@ namespace ndOfbx
 			const u8* cin = begin;
 			while (cin != end && cout - out < N - 1)
 			{
-				*cout = (char)*cin;
+				//*cout = (char)*cin;
+				*cout = char(*cin);
 				++cin;
 				++cout;
 			}

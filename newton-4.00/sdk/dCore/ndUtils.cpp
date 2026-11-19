@@ -75,8 +75,8 @@ class ndSortCluster
 	{
 		ndInt32 index = 0;
 		ndFloat64 maxVariance = ndFloat64(-1.0e10f);
-		const ndBigVector origin(m_sum.Scale(ndFloat32(1.0f) / (ndFloat32)m_count));
-		const ndBigVector variance2(m_sum2.Scale(ndFloat32(1.0f) / (ndFloat32)m_count) - origin * origin);
+		const ndBigVector origin(m_sum.Scale(ndFloat64(1.0f) / ndFloat64(m_count)));
+		const ndBigVector variance2(m_sum2.Scale(ndFloat64(1.0f) / ndFloat64(m_count)) - origin * origin);
 		for (ndInt32 i = 0; i < 3; ++i)
 		{
 			if (variance2[i] >= maxVariance)
@@ -120,37 +120,26 @@ static ndInt32 SortVertices(
 	sortContext.m_vertex = vertexList;
 	sortContext.m_stride = stride;
 	sortContext.m_vertexSortIndex = firstSortAxis;
-	class ndCompareKey
+
+	ndSort(remapIndex, cluster.m_count, [&sortContext](const ndSortKey& elementA, const ndSortKey& elementB)
 	{
-		public:
-		ndCompareKey(void* const context)
-			:m_sortContext((ndVertexSortData*)context)
+		const ndInt32 index0 = elementA.m_vertexIndex * sortContext.m_stride + sortContext.m_vertexSortIndex;
+		const ndInt32 index1 = elementB.m_vertexIndex * sortContext.m_stride + sortContext.m_vertexSortIndex;
+		const ndFloat64 val0 = sortContext.m_vertex[index0];
+		const ndFloat64 val1 = sortContext.m_vertex[index1];
+		if (val0 < val1)
 		{
+			return -1;
 		}
-
-		ndInt32 Compare(const ndSortKey& elementA, const ndSortKey& elementB) const
+		if (val0 > val1)
 		{
-			const ndInt32 index0 = elementA.m_vertexIndex * m_sortContext->m_stride + m_sortContext->m_vertexSortIndex;
-			const ndInt32 index1 = elementB.m_vertexIndex * m_sortContext->m_stride + m_sortContext->m_vertexSortIndex;
-			const ndFloat64 val0 = m_sortContext->m_vertex[index0];
-			const ndFloat64 val1 = m_sortContext->m_vertex[index1];
-			if (val0 < val1)
-			{
-				return -1;
-			}
-			if (val0 > val1)
-			{
-				return 1;
-			}
-			return 0;
+			return 1;
 		}
+		return 0;
+	});
 
-		ndVertexSortData* m_sortContext;
-	};
-	ndSort<ndSortKey, ndCompareKey>(remapIndex, cluster.m_count, &sortContext);
-
-	const ndBigVector origin(cluster.m_sum.Scale(ndFloat32(1.0f) / (ndFloat32)cluster.m_count));
-	const ndBigVector variance(ndBigVector::m_zero.GetMax(cluster.m_sum2.Scale(ndFloat32(1.0f) / (ndFloat32)cluster.m_count) - origin * origin).Sqrt());
+	const ndBigVector origin(cluster.m_sum.Scale(ndFloat64(1.0f) / ndFloat64(cluster.m_count)));
+	const ndBigVector variance(ndBigVector::m_zero.GetMax(cluster.m_sum2.Scale(ndFloat64(1.0f) / ndFloat64(cluster.m_count)) - origin * origin).Sqrt());
 	const ndFloat64 minDist = ndMin(ndMin(variance.m_x, variance.m_y), variance.m_z);
 	const ndFloat64 tolerance = ndMax(ndMin(minDist, ndFloat64(tol)), ndFloat64(1.0e-8f));
 	const ndFloat64 sweptWindow = ndFloat64(2.0f) * tolerance;
@@ -249,12 +238,12 @@ static ndInt32 QuickSortVertices(ndFloat64* const vertListOut, ndInt32 stride, n
 		{
 			cluster = spliteStack.Pop();
 
-			const ndBigVector origin(cluster.m_sum.Scale(ndFloat32(1.0f) / (ndFloat32)cluster.m_count));
-			const ndBigVector variance2(cluster.m_sum2.Scale(ndFloat32(1.0f) / (ndFloat32)cluster.m_count) - origin * origin);
+			const ndBigVector origin(cluster.m_sum.Scale(ndFloat64(1.0f) / ndFloat64(cluster.m_count)));
+			const ndBigVector variance2(cluster.m_sum2.Scale(ndFloat64(1.0f) / ndFloat64(cluster.m_count)) - origin * origin);
 			ndSortKey* const remapIndex = &indirectList[cluster.m_start];
 
 			ndFloat64 maxVariance2 = ndMax(ndMax(variance2.m_x, variance2.m_y), variance2.m_z);
-			bool doSort = (cluster.m_count <= ND_VERTEXLIST_INDEX_LIST_BATCH) || (spliteStack.GetCount() > (spliteStack.GetCapacity() - 4)) || (maxVariance2 < ndFloat32(4.0f));
+			bool doSort = (cluster.m_count <= ND_VERTEXLIST_INDEX_LIST_BATCH) || (spliteStack.GetCount() > (spliteStack.GetCapacity() - 4)) || (maxVariance2 < ndFloat64(4.0f));
 			if (doSort)
 			{
 				ndInt32 sortIndex = cluster.GetSortIndex();
@@ -376,7 +365,7 @@ ndInt32 ndVertexListToIndexList(ndReal* const vertexList, ndInt32 strideInBytes,
 		const ndReal* const src = &vertexList[i * stride];
 		for (ndInt32 j = 0; j < stride; ++j)
 		{
-			dst[j] = src[j];
+			dst[j] = ndFloat64(src[j]);
 		}
 	}
 

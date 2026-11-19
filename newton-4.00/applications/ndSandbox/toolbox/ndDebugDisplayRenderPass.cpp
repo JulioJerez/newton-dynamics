@@ -62,13 +62,13 @@ ndDebugDisplayRenderPass::ndDebugMesh* ndDebugDisplayRenderPass::CreateRenderPri
 	ndRenderPrimitive::ndDescriptor descriptor(render);
 	descriptor.m_collision = shape;
 
-	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugFlatShaded;
+	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshFlatShaded;
 	debugMesh->m_flatShaded = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 
-	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
+	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshWireFrame;
 	debugMesh->m_wireFrameShareEdge = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 
-	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
+	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshHiddenLines;
 	debugMesh->m_zBuffer = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 
 	return debugMesh;

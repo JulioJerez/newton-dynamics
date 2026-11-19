@@ -89,11 +89,11 @@ void ndJointSlider::SetLimits(ndFloat32 minLimit, ndFloat32 maxLimit)
 #ifdef _DEBUG
 	if (minLimit > 0.0f)
 	{
-		ndTrace(("warning: %s minLimit %f larger than zero\n", __FUNCTION__, minLimit))
+		ndTrace(("warning: %s minLimit %f larger than zero\n", __FUNCTION__, ndFloat64(minLimit)))
 	}
 	if (maxLimit < 0.0f)
 	{
-		ndTrace(("warning: %s m_maxLimit %f smaller than zero\n", __FUNCTION__, maxLimit))
+		ndTrace(("warning: %s m_maxLimit %f smaller than zero\n", __FUNCTION__, ndFloat64(maxLimit)))
 	}
 #endif
 
@@ -283,14 +283,14 @@ void ndJointSlider::SubmitMotor(ndConstraintDescritor& desc, const ndMatrix& mat
 
 void ndJointSlider::ApplyBaseRows(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
-	const ndVector veloc0(m_body0->GetVelocityAtPoint(matrix0.m_posit));
-	const ndVector veloc1(m_body1->GetVelocityAtPoint(matrix1.m_posit));
+	//const ndVector veloc0(m_body0->GetVelocityAtPoint(matrix0.m_posit));
+	//const ndVector veloc1(m_body1->GetVelocityAtPoint(matrix1.m_posit));
 
 	const ndVector& pin = matrix1[0];
 	const ndVector& p0 = matrix0.m_posit;
 	const ndVector& p1 = matrix1.m_posit;
 	const ndVector prel(p0 - p1);
-	const ndVector vrel(veloc0 - veloc1);
+	//const ndVector vrel(veloc0 - veloc1);
 	const ndVector projectedPoint = p1 + pin.Scale(pin.DotProduct(prel).GetScalar());
 
 	AddLinearRowJacobian(desc, p0, projectedPoint, matrix1[1]);

@@ -210,7 +210,7 @@ const ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndModelArtic
 
 void ndModelArticulation::AddCloseLoop(const ndSharedPtr<ndJointBilateralConstraint>& joint, const char* const name)
 {
-	#ifdef _DEBUG
+	#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	auto Check = [&](const ndBodyKinematic* const body)
 	{
 		if (body->GetInvMass() == ndFloat32(0.0f))
@@ -419,14 +419,14 @@ void ndModelArticulation::SetMulticoreHint(bool hint)
 	m_solveMulticore = hint;
 }
 
-void ndModelArticulation::SetTransform(const ndMatrix& matrix)
+void ndModelArticulation::SetTransform(const ndMatrix& rootMatrix)
 {
 	if (m_rootNode)
 	{
-		ndMatrix bodyMatrix(m_rootNode->m_body->GetMatrix());
-		const ndMatrix offset(bodyMatrix.OrthoInverse() * matrix);
+		const ndMatrix bodyBodyMatrix(m_rootNode->m_body->GetMatrix());
+		const ndMatrix offset(bodyBodyMatrix.OrthoInverse() * rootMatrix);
 		ndAssert(offset.TestOrthogonal());
-		auto ApplyTransfrom = [this, &offset](ndModelArticulation::ndNode* const node)
+		auto ApplyTransfrom = [&offset](ndModelArticulation::ndNode* const node)
 		{
 			if (node->m_body)
 			{
@@ -458,7 +458,7 @@ bool ndModelArticulation::IsCloseLoop(const ndNode* const loopJointNode) const
 
 void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 {
-	ndModelArticulation* const self = (ndModelArticulation*)this;
+	ndModelArticulation* const self = const_cast<ndModelArticulation*>(this);
 	auto SerializeToMesh = [this, meshRootNode](ndModelArticulation::ndNode* const node)
 	{
 		if (IsCloseLoop(node))
@@ -613,13 +613,13 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 ndMesh* ndModelArticulation::CreateDefaultMesh() const
 {
 	ndMesh* rootMesh = nullptr;
-	auto BuildDefaultMesh = [this, &rootMesh](ndModelArticulation::ndNode* const node)
+	auto BuildDefaultMesh = [&rootMesh](ndModelArticulation::ndNode* const node)
 	{
 		if (node->m_body)
 		{
 			const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
 			const ndShapeInstance& collisionShape = body->GetCollisionShape();
-			bool hasGeometry = ((ndShape*)collisionShape.GetShape())->GetAsShapeNull() ? false : true;
+			bool hasGeometry = (const_cast<ndShape*>(collisionShape.GetShape())->GetAsShapeNull()) ? false : true;
 			ndMesh* const newMesh = hasGeometry ? new ndMesh(collisionShape) : new ndMesh();
 
 			ndMatrix matrix(node->m_body->GetMatrix());
@@ -788,7 +788,7 @@ bool ndModelArticulation::SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFl
 				body->RestoreSleepState(true);
 			}
 		};
-		ndModelArticulation* const self = (ndModelArticulation*)this;
+		ndModelArticulation* const self = const_cast<ndModelArticulation*>(this);
 		self->NodeIterator(SetSleep);
 	}
 	return isSleeping;
@@ -804,7 +804,7 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 
 	ndFixSizeArray<ndVector, D_INV_IK_MAX_LINKS> bodyCenter;
 	ndFixSizeArray<const ndBodyKinematic*, D_INV_IK_MAX_LINKS> bodyArray;
-	auto CalculateCom = [this, &dynamics, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
+	auto CalculateCom = [&dynamics, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
 	{
 		if (node->m_body)
 		{
@@ -819,7 +819,7 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 			dynamics.m_com += bodyCom.Scale(mass);
 		}
 	};
-	ndModelArticulation* const self = (ndModelArticulation*)this;
+	ndModelArticulation* const self = const_cast<ndModelArticulation*>(this);
 	self->NodeIterator(CalculateCom);
 	
 	dynamics.m_com = dynamics.m_com.Scale(ndFloat32(1.0f) / dynamics.m_mass);
@@ -875,7 +875,7 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	
 	ndFixSizeArray<ndVector, D_INV_IK_MAX_LINKS> bodyCenter;
 	ndFixSizeArray<const ndBodyKinematic*, D_INV_IK_MAX_LINKS> bodyArray;
-	auto CalculateCom = [this, &dynamics, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
+	auto CalculateCom = [&dynamics, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
 	{
 		if (node->m_body)
 		{
@@ -890,7 +890,7 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 			dynamics.m_com += bodyCom.Scale(mass);
 		}
 	};
-	ndModelArticulation* const self = (ndModelArticulation*)this;
+	ndModelArticulation* const self = const_cast<ndModelArticulation*>(this);
 	self->NodeIterator(CalculateCom);
 
 	dynamics.m_com = dynamics.m_com.Scale(ndFloat32(1.0f) / dynamics.m_mass);
@@ -902,7 +902,7 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 		bodyCenter[i] = (bodyCenter[i] - dynamics.m_com) & ndVector::m_triplexMask;
 	}
 	
-	ndConstraint** const extraJointsPtr = extraJoints.GetCount() ? (ndConstraint**) & extraJoints[0] : nullptr;
+	ndConstraint** const extraJointsPtr = extraJoints.GetCount() ? reinterpret_cast<ndConstraint**>(&extraJoints[0]) : nullptr;
 	solver.SolverBegin(skeleton, extraJointsPtr, extraJoints.GetCount(), GetWorld(), timestep, 0);
 	solver.Solve();
 	auto CalculateComFullDynamics = [&dynamics, &bodyArray, &bodyCenter]()
@@ -951,7 +951,7 @@ ndFloat32 ndModelArticulation::CalculateConservativeInetiaScaler() const
 	ndVector centerOfMass(ndVector::m_zero);
 	ndFixSizeArray<ndVector, D_INV_IK_MAX_LINKS> bodyCenter;
 	ndFixSizeArray<const ndBodyKinematic*, D_INV_IK_MAX_LINKS> bodyArray;
-	auto CalculateCom = [this, &totalMass, &centerOfMass, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
+	auto CalculateCom = [&totalMass, &centerOfMass, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
 	{
 		if (node->m_body)
 		{
@@ -966,7 +966,7 @@ ndFloat32 ndModelArticulation::CalculateConservativeInetiaScaler() const
 			centerOfMass += bodyCom.Scale(mass);
 		}
 	};
-	ndModelArticulation* const self = (ndModelArticulation*)this;
+	ndModelArticulation* const self = const_cast<ndModelArticulation*>(this);
 	self->NodeIterator(CalculateCom);
 	centerOfMass = centerOfMass.Scale(ndFloat32(1.0f) / totalMass);
 	centerOfMass.m_w = ndFloat32(1.0f);
@@ -1019,7 +1019,7 @@ ndMatrix ndModelArticulation::CalculateComMassMatrix() const
 	ndVector centerOfMass(ndVector::m_zero);
 	ndFixSizeArray<ndVector, D_INV_IK_MAX_LINKS> bodyCenter;
 	ndFixSizeArray<const ndBodyKinematic*, D_INV_IK_MAX_LINKS> bodyArray;
-	auto CalculateCom = [this, &totalMass, &centerOfMass, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
+	auto CalculateCom = [&totalMass, &centerOfMass, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
 	{
 		if (node->m_body)
 		{
@@ -1034,7 +1034,7 @@ ndMatrix ndModelArticulation::CalculateComMassMatrix() const
 			centerOfMass += bodyCom.Scale(mass);
 		}
 	};
-	ndModelArticulation* const self = (ndModelArticulation*)this;
+	ndModelArticulation* const self = const_cast<ndModelArticulation*>(this);
 	self->NodeIterator(CalculateCom);
 	centerOfMass = centerOfMass.Scale(ndFloat32(1.0f) / totalMass);
 	centerOfMass.m_w = ndFloat32(1.0f);

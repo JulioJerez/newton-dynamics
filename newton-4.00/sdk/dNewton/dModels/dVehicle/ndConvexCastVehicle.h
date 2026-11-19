@@ -27,6 +27,7 @@
 #include "ndMultiBodyVehicle.h"
 
 class ndSkeletonContainer;
+#define	ND_MAX_SKEL_ITEMS	32	
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndConvexCastVehicle : public ndMultiBodyVehicle
@@ -49,13 +50,13 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	D_NEWTON_API virtual void Debug(ndConstraintDebugCallback& context) const override;
 
 	ndIkSolver m_solver;
-	ndFixSizeArray<ndBodyDynamic*, 32> m_savedBody;
-	ndFixSizeArray<ndJacobian, 32> m_savedForceTorque;
+	ndFixSizeArray<ndBodyDynamic*, ND_MAX_SKEL_ITEMS> m_savedBody;
+	ndFixSizeArray<ndVector8, ND_MAX_SKEL_ITEMS> m_savedForceTorque;
 	ndSharedPtr<ndSkeletonContainer> m_skeleton;
-	ndWeakPtr<ndSkeletonContainer> m_originaSkeleton;
+	//ndWeakPtr<ndSkeletonContainer> m_originalSkeleton;
 	ndSharedPtr<ndJointBilateralConstraint> m_castGearBox;
 	ndList<ndSharedPtr<ndJointBilateralConstraint>> m_castDifferentialAxelList;
-	ndInt32 m_sleepCounter;
+	//ndInt32 m_sleepCounter;
 
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 

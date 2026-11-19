@@ -111,6 +111,9 @@ class ndScene : public ndThreadPool
 	D_COLLISION_API ndArray<ndConstraint*>& GetActiveContactArray();
 	D_COLLISION_API const ndArray<ndConstraint*>& GetActiveContactArray() const;
 
+	D_COLLISION_API ndSharedPtr<ndGpuDriver> GetGpuContext() const;
+	D_COLLISION_API void SetGpuContext(ndSharedPtr<ndGpuDriver>);
+
 	D_COLLISION_API ndFloat32 GetTimestep() const;
 	D_COLLISION_API void SetTimestep(ndFloat32 timestep);
 	D_COLLISION_API ndBodyKinematic* GetSentinelBody() const;
@@ -149,7 +152,6 @@ class ndScene : public ndThreadPool
 	D_COLLISION_API virtual void DeleteDeadContacts();
 
 	D_COLLISION_API virtual void CalculateContacts(ndInt32 threadIndex, ndContact* const contact);
-	//D_COLLISION_API virtual void UpdateTransformNotify(ndInt32 threadIndex, ndBodyKinematic* const body);
 	D_COLLISION_API virtual void UpdateTransformNotify(ndFloat32 timestep, ndBodyKinematic* const body);
 
 	D_COLLISION_API virtual void ParticleUpdate(ndFloat32 timestep);
@@ -171,7 +173,8 @@ class ndScene : public ndThreadPool
 
 	ndSpinLock m_lock;
 	ndBvhNode* m_rootNode;
-	ndBodyKinematic* m_sentinelBody;
+	ndSharedPtr<ndGpuDriver> m_gpuContext;
+	ndSharedPtr<ndBodyKinematic> m_sentinelBody;
 	ndSharedPtr<ndContactNotify> m_contactNotifyCallback;
 	
 	ndFloat32 m_timestep;
@@ -192,6 +195,5 @@ class ndScene : public ndThreadPool
 	friend class ndSkeletonContainer;
 	friend class ndConvexCastVehicle;
 } D_GCC_NEWTON_CLASS_ALIGN_32 ;
-
 
 #endif
