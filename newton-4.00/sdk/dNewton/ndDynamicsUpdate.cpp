@@ -57,6 +57,32 @@ ndDynamicsUpdate::ndDynamicsUpdate(ndWorld* const world)
 {
 }
 
+ndDynamicsUpdate::ndDynamicsUpdate(const ndDynamicsUpdate& copy)
+	:m_velocTol(ndFloat32(1.0e-8f))
+	,m_islands(D_DEFAULT_BUFFER_SIZE)
+	,m_skeletonOrder(D_DEFAULT_BUFFER_SIZE)
+	,m_jointForcesIndex(D_DEFAULT_BUFFER_SIZE)
+	,m_internalForces(D_DEFAULT_BUFFER_SIZE)
+	,m_leftHandSide(D_DEFAULT_BUFFER_SIZE * 4)
+	,m_rightHandSide(D_DEFAULT_BUFFER_SIZE)
+	,m_tempInternalForces(D_DEFAULT_BUFFER_SIZE)
+	,m_bodyIslandOrder(D_DEFAULT_BUFFER_SIZE)
+	,m_jointBodyPairIndexBuffer(D_DEFAULT_BUFFER_SIZE)
+	,m_world(copy.m_world)
+	,m_timestep(ndFloat32(0.0f))
+	,m_invTimestep(ndFloat32(0.0f))
+	,m_firstPassCoef(ndFloat32(0.0f))
+	,m_invStepRK(ndFloat32(0.0f))
+	,m_timestepRK(ndFloat32(0.0f))
+	,m_invTimestepRK(ndFloat32(0.0f))
+	,m_solverPasses(0)
+	,m_activeJointCount(0)
+	,m_activeSkeleton(0)
+	,m_parallelSkeleton(0)
+	,m_unConstrainedBodyCount(0)
+{
+}
+
 ndDynamicsUpdate::~ndDynamicsUpdate()
 {
 	Clear();

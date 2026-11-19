@@ -46,15 +46,15 @@ ndRenderPrimitiveImplement::ndRenderPrimitiveImplement(ndRenderPrimitive* const 
 	{
 		BuildFromNewtonMeshEffect(descriptor);
 	}
-	else if (descriptor.m_meshBuildMode == ndRenderPrimitive::m_debugTriangleArray)
+	else if (descriptor.m_meshBuildMode == ndRenderPrimitive::m_debugMeshTriangleArray)
 	{
 		BuildDebugTriangleArray(descriptor);
 	}
-	else if (descriptor.m_meshBuildMode == ndRenderPrimitive::m_debugLineArray)
+	else if (descriptor.m_meshBuildMode == ndRenderPrimitive::m_debugMeshLineArray)
 	{
 		BuildDebugLineArray(descriptor);
 	}
-	else if (descriptor.m_meshBuildMode == ndRenderPrimitive::m_debugPointArray)
+	else if (descriptor.m_meshBuildMode == ndRenderPrimitive::m_debugMeshPointArray)
 	{
 		BuildDebugPointArray(descriptor);
 	}
@@ -296,19 +296,19 @@ void ndRenderPrimitiveImplement::BuildFromCollisionShape(const ndRenderPrimitive
 			break;
 		}
 
-		case ndRenderPrimitive::m_debugWireFrame:
+		case ndRenderPrimitive::m_debugMeshWireFrame:
 		{
 			BuildWireframeDebugMesh(descriptor);
 			break;
 		}
 
-		case ndRenderPrimitive::m_debugFlatShaded:
+		case ndRenderPrimitive::m_debugMeshFlatShaded:
 		{
 			BuildDebugFlatShadedMesh(descriptor);
 			break;
 		}
 
-		case ndRenderPrimitive::m_debugHiddenLines:
+		case ndRenderPrimitive::m_debugMeshHiddenLines:
 		{
 			BuildSetZBufferDebugMesh(descriptor);
 			break;
@@ -338,19 +338,19 @@ void ndRenderPrimitiveImplement::BuildFromNewtonMeshEffect(const ndRenderPrimiti
 			break;
 		}
 
-		case ndRenderPrimitive::m_debugHiddenLines:
+		case ndRenderPrimitive::m_debugMeshHiddenLines:
 		{
 			BuildSetZBufferDebugMesh(descriptor);
 			break;
 		}
 
-		case ndRenderPrimitive::m_debugWireFrame:
+		case ndRenderPrimitive::m_debugMeshWireFrame:
 		{
 			BuildWireframeDebugMesh(descriptor);
 			break;
 		}
 
-		case ndRenderPrimitive::m_debugFlatShaded:
+		case ndRenderPrimitive::m_debugMeshFlatShaded:
 		{
 			BuildDebugFlatShadedMesh(descriptor);
 			break;
@@ -374,8 +374,8 @@ void ndRenderPrimitiveImplement::BuildRenderMeshFromCollisionShape(const ndRende
 	ndInt32 textureId = ndInt32(image->m_texture);
 	switch (descriptor.m_mapping)
 	{
-		case ndRenderPrimitive::m_capsule:
-		case ndRenderPrimitive::m_spherical:
+		case ndRenderPrimitive::m_capsule_uv:
+		case ndRenderPrimitive::m_spherical_uv:
 		{
 			ndMatrix flipMatrix(ndGetIdentityMatrix());
 			flipMatrix[0][0] = ndFloat32(-1.0f);
@@ -384,7 +384,7 @@ void ndRenderPrimitiveImplement::BuildRenderMeshFromCollisionShape(const ndRende
 			break;
 		}
 
-		case ndRenderPrimitive::m_cylindrical:
+		case ndRenderPrimitive::m_cylindrical_uv:
 		{
 			ndMatrix flipMatrix(ndGetIdentityMatrix());
 			flipMatrix[0][0] = ndFloat32(-1.0f);
@@ -393,7 +393,7 @@ void ndRenderPrimitiveImplement::BuildRenderMeshFromCollisionShape(const ndRende
 			break;
 		}
 
-		case ndRenderPrimitive::m_box:
+		case ndRenderPrimitive::m_box_uv:
 		{
 			if (descriptor.m_stretchMaping)
 			{
@@ -1309,8 +1309,8 @@ void ndRenderPrimitiveImplement::BuildRenderInstanceMesh(const ndRenderPrimitive
 	ndInt32 textureId = ndInt32(image->m_texture);
 	switch (descriptor.m_mapping)
 	{
-		case ndRenderPrimitive::m_capsule:
-		case ndRenderPrimitive::m_spherical:
+		case ndRenderPrimitive::m_capsule_uv:
+		case ndRenderPrimitive::m_spherical_uv:
 		{
 			ndMatrix flipMatrix(ndGetIdentityMatrix());
 			flipMatrix[0][0] = ndFloat32(-1.0f);
@@ -1319,7 +1319,7 @@ void ndRenderPrimitiveImplement::BuildRenderInstanceMesh(const ndRenderPrimitive
 			break;
 		}
 
-		case ndRenderPrimitive::m_cylindrical:
+		case ndRenderPrimitive::m_cylindrical_uv:
 		{
 			ndMatrix flipMatrix(ndGetIdentityMatrix());
 			flipMatrix[0][0] = ndFloat32(-1.0f);
@@ -1328,7 +1328,7 @@ void ndRenderPrimitiveImplement::BuildRenderInstanceMesh(const ndRenderPrimitive
 			break;
 		}
 
-		case ndRenderPrimitive::m_box:
+		case ndRenderPrimitive::m_box_uv:
 		{
 			if (descriptor.m_stretchMaping)
 			{

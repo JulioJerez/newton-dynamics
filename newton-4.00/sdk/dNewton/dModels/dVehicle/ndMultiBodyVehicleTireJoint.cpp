@@ -15,6 +15,11 @@
 #include "ndMultiBodyVehicle.h"
 #include "ndMultiBodyVehicleTireJoint.h"
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 static ndTireFrictionModel::ndPacejkaTireModel pacejkaSportLateral(ndFloat32(4.0f), ndFloat32(0.2f), ndFloat32(1.5f), ndFloat32(-0.1f), ndFloat32(0.0f), ndFloat32(0.0f));
 static ndTireFrictionModel::ndPacejkaTireModel pacejkaSportLongitudinal(ndFloat32(2.0f), ndFloat32(0.5f), ndFloat32(1.65f), ndFloat32(0.8f), ndFloat32(0.0f), ndFloat32(0.0f));
 
@@ -23,6 +28,10 @@ static ndTireFrictionModel::ndPacejkaTireModel pacejkaUtilityLongitudinal(ndFloa
 
 static ndTireFrictionModel::ndPacejkaTireModel pacejkaTruckLateral(ndFloat32(2.0f), ndFloat32(0.01f), ndFloat32(2.85f), ndFloat32(1.42f), ndFloat32(0.0f), ndFloat32(0.0f));
 static ndTireFrictionModel::ndPacejkaTireModel pacejkaTruckLongitudinal(ndFloat32(2.0f), ndFloat32(0.5f), ndFloat32(1.65f), ndFloat32(0.8f), ndFloat32(0.0f), ndFloat32(0.0f));
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 ndTireFrictionModel::ndTireFrictionModel()
 	:m_frictionModel(m_pacejkaUtility)
@@ -56,12 +65,10 @@ const char* ndTireFrictionModel::GetLabel(ndFrictionModel frictionModel)
 
 		case ndTireFrictionModel::m_pacejkaCustom:
 			return "pacejkaCustom";
-			break;
 
 		case ndTireFrictionModel::m_coulombCicleOfFriction:
 		default:
 			return "coulombCicleOfFriction";
-			break;
 	}
 }
 
@@ -104,6 +111,14 @@ void ndTireFrictionModel::SetPacejkaCurves(ndFrictionModel frictionModel)
 			m_frictionModel = frictionModel;
 			break;
 
+		case ndTireFrictionModel::m_pacejkaCustom:
+			ndAssert(0);
+			SetPacejkaCurves(pacejkaUtilityLongitudinal, pacejkaUtilityLateral);
+			m_frictionModel = frictionModel;
+			break;
+
+		case ndTireFrictionModel::m_coulomb:
+		case ndTireFrictionModel::m_coulombCicleOfFriction:
 		case ndTireFrictionModel::m_pacejkaUtility:
 		default:
 			SetPacejkaCurves(pacejkaUtilityLongitudinal, pacejkaUtilityLateral);
@@ -126,6 +141,9 @@ void ndTireFrictionModel::GetPacejkaCurves(ndFrictionModel pacejkaStockModel, nd
 			longitudinal = pacejkaTruckLongitudinal;
 			break;
 
+		case ndTireFrictionModel::m_coulomb:
+		case ndTireFrictionModel::m_pacejkaCustom:
+		case ndTireFrictionModel::m_coulombCicleOfFriction:
 		case ndTireFrictionModel::m_pacejkaUtility:
 		default:
 			lateral = pacejkaUtilityLateral;
@@ -148,7 +166,7 @@ void ndTireFrictionModel::PlotPacejkaCurves(const char* const name) const
 	{
 		ndFloat32 fx = m_longitudinalPacejka.Evaluate(x, ndFloat32(1.0f));
 		ndFloat32 fz = m_lateralPacejka.Evaluate(x, ndFloat32(1.0f));
-		fprintf(outFile, "%g; %g; %g\n", fx, fz, x);
+		fprintf(outFile, "%g; %g; %g\n", ndFloat64(fx), ndFloat64(fz), ndFloat64(x));
 	}
 	fclose(outFile);
 }

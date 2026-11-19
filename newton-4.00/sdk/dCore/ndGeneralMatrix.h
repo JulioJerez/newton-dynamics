@@ -215,6 +215,7 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 		}
 	};
 
+	#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	auto DebugIndentity = [](const CholeskyTile& A, const CholeskyTile& B)
 	{
 		CholeskyTile tile;
@@ -237,6 +238,7 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 		}
 		return pass;
 	};
+	#endif
 
 	auto CalculateOffDiagonalTile = [stride, psdMatrix](const CholeskyTile& tile, const CholeskyTile& invDiagonal, const ndInt32 row, ndInt32 column)
 	{
@@ -348,7 +350,9 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 				CholeskyTile& invTile = invDiagonalTiles[i];
 
 				InverseTile(invTile, tile);
-				ndAssert(DebugIndentity(GetTile(i, i), invTile));
+				#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
+					ndAssert(DebugIndentity(GetTile(i, i), invTile));
+				#endif
 			}
 		}
 	}

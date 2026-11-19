@@ -127,13 +127,13 @@ ndRenderPassDebug::ndRenderPassDebug(ndRender* const owner, ndWorld* const world
 	m_owner->m_cachedDebugPass = this;
 	ndRenderPrimitive::ndDescriptor descriptor(render);
 
-	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugPointArray;
+	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshPointArray;
 	m_renderPointsPrimitive = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 
-	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugLineArray;
+	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshLineArray;
 	m_renderLinesPrimitive = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 
-	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugTriangleArray;
+	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugMeshTriangleArray;
 	m_renderTrianglePrimitive = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 }
 
