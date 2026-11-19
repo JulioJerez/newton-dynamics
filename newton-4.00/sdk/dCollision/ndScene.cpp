@@ -1564,18 +1564,6 @@ void ndScene::InitBodyArray()
 	ParallelExecute(BuildBodyArray, count, OptimalGroupBatch(count));
 
 	ndUnsigned32 scans[4];
-	class ndSortCompactKey
-	{
-		public:
-		ndSortCompactKey(const void* const)
-		{
-		}
-
-		ndInt32 GetKey(const ndBodyKinematic* const body) const
-		{
-			return body->m_sceneEquilibrium;
-		}
-	};
 
 	ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
 	ndInt32 movingBodyCount = 0;
@@ -1583,7 +1571,10 @@ void ndScene::InitBodyArray()
 	if (sceneBodyCount)
 	{
 		m_sceneBodyArray.SetCount(sceneBodyCount);
-		ndCountingSort<ndBodyKinematic*, ndSortCompactKey, 1>(*this, &view[0], &m_sceneBodyArray[0], sceneBodyCount, scans, nullptr);
+		ndCountingSort(*this, &view[0], &m_sceneBodyArray[0], sceneBodyCount, scans, 1, [](const ndBodyKinematic* const body)
+		{
+			return body->m_sceneEquilibrium;
+		});
 		movingBodyCount = ndInt32(scans[1] - scans[0]);
 		m_sceneBodyArray.SetCount(movingBodyCount);
 	}
@@ -1728,36 +1719,26 @@ void ndScene::DeleteDeadContacts()
 		m_dead,
 	};
 
-	class ndJointActive
-	{
-		public:
-		ndJointActive(void* const)
-		{
-			m_code[0] = m_active;
-			m_code[1] = m_inactive;
-			m_code[2] = m_dead;
-			m_code[3] = m_dead;
-		}
-
-		ndInt32 GetKey(const ndContact* const contact) const
-		{
-			const ndUnsigned32 inactive = ndUnsigned32(!contact->IsActive() | (contact->m_maxDof ? 0 : 1));
-			const ndUnsigned32 idDead = contact->m_isDead;
-			return m_code[idDead * 2 + inactive];
-		}
-		ndInt32 m_code[4];
-	};
 	ndUnsigned32 prefixScan[5];
-
 	ndScopeSpinLock lock(m_contactArray.GetLock());
 	m_contactArray.SetCount(m_newPairs.GetCount() + m_contactArray.GetCount());
 	if (m_contactArray.GetCount())
 	{
 		ND_PROFILE_ZONE();
 		ndContact** const tmpJointsArray = (ndContact**)&m_scratchBuffer[0];
-		ndCountingSort<ndContact*, ndJointActive, 2>(*this, tmpJointsArray, &m_contactArray[0], ndInt32(m_contactArray.GetCount()), prefixScan, nullptr);
+		ndInt32 code[4];
+		code[0] = m_active;
+		code[1] = m_inactive;
+		code[2] = m_dead;
+		code[3] = m_dead;
+		ndCountingSort(*this, tmpJointsArray, &m_contactArray[0], ndInt32(m_contactArray.GetCount()), prefixScan, 2, [&code](const ndContact* const contact)
+		{
+			const ndUnsigned32 inactive = ndUnsigned32(!contact->IsActive() | (contact->m_maxDof ? 0 : 1));
+			const ndUnsigned32 idDead = contact->m_isDead;
+			return code[idDead * 2 + inactive];
+		});
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		for (ndInt32 i = ndInt32(m_contactArray.GetCount()) - 1; i >= 0; --i)
 		{
 			ndContact* const contact = m_contactArray[i];

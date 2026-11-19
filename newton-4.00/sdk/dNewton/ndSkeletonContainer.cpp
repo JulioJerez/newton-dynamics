@@ -553,7 +553,7 @@ void ndSkeletonContainer::Finalize(ndInt32 loopJointsCount, ndJointBilateralCons
 
 	ndAssert(maxLayer < 128);
 	m_factorizeSpans.SetCount(128);
-	ndCountingSortNew(tmpArray, m_nodesFactorizationOrder, m_nodeList.GetCount() - 1, &m_factorizeSpans[0], 7, [](const ndNode* const node)
+	ndCountingSort(tmpArray, m_nodesFactorizationOrder, m_nodeList.GetCount() - 1, &m_factorizeSpans[0], 7, [](const ndNode* const node)
 	{
 		return node->m_factorizeLayer;
 	});

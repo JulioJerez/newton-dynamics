@@ -74,6 +74,7 @@ class ndMarchingCubes : public ndClassAlloc
 				ndUnsigned8 m_zLow;
 				ndUnsigned8 m_zHigh;
 			};
+			ndUnsigned8 m_key[6];
 			ndUnsigned64 m_gridFullHash;
 		};
 	};

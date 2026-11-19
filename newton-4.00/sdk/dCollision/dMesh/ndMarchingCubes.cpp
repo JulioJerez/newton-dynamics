@@ -486,67 +486,6 @@ namespace Original
 // ***********************************************************
 //
 // ***********************************************************
-class ndMarchingCubes::ndKey_xlow
-{
-	public:
-	ndKey_xlow(void* const) {}
-	ndInt32 GetKey(const ndGridHash& cell) const
-	{
-		return cell.m_xLow;
-	}
-};
-
-class ndMarchingCubes::ndKey_xhigh
-{
-	public:
-	ndKey_xhigh(void* const) {}
-	ndInt32 GetKey(const ndGridHash& cell) const
-	{
-		return cell.m_xHigh;
-	}
-};
-
-class ndMarchingCubes::ndKey_ylow
-{
-	public:
-	ndKey_ylow(void* const) {}
-	ndInt32 GetKey(const ndGridHash& cell) const
-	{
-		return cell.m_yLow;
-	}
-};
-
-class ndMarchingCubes::ndKey_yhigh
-{
-	public:
-	ndKey_yhigh(void* const) {}
-	ndInt32 GetKey(const ndGridHash& cell) const
-	{
-		return cell.m_yHigh;
-	}
-};
-
-class ndMarchingCubes::ndKey_zlow
-{
-	public:
-	ndKey_zlow(void* const) {}
-	ndInt32 GetKey(const ndGridHash& cell) const
-	{
-		return cell.m_zLow;
-	}
-};
-
-class ndMarchingCubes::ndKey_zhigh
-{
-	public:
-	ndKey_zhigh(void* const) {}
-	ndInt32 GetKey(const ndGridHash& cell) const
-	{
-		return cell.m_zHigh;
-	}
-};
-
-
 class ndMarchingCubes::ndIsoCell
 {
 	public:
@@ -3151,22 +3090,17 @@ void ndMarchingCubesPaticles::RemoveDuplicates()
 	m_threadPool->ParallelExecute(CalculateHashes, count, jobStride);
 
 	m_volumeInGrids = (m_invGridSize * (m_boxP1 - m_boxP0 + m_gridSize * ndVector::m_two)).Ceiling().GetInt();
-	ndCountingSort<ndGridHash, ndKey_xlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
-	if (m_volumeInGrids.m_ix >= 256)
+	for (ndInt32 i = 0; i < 3; ++i)
 	{
-		ndCountingSort<ndGridHash, ndKey_xhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
-	}
-
-	ndCountingSort<ndGridHash, ndKey_ylow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
-	if (m_volumeInGrids.m_iy >= 256)
-	{
-		ndCountingSort<ndGridHash, ndKey_yhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
-	}
-
-	ndCountingSort<ndGridHash, ndKey_zlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
-	if (m_volumeInGrids.m_iz >= 256)
-	{
-		ndCountingSort<ndGridHash, ndKey_zhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+		ndInt32 index = 0;
+		do
+		{
+			ndCountingSort(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, 8, [&i, &index](const ndGridHash& cell)
+			{
+				return cell.m_key[i * 2 + index];
+			});
+			index++;
+		} while ((index <= 2) && m_volumeInGrids.m_i[i] >= 256);
 	}
 
 	ndInt32 gridCount = 0;
@@ -3224,24 +3158,19 @@ void ndMarchingCubesPaticles::GenerateGrids()
 	//ndCountingSort<ndGridHash, ndParticleOwners, 2>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, cellOwnersScans, nullptr);
 	//m_hashGridMap.SetCount(cellOwnersScans[1]);
 
-	ndCountingSort<ndGridHash, ndKey_xlow, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
-	if (m_volumeInGrids.m_ix >= 256)
+	for (ndInt32 i = 0; i < 3; ++i)
 	{
-		ndCountingSort<ndGridHash, ndKey_xhigh, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
+		ndInt32 index = 0;
+		do
+		{
+			ndCountingSort(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, 8, [&i, &index](const ndGridHash& cell)
+			{
+				return cell.m_key[i * 2 + index];
+			});
+			index++;
+		} while ((index <= 2) && m_volumeInGrids.m_i[i] >= 256);
 	}
-
-	ndCountingSort<ndGridHash, ndKey_ylow, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
-	if (m_volumeInGrids.m_iy >= 256)
-	{
-		ndCountingSort<ndGridHash, ndKey_yhigh, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
-	}
-
-	ndCountingSort<ndGridHash, ndKey_zlow, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
-	if (m_volumeInGrids.m_iz >= 256)
-	{
-		ndCountingSort<ndGridHash, ndKey_zhigh, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
-	}
-
+	
 	ndInt32 start = 0;
 	m_cellScans.SetCount(0);
 	m_hashGridMap.PushBack(ndGridHash(0x7fff, 0x7fff, 0x7fff));
@@ -3437,95 +3366,21 @@ void ndMarchingCubesPaticles::GenerateIndexList()
 	#define D_LOW_RES_BITS	   1
 	#define D_LOW_RES_FRACTION (1 << D_LOW_RES_BITS)
 
-	class ndKey_lowX
+	for (ndInt32 i = 0; i < 3; ++i)
 	{
-		public:
-		ndKey_lowX(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
+		ndInt32 index = 0;
+		do
 		{
-			ndFloat32 val = (point.m_x * D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val);
-			return key & 0xff;
-		}
-	};
-
-	class ndKey_highX
-	{
-		public:
-		ndKey_highX(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			ndFloat32 val = point.m_x * ndFloat32(D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val) >> 8;
-			return key & 0xff;
-		}
-	};
-
-	class ndKey_lowY
-	{
-		public:
-		ndKey_lowY(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			ndFloat32 val = (point.m_y * D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val);
-			return key & 0xff;
-		}
-	};
-
-	class ndKey_highY
-	{
-		public:
-		ndKey_highY(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			ndFloat32 val = point.m_y * ndFloat32(D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val) >> 8;
-			return key & 0xff;
-		}
-	};
-
-	class ndKey_lowZ
-	{
-		public:
-		ndKey_lowZ(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			ndFloat32 val = (point.m_z * D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val);
-			return key & 0xff;
-		}
-	};
-
-	class ndKey_highZ
-	{
-		public:
-		ndKey_highZ(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			ndFloat32 val = point.m_z * ndFloat32(D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val) >> 8;
-			return key & 0xff;
-		}
-	};
-
-	ndCountingSort<ndVector, ndKey_lowX, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	if (D_LOW_RES_FRACTION * m_volumeInGrids.m_ix >= 256)
-	{
-		ndCountingSort<ndVector, ndKey_highX, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
+			ndCountingSort(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, 8, [&i, &index](const ndVector& point)
+			{
+				const ndFloat32 val = point[i] * ndFloat32(D_LOW_RES_FRACTION);
+				const ndInt32 key = ndInt32(val) >> (index * 8);
+				return key & 0xff;
+			});
+			index++;
+		} while ((index <= 2) && (D_LOW_RES_FRACTION * m_volumeInGrids.m_i[i] >= 256));
 	}
 
-	ndCountingSort<ndVector, ndKey_lowY, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	if (D_LOW_RES_FRACTION * m_volumeInGrids.m_iy >= 256)
-	{
-		ndCountingSort<ndVector, ndKey_highY, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	}
-
-	ndCountingSort<ndVector, ndKey_lowZ, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	if (D_LOW_RES_FRACTION * m_volumeInGrids.m_iz >= 256)
-	{
-		ndCountingSort<ndVector, ndKey_highZ, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	}
 	m_meshIndices.SetCount(m_meshPoints.GetCount());
 
 	ndInt32 vertexCount = 0;
