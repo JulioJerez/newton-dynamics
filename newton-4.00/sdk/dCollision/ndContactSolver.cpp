@@ -459,7 +459,7 @@ ndBigVector ndContactSolver::ReduceLine(ndInt32& indexOut)
 
 	const ndFloat64 mag2 = dp.DotProduct(dp).GetScalar();
 	ndAssert(mag2 > ndFloat64(0.0f));
-	if (mag2 < ndFloat32(1.0e-24f)) 
+	if (mag2 < ndFloat64(1.0e-24f)) 
 	{
 		v = p0;
 		indexOut = 1;
@@ -500,7 +500,7 @@ ndBigVector ndContactSolver::ReduceTriangle(ndInt32& indexOut)
 
 	const ndFloat64 det = a00 * a11 - a01 * a01;
 	ndAssert(det >= ndFloat32(0.0f));
-	if (ndAbs(det) > ndFloat32(1.0e-16f)) 
+	if (ndAbs(det) > ndFloat64(1.0e-16f)) 
 	{
 		const ndFloat64 b0 = -e10.DotProduct(p0).GetScalar();
 		const ndFloat64 b1 = -e20.DotProduct(p0).GetScalar();
@@ -508,11 +508,11 @@ ndBigVector ndContactSolver::ReduceTriangle(ndInt32& indexOut)
 		const ndFloat64 u2 = b1 * a00 - a01 * b0;
 		const ndFloat64 u1 = b0 * a11 - a01 * b1;
 
-		if (u2 < ndFloat32(0.0f)) 
+		if (u2 < ndFloat64(0.0f)) 
 		{
 			// this looks funny but it is correct
 		}
-		else if (u1 < ndFloat32(0.0f)) 
+		else if (u1 < ndFloat64(0.0f)) 
 		{
 			m_hullSum[1] = m_hullSum[2];
 			m_hullDiff[1] = m_hullDiff[2];
@@ -669,6 +669,8 @@ ndInt32 ndContactSolver::CalculateClosestSimplex()
 				v = ReduceTetrahedrum (m_vertexIndex);
 				break;
 			}
+			default:
+				ndAssert(0);
 		}
 		index = m_vertexIndex;
 	}
@@ -677,12 +679,12 @@ ndInt32 ndContactSolver::CalculateClosestSimplex()
 	
 	ndInt32 iter = 0;
 	ndInt32 cycling = 0;
-	ndFloat64 minDist = ndFloat32 (1.0e20f);
-	ndFloat64 bestNormalDist = ndFloat32 (1.0e20f);
+	ndFloat64 minDist = ndFloat64 (1.0e20f);
+	ndFloat64 bestNormalDist = ndFloat64 (1.0e20f);
 	do 
 	{
 		ndFloat64 dist = v.DotProduct(v).GetScalar();
-		if (dist < ndFloat32 (1.0e-9f)) 
+		if (dist < ndFloat64 (1.0e-9f)) 
 		{
 			// very deep penetration, resolve with generic Minkowski solver
 			return -index; 
@@ -699,13 +701,14 @@ ndInt32 ndContactSolver::CalculateClosestSimplex()
 			return -index;
 		}
 	
-		const ndBigVector dir (v.Scale (-ndRsqrt(dist)));
-		ndAssert (dir.m_w == ndFloat32 (0.0f));
+		//const ndBigVector dir (v.Scale (-ndRsqrt(dist)));
+		const ndBigVector dir(v.Scale(-ndFloat64(1.0f) / sqrt(dist)));
+		ndAssert (dir.m_w == ndFloat64 (0.0f));
 		SupportVertex (dir, index);
 	
 		const ndBigVector w (m_hullDiff[index]);
 		const ndBigVector wv (w - v);
-		ndAssert (wv.m_w == ndFloat32 (0.0f));
+		ndAssert (wv.m_w == ndFloat64 (0.0f));
 		const ndFloat64 dist1 = dir.DotProduct(wv).GetScalar();
 		if (dist1 < ndFloat64 (1.0e-3f)) 
 		{
@@ -739,6 +742,8 @@ ndInt32 ndContactSolver::CalculateClosestSimplex()
 				v = ReduceTetrahedrum (index);
 				break;
 			}
+			default:
+				ndAssert(0);
 		}
 	
 		iter ++;
@@ -766,9 +771,7 @@ void ndContactSolver::CalculateContactFromFeacture(ndInt32 featureType)
 			const ndFloat64 a01 = e10.DotProduct(e20).GetScalar();
 
 			const ndFloat64 det = a00 * a11 - a01 * a01;
-			//ndAssert(det >= ndFloat32(0.0f));
-			// check against machine precision 
-			if (ndAbs(det) > ndFloat32(1.0e-16f))
+			if (ndAbs(det) > ndFloat64(1.0e-16f))
 			{
 				const ndFloat64 b0 = -e10.DotProduct(p0).GetScalar();
 				const ndFloat64 b1 = -e20.DotProduct(p0).GetScalar();
@@ -776,11 +779,11 @@ void ndContactSolver::CalculateContactFromFeacture(ndInt32 featureType)
 				const ndFloat64 u2 = b1 * a00 - a01 * b0;
 				const ndFloat64 u1 = b0 * a11 - a01 * b1;
 
-				if (u2 < ndFloat32(0.0f))
+				if (u2 < ndFloat64(0.0f))
 				{
 					// this looks funny but it is correct
 				}
-				else if (u1 < ndFloat32(0.0f))
+				else if (u1 < ndFloat64(0.0f))
 				{
 					m_hullSum[1] = m_hullSum[2];
 					m_hullDiff[1] = m_hullDiff[2];
@@ -811,8 +814,8 @@ void ndContactSolver::CalculateContactFromFeacture(ndInt32 featureType)
 				const ndBigVector dir ((a00 > a11) ? e10 : e20);
 				ndInt32 maxIndex = 0;
 				ndInt32 minIndex = 0;
-				ndFloat64 maxVal = ndFloat32(-1.0e20f);
-				ndFloat64 minVal = ndFloat32( 1.0e20f);
+				ndFloat64 maxVal = ndFloat64(-1.0e20f);
+				ndFloat64 minVal = ndFloat64( 1.0e20f);
 				for (ndInt32 i = 0; i < 3; ++i)
 				{
 					ndFloat64 val = dir.DotProduct(m_hullDiff[i]).GetScalar();
@@ -847,7 +850,7 @@ void ndContactSolver::CalculateContactFromFeacture(ndInt32 featureType)
 
 			const ndFloat64 mag2 = dp.DotProduct(dp).GetScalar();
 			ndAssert(mag2 > ndFloat64(0.0f));
-			if (mag2 < ndFloat32(1.0e-24f))
+			if (mag2 < ndFloat64(1.0e-24f))
 			{
 				s = m_hullSum[0];
 				d = m_hullDiff[0];
@@ -1830,13 +1833,13 @@ ndFloat32 ndContactSolver::RayCast(const ndVector& localP0, const ndVector& loca
 	{
 		ndInt32 iter = 0;
 		ndInt32 cycling = 0;
-		ndFloat64 minDist = ndFloat32(1.0e20f);
+		ndFloat64 minDist = ndFloat64(1.0e20f);
 
 		do 
 		{
 			ndAssert(v.m_w == ndFloat32(0.0f));
 			const ndFloat64 distance = v.DotProduct(v).GetScalar();
-			if (distance < ndFloat32(1.0e-9f)) 
+			if (distance < ndFloat64(1.0e-9f)) 
 			{
 				index = -1;
 				break;
@@ -1854,14 +1857,15 @@ ndFloat32 ndContactSolver::RayCast(const ndVector& localP0, const ndVector& loca
 				break;
 			}
 
-			ndVector dir(v.Scale(-ndRsqrt(ndFloat32(distance))));
+			//ndVector dir(v.Scale(-ndRsqrt(distance)));
+			const ndVector dir(v.Scale(-ndFloat64(1.0f) / sqrt(distance)));
 			ndAssert(dir.m_w == ndFloat32(0.0f));
 			m_hullDiff[index] = shape->SupportVertex(dir) - point;
 			const ndBigVector w(m_hullDiff[index]);
 			const ndVector wv(w - v);
 			ndAssert(wv.m_w == ndFloat32(0.0f));
 			const ndFloat32 distance1 = dir.DotProduct(wv).GetScalar();
-			if (distance1 < ndFloat64(1.0e-3f)) 
+			if (distance1 < ndFloat32(1.0e-3f)) 
 			{
 				normal = dir;
 				break;
@@ -1887,6 +1891,9 @@ ndFloat32 ndContactSolver::RayCast(const ndVector& localP0, const ndVector& loca
 					v = ReduceTetrahedrum(index);
 					break;
 				}
+
+				default:
+					ndAssert(0);
 			}
 
 			iter++;
@@ -1956,6 +1963,8 @@ ndFloat32 ndContactSolver::RayCast(const ndVector& localP0, const ndVector& loca
 					v = ReduceTetrahedrum(index);
 					break;
 				}
+				default:
+					ndAssert(0);
 			}
 		}
 	} while (index >= 0);
@@ -3102,9 +3111,7 @@ ndInt32 ndContactSolver::CompoundToShapeStaticBvhContactsDiscrete()
 	const ndVector bvhOrigin((bvhp1 + bvhp0) * ndVector::m_half);
 	const ndVector treeScale(bvhTreeInstance->GetScale());
 
-	//ndInt32 stack = 1;
 	ndInt32 contactCount = 0;
-	//ndStackBvhStackEntry stackPool[2 * D_COMPOUND_STACK_DEPTH];
 	ndFixSizeArray<ndStackBvhStackEntry, 2 * D_COMPOUND_STACK_DEPTH> stackPool;
 
 	auto InsertNode = [&data, &stackPool, bvhTreeCollision](
