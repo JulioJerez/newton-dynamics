@@ -36,11 +36,13 @@
 #include "ndShapeConvexPolygon.h"
 #include "ndShapeStaticProceduralMesh.h"
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 ndVector ndContactSolver::m_pruneUpDir(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f));
 ndVector ndContactSolver::m_pruneSupportX(ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f));
-
-#define ND_MIN_DIST ndFloat32 (1.0e4f)
-#define ND_MIN_DIST2 (ND_MIN_DIST * ND_MIN_DIST)
 
 ndVector ndContactSolver::m_hullDirs[] =
 {
@@ -59,6 +61,14 @@ ndVector ndContactSolver::m_hullDirs[] =
 	ndVector(ndFloat32(0.000000f), ndFloat32(0.000000f), ndFloat32(1.000000f), ndFloat32(0.0f)),
 	ndVector(ndFloat32(0.000000f), ndFloat32(0.000000f), ndFloat32(-1.000000f), ndFloat32(0.0f)),
 };
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
+
+#define ND_MIN_DIST ndFloat32 (1.0e4f)
+#define ND_MIN_DIST2 (ND_MIN_DIST * ND_MIN_DIST)
+
 
 ndInt32 ndContactSolver::m_rayCastSimplex[4][4] =
 {
