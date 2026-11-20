@@ -27,9 +27,18 @@
 #include "ndPolygonMeshDesc.h"
 #include "ndShapeHeightfield.h"
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 ndVector ndShapeHeightfield::m_yMask(0xffffffff, 0, 0xffffffff, 0);
 ndVector ndShapeHeightfield::m_padding(ndFloat32(0.25f), ndFloat32(0.25f), ndFloat32(0.25f), ndFloat32(0.0f));
 ndVector ndShapeHeightfield::m_elevationPadding(ndFloat32(0.0f), ndFloat32(1.0e10f), ndFloat32(0.0f), ndFloat32(0.0f));
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 ndInt32 ndShapeHeightfield::m_cellIndices[][4] =
 {
@@ -77,8 +86,8 @@ ndShapeInfo ndShapeHeightfield::GetShapeInfo() const
 	info.m_heightfield.m_gridsDiagonals = m_diagonalMode;
 	info.m_heightfield.m_horizonalScale_x = m_horizontalScale_x;
 	info.m_heightfield.m_horizonalScale_z = m_horizontalScale_z;
-	info.m_heightfield.m_elevation = (ndReal*)&m_elevationMap[0];
-	info.m_heightfield.m_atributes = (ndInt8*)&m_attributeMap[0];
+	info.m_heightfield.m_elevation = const_cast<ndReal*>(&m_elevationMap[0]);
+	info.m_heightfield.m_atributes = const_cast<ndInt8*>(&m_attributeMap[0]);
 
 	return info;
 }
@@ -250,10 +259,10 @@ ndFloat32 ndShapeHeightfield::RayCastCell(const ndFastRay& ray, ndInt32 xIndex0,
 
 	ndInt32 base = zIndex0 * m_width + xIndex0;
 
-	points[0 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * m_horizontalScale_x, ndFloat32 (m_elevationMap[base + 0]),			 (ndFloat32)(zIndex0 + 0) * m_horizontalScale_z, ndFloat32(0.0f));
-	points[0 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * m_horizontalScale_x, ndFloat32 (m_elevationMap[base + 1]),			 (ndFloat32)(zIndex0 + 0) * m_horizontalScale_z, ndFloat32(0.0f));
-	points[1 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * m_horizontalScale_x, ndFloat32 (m_elevationMap[base + m_width + 1]), (ndFloat32)(zIndex0 + 1) * m_horizontalScale_z, ndFloat32(0.0f));
-	points[1 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * m_horizontalScale_x, ndFloat32 (m_elevationMap[base + m_width + 0]), (ndFloat32)(zIndex0 + 1) * m_horizontalScale_z, ndFloat32(0.0f));
+	points[0 * 2 + 0] = ndVector(ndFloat32(xIndex0 + 0) * m_horizontalScale_x, ndFloat32 (m_elevationMap[base + 0]),			 ndFloat32(zIndex0 + 0) * m_horizontalScale_z, ndFloat32(0.0f));
+	points[0 * 2 + 1] = ndVector(ndFloat32(xIndex0 + 1) * m_horizontalScale_x, ndFloat32 (m_elevationMap[base + 1]),			 ndFloat32(zIndex0 + 0) * m_horizontalScale_z, ndFloat32(0.0f));
+	points[1 * 2 + 1] = ndVector(ndFloat32(xIndex0 + 1) * m_horizontalScale_x, ndFloat32 (m_elevationMap[base + m_width + 1]), ndFloat32(zIndex0 + 1) * m_horizontalScale_z, ndFloat32(0.0f));
+	points[1 * 2 + 0] = ndVector(ndFloat32(xIndex0 + 0) * m_horizontalScale_x, ndFloat32 (m_elevationMap[base + m_width + 0]), ndFloat32(zIndex0 + 1) * m_horizontalScale_z, ndFloat32(0.0f));
 
 	ndFloat32 t = ndFloat32(1.2f);
 	if (m_diagonalMode == m_normalDiagonals)
@@ -360,14 +369,14 @@ ndFloat32 ndShapeHeightfield::RayCast(ndRayCastNotify&, const ndVector& localP0,
 			xInc = 1;
 			ndFloat32 val = ndFloat32(1.0f) / dp.m_x;
 			stepX = scale_x * val;
-			tx = (scale_x * ((ndFloat32)ix0 + ndFloat32(1.0f)) - p0.m_x) * val;
+			tx = (scale_x * (ndFloat32(ix0) + ndFloat32(1.0f)) - p0.m_x) * val;
 		}
 		else if (dp.m_x < ndFloat32(0.0f)) 
 		{
 			xInc = -1;
 			ndFloat32 val = -ndFloat32(1.0f) / dp.m_x;
 			stepX = scale_x * val;
-			tx = -(scale_x * (ndFloat32)ix0 - p0.m_x) * val;
+			tx = -(scale_x * ndFloat32(ix0) - p0.m_x) * val;
 		}
 		else 
 		{
@@ -384,14 +393,14 @@ ndFloat32 ndShapeHeightfield::RayCast(ndRayCastNotify&, const ndVector& localP0,
 			zInc = 1;
 			ndFloat32 val = ndFloat32(1.0f) / dp.m_z;
 			stepZ = scale_z * val;
-			tz = (scale_z * ((ndFloat32)iz0 + ndFloat32(1.0f)) - p0.m_z) * val;
+			tz = (scale_z * (ndFloat32(iz0) + ndFloat32(1.0f)) - p0.m_z) * val;
 		}
 		else if (dp.m_z < ndFloat32(0.0f)) 
 		{
 			zInc = -1;
 			ndFloat32 val = -ndFloat32(1.0f) / dp.m_z;
 			stepZ = scale_z * val;
-			tz = -(scale_z * (ndFloat32)iz0 - p0.m_z) * val;
+			tz = -(scale_z * ndFloat32(iz0) - p0.m_z) * val;
 		}
 		else 
 		{

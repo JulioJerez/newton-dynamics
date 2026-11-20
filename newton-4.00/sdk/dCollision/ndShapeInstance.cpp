@@ -391,7 +391,7 @@ void ndShapeInstance::SavePLY(const char* const fileName) const
 		for (ndInt32 i = 0; i < drawShapes.m_vertex.GetCount(); ++i)
 		{
 			const ndVector& point = drawShapes.m_vertex[i];
-			fprintf(file, "%f %f %f\n", point.m_x, point.m_y, point.m_z);
+			fprintf(file, "%f %f %f\n", ndFloat64(point.m_x), ndFloat64(point.m_y), ndFloat64(point.m_z));
 		}
 
 		ndInt32 index = 0;

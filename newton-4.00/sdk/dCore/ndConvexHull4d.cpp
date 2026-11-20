@@ -150,12 +150,12 @@ ndConvexHull4dTetraherum::ndTetrahedrumPlane::ndTetrahedrumPlane (const ndBigVec
 	:ndBigVector ((p1 - p0).CrossProduct (p2 - p0, p3 - p0))
 {
 	ndBigVector& me = *this;
-	ndFloat64 invMag2 = ndFloat32 (0.0f);
+	ndFloat64 invMag2 = ndFloat64 (0.0f);
 	ndFloat64 val = me.DotProduct(me).m_x;
 	if (val > ndFloat64 (1.0e-38)) {
 		invMag2 = ndFloat64 (1.0f) / sqrt (val);
 	} else {
-		invMag2 = ndFloat32 (0.0f);
+		invMag2 = ndFloat64 (0.0f);
 	}
 
 	me.m_x *= invMag2;
@@ -307,7 +307,7 @@ ndBigVector ndConvexHull4dTetraherum::CircumSphereCenter (const ndConvexHull4dVe
 		for (ndInt32 j = 0; j < 3; ++j) {
 			matrix[i][j] = ndGoogol (points[i][j]);
 		}
-		matrix[i][3] = ndGoogol (1.0f);
+		matrix[i][3] = ndGoogol (ndFloat64(1.0f));
 	}
 	ndGoogol det (Determinant4x4(matrix));
 	ndFloat64 invDen = ndFloat64 (1.0f) / (ndFloat64(det) * ndFloat64 (2.0f));
@@ -321,14 +321,14 @@ ndBigVector ndConvexHull4dTetraherum::CircumSphereCenter (const ndConvexHull4dVe
 				ndInt32 j1 = (j < k) ? j : j + 1; 
 				matrix[i][j + 1] = ndGoogol (points[i][j1]);
 			}
-			matrix[i][3] = ndGoogol (1.0f);
+			matrix[i][3] = ndGoogol (ndFloat64(1.0f));
 		}
 		ndGoogol det1 (Determinant4x4(matrix));
 		ndFloat64 val = ndFloat64 (det1) * sign;
 		sign *= ndFloat64 (-1.0f);
 		centerOut[k] = val * invDen; 
 	}
-	centerOut[3] = ndFloat32 (0.0f);
+	centerOut[3] = ndFloat64 (0.0f);
 	return centerOut;
 }
 
@@ -345,7 +345,7 @@ ndConvexHull4d::ndConvexHull4d ()
 	:ndList<ndConvexHull4dTetraherum>()
 	,m_mark(0)
 	,m_count(0)
-	,m_diag(ndFloat32 (0.0f))
+	,m_diag(ndFloat64 (0.0f))
 	,m_points() 
 {
 }
@@ -360,7 +360,7 @@ ndConvexHull4d::ndConvexHull4d (const ndFloat64* const vertexCloud, ndInt32 stri
 	:ndList<ndConvexHull4dTetraherum>()
 	,m_mark(0)
 	,m_count(0)
-	,m_diag(ndFloat32(0.0f))
+	,m_diag(ndFloat64(0.0f))
 	,m_points() 
 {
 	BuildHull (vertexCloud, strideInBytes, count, distTol);
@@ -408,7 +408,7 @@ ndInt32 ndConvexHull4d::SupportVertex (ndConvexHull4dAABBTreeNode** const treePo
 	ndInt32 index = -1;
 	ndInt32 stack = 1;
 	stackPool[0] = *treePointer;
-	aabbProjection[0] = ndFloat32 (1.0e20f);
+	aabbProjection[0] = ndFloat64 (1.0e20f);
 	ndFloat64 maxProj = ndFloat64 (-1.0e20f); 
 	ndInt32 ix = (dir[0] > ndFloat64 (0.0f)) ? 1 : 0;
 	ndInt32 iy = (dir[1] > ndFloat64 (0.0f)) ? 1 : 0;
@@ -455,7 +455,7 @@ ndInt32 ndConvexHull4d::SupportVertex (ndConvexHull4dAABBTreeNode** const treePo
 			} 
 			else 
 			{
-				ndConvexHull4dPointCluster* const cluster = (ndConvexHull4dPointCluster*) me;
+				ndConvexHull4dPointCluster* const cluster = static_cast<ndConvexHull4dPointCluster*>(const_cast<ndConvexHull4dAABBTreeNode*>(me));
 				for (ndInt32 i = 0; i < cluster->m_count; ++i) 
 				{
 					const ndConvexHull4dVector& p = points[cluster->m_indices[i]];
@@ -525,8 +525,8 @@ ndConvexHull4dAABBTreeNode* ndConvexHull4d::BuildTree (ndConvexHull4dAABBTreeNod
 	ndConvexHull4dAABBTreeNode* tree = nullptr;
 
 	ndAssert (count);
-	ndBigVector minP ( ndFloat32 (1.0e15f)); 
-	ndBigVector maxP (-ndFloat32 (1.0e15f)); 
+	ndBigVector minP ( ndFloat64 (1.0e15f)); 
+	ndBigVector maxP (-ndFloat64 (1.0e15f)); 
 	if (count <= D_VERTEX_CLUMP_SIZE_4D) 
 	{
 		ndConvexHull4dPointCluster* const clump = new (*memoryPool) ndConvexHull4dPointCluster;
@@ -561,7 +561,7 @@ ndConvexHull4dAABBTreeNode* ndConvexHull4d::BuildTree (ndConvexHull4dAABBTreeNod
 			maxP = maxP.GetMax(p);
 		}
 
-		varian = varian.Scale (ndFloat32 (count)) - median * median;
+		varian = varian.Scale (ndFloat64 (count)) - median * median;
 
 		ndInt32 index = 0;
 		ndFloat64 maxVarian = ndFloat64 (-1.0e10f);
@@ -686,16 +686,17 @@ ndInt32 ndConvexHull4d::InitVertexArray(ndConvexHull4dVector* const points, cons
 		return count;
 	}
 
-	ndConvexHull4dAABBTreeNode* tree = BuildTree (nullptr, points, count, 0, (ndInt8**) &memoryPool, maxMemSize);
+	ndInt8* memoryAllocator = reinterpret_cast<ndInt8*>(memoryPool);
+	ndConvexHull4dAABBTreeNode* tree = BuildTree (nullptr, points, count, 0, static_cast<ndInt8**>(&memoryAllocator), maxMemSize);
 
 	ndBigVector boxSize (tree->m_box[1] - tree->m_box[0]);	
-	m_diag = ndFloat32 (sqrt (boxSize.DotProduct(boxSize).m_x));
+	m_diag = ndFloat64 (sqrt (boxSize.DotProduct(boxSize).m_x));
 
 	ndInt32 marks[4];
 	m_points.SetCount(count);
 	bool validTetrahedrum = false;
 	ndConvexHull4dVector* const convexPoints = &m_points[0]; 
-	const ndFloat64 testVol = ndFloat32 (1.0e-6f) * m_diag * m_diag * m_diag;
+	const ndFloat64 testVol = ndFloat64 (1.0e-6f) * m_diag * m_diag * m_diag;
 
 	const ndNormalMap& normalMap = GetNormaMap();
 	for (ndInt32 i = 0; !validTetrahedrum && (i < normalMap.m_count); ++i) 
@@ -708,7 +709,7 @@ ndInt32 ndConvexHull4d::InitVertexArray(ndConvexHull4dVector* const points, cons
 			ndInt32 index1 = SupportVertex(&tree, points, normalMap.m_normal[j], false);
 			convexPoints[1] = points[index1];
 			ndBigVector p10(convexPoints[1] - convexPoints[0]);
-			if (p10.DotProduct(p10).GetScalar() >(ndFloat32(1.0e-3f) * m_diag)) 
+			if (p10.DotProduct(p10).GetScalar() >(ndFloat64(1.0e-3f) * m_diag)) 
 			{
 				marks[1] = index1;
 				for (ndInt32 k = j + 1; !validTetrahedrum && (k < normalMap.m_count); ++k) 
@@ -717,8 +718,8 @@ ndInt32 ndConvexHull4d::InitVertexArray(ndConvexHull4dVector* const points, cons
 					convexPoints[2] = points[index2];
 					ndBigVector p20(convexPoints[2] - convexPoints[0]);
 					ndBigVector p21(convexPoints[2] - convexPoints[1]);
-					bool test = p20.DotProduct(p20).GetScalar() > (ndFloat32(1.0e-3f) * m_diag);
-					test = test && (p21.DotProduct(p21).GetScalar() > (ndFloat32(1.0e-3f) * m_diag));
+					bool test = p20.DotProduct(p20).GetScalar() > (ndFloat64(1.0e-3f) * m_diag);
+					test = test && (p21.DotProduct(p21).GetScalar() > (ndFloat64(1.0e-3f) * m_diag));
 					if (test) 
 					{
 						marks[2] = index2;
@@ -914,7 +915,7 @@ void ndConvexHull4d::InsertNewVertex(ndInt32 vertexIndex, ndNode* const frontFac
 			face->SetMark(mark);
 			for (ndInt32 i = 0; i < 4; ++i) 
 			{
-				ndNode* const twinNode = (ndNode*)face->m_faces[i].m_twin;
+				ndNode* const twinNode = reinterpret_cast<ndNode*>(face->m_faces[i].m_twin);
 				ndAssert (twinNode);
 				ndConvexHull4dTetraherum* const twinFace = &twinNode->GetInfo();
 

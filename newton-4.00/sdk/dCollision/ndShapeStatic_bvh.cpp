@@ -155,7 +155,7 @@ ndIntersectStatus ndShapeStatic_bvh::ShowDebugPolygon(void* const context, const
 	{
 		const ndVector& p = vextexBuffer[indexArray[i]];
 		poly[i] = data.m_matrix.TransformVector(p);
-		ndInt32 edgeIndexType = (indexArray[i + indexCount + 2]) & D_CONCAVE_EDGE_MASK;
+		ndInt32 edgeIndexType = (indexArray[i + indexCount + 2]) & ndInt32(D_CONCAVE_EDGE_MASK);
 		edgeType[i] = edgeIndexType ? ndShapeDebugNotify::m_open : ndShapeDebugNotify::m_shared;
 	}
 	data.m_callback->DrawPolygon(indexCount, poly, edgeType);

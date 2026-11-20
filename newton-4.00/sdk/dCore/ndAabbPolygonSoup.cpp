@@ -446,7 +446,7 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 						pool[normalCount].m_y = n.m_y;
 						pool[normalCount].m_z = n.m_z;
 						pool[normalCount].m_w = ndFloat32 (0.0f);
-						face[j0] = normalCount | D_CONCAVE_EDGE_MASK;
+						face[j0] = normalCount | ndInt32(D_CONCAVE_EDGE_MASK);
 						normalCount ++;
 					}
 					q0 = q1;
@@ -480,7 +480,7 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 						pool[normalCount].m_y = n.m_y;
 						pool[normalCount].m_z = n.m_z;
 						pool[normalCount].m_w = ndFloat32(0.0f);
-						face[j0] = normalCount | D_CONCAVE_EDGE_MASK;
+						face[j0] = normalCount | ndInt32(D_CONCAVE_EDGE_MASK);
 						normalCount ++;
 					}
 					q0 = q1;
@@ -518,8 +518,8 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 					ndInt32 edgeIndexNormal = face[vCount + 2 + j];
 					if (edgeIndexNormal & D_CONCAVE_EDGE_MASK)
 					{
-						ndInt32 k = edgeIndexNormal & (~D_CONCAVE_EDGE_MASK);
-						face[vCount + 2 + j] = (indexArray[k] + oldCount) | D_CONCAVE_EDGE_MASK;
+						ndInt32 k = edgeIndexNormal & ndInt32(~D_CONCAVE_EDGE_MASK);
+						face[vCount + 2 + j] = (indexArray[k] + oldCount) | ndInt32(D_CONCAVE_EDGE_MASK);
 					}
 					#ifdef _DEBUG	
 						//ndVector normal (&vertexArray1[face[vCount + 2 + j]].m_x);
@@ -537,14 +537,14 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 				for (ndInt32 j = 0; j < vCount; ++j) 
 				{
 					ndInt32 edgeIndexNormal = face[vCount + 2 + j];
-					if (edgeIndexNormal & D_CONCAVE_EDGE_MASK)
+					if (edgeIndexNormal & ndInt32(D_CONCAVE_EDGE_MASK))
 					{
-						ndInt32 k = edgeIndexNormal & (~D_CONCAVE_EDGE_MASK);
-						face[vCount + 2 + j] = (indexArray[k] + oldCount) | D_CONCAVE_EDGE_MASK;
+						ndInt32 k = edgeIndexNormal & ndInt32(~D_CONCAVE_EDGE_MASK);
+						face[vCount + 2 + j] = (indexArray[k] + oldCount) | ndInt32(D_CONCAVE_EDGE_MASK);
 					}
 	
 					#ifdef _DEBUG	
-						ndVector normal(vertexArray1[face[vCount + 2 + j] & (~D_CONCAVE_EDGE_MASK)]);
+						ndVector normal(vertexArray1[face[vCount + 2 + j] & ndInt32(~D_CONCAVE_EDGE_MASK)]);
 						ndAssert (ndAbs (normal.DotProduct(normal).GetScalar() - ndFloat32 (1.0f)) < ndFloat32 (1.0e-6f));
 					#endif
 				}

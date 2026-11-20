@@ -157,7 +157,7 @@ ndQuaternion ndQuaternion::IntegrateOmega(const ndVector& omega, ndFloat32 times
 	return result;
 }
 
-ndQuaternion ndQuaternion::Slerp (const ndQuaternion &q1, ndFloat32 t) const 
+ndQuaternion ndQuaternion::Slerp (const ndQuaternion &q, ndFloat32 t) const 
 {
 	auto Slerp = [this](const ndQuaternion& q1, const ndFloat32 dot, ndFloat32 param)
 	{
@@ -178,14 +178,14 @@ ndQuaternion ndQuaternion::Slerp (const ndQuaternion &q1, ndFloat32 t) const
 		return *this;
 	};
 
-	ndFloat32 dot = DotProduct(q1).GetScalar();
+	ndFloat32 dot = DotProduct(q).GetScalar();
 	if (dot >= ndFloat32(0.0f))
 	{
-		return Slerp(q1, dot, t);
+		return Slerp(q, dot, t);
 	}
 	else
 	{
-		const ndQuaternion q2(q1.Scale(ndFloat32 (-1.0f)));
+		const ndQuaternion q2(q.Scale(ndFloat32 (-1.0f)));
 		return Slerp(q2, -dot, t);
 	}
 }

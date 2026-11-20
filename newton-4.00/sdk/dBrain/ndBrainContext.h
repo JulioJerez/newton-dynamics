@@ -135,3 +135,4 @@ class ndBrainContext : public ndClassAlloc
 };
 
 #endif
+

@@ -166,6 +166,9 @@ ndMatrix ndFbxMeshLoader::GetCoordinateSystemMatrix(ndOfbx::IScene* const fbxSce
 			axisMatrix[2][1] = ndFloat32(1.0f);
 			axisMatrix[3][3] = ndFloat32(1.0f);
 			break;
+		default:
+			ndAssert(0);
+			break;
 	}
 	
 	convertMatrix = axisMatrix * convertMatrix;
@@ -487,7 +490,7 @@ void ndFbxMeshLoader::AlignToWorld(ndMesh* const mesh)
 
 void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 {
-	auto InitBoneDistance = [this](ndMesh* const node)
+	auto InitBoneDistance = [](ndMesh* const node)
 	{
 		if (node->GetNodeType() != ndMesh::m_bone)
 		{
@@ -509,7 +512,7 @@ void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 	};
 	entity->NodeIterator(InitBoneDistance);
 
-	auto CalculateBonesLenth = [this](ndMesh* const node)
+	auto CalculateBonesLenth = [](ndMesh* const node)
 	{
 		if (node->GetNodeType() == ndMesh::m_bone)
 		{
@@ -539,7 +542,7 @@ void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 	};
 	entity->NodeIterator(CalculateBonesLenth);
 
-	auto SetEndBones = [this](ndMesh* const node)
+	auto SetEndBones = [](ndMesh* const node)
 	{
 		if (node->GetNodeType() == ndMesh::m_bone)
 		{
@@ -574,7 +577,7 @@ void ndFbxMeshLoader::ApplyAllTransforms(ndMesh* const mesh, const ndMatrix& coo
 
 void ndFbxMeshLoader::ImportMeshNode(ndOfbx::Object* const fbxNode, ndFbx2ndMeshNodeMap& nodeMap)
 {
-	const ndOfbx::Mesh* const fbxMesh = (ndOfbx::Mesh*)fbxNode;
+	const ndOfbx::Mesh* const fbxMesh = static_cast<ndOfbx::Mesh*>(fbxNode);
 
 	ndAssert(nodeMap.Find(fbxNode));
 	ndMesh* const entity = nodeMap.Find(fbxNode)->GetInfo();
@@ -660,7 +663,7 @@ void ndFbxMeshLoader::ImportMeshNode(ndOfbx::Object* const fbxNode, ndFbx2ndMesh
 	}
 
 	const ndOfbx::Vec3* const vertices = geom->getVertices();
-	format.m_vertex.m_data = (ndFloat64*)&vertices[0].x;
+	format.m_vertex.m_data = const_cast<ndFloat64*>(&vertices[0].x);
 	format.m_vertex.m_indexList = &indexArray[0];
 	format.m_vertex.m_strideInBytes = sizeof(ndOfbx::Vec3);
 	
@@ -809,7 +812,7 @@ ndMesh* ndFbxMeshLoader::FbxToMesh(ndOfbx::IScene* const fbxScene)
 	ndFbx2ndMeshNodeMap::Iterator iter(nodeMap);
 	for (iter.Begin(); iter; iter++)
 	{
-		ndOfbx::Object* const fbxNode = (ndOfbx::Object*)iter.GetKey();
+		ndOfbx::Object* const fbxNode = const_cast<ndOfbx::Object*>(iter.GetKey());
 		ndMesh* const entity = iter.GetNode()->GetInfo();
 
 		ndOfbx::Object::Type type = fbxNode->getType();
@@ -853,34 +856,22 @@ ndMesh* ndFbxMeshLoader::FbxToMesh(ndOfbx::IScene* const fbxScene)
 
 				break;
 			}
-	
-			//case FbxNodeAttribute::eLine:
-			//{
-			//	ImportLineShape(fbxScene, ngdScene, fbxNode, node, meshCache, materialCache, textureCache, usedMaterials);
-			//	break;
-			//}
-			//case FbxNodeAttribute::eNurbsCurve:
-			//{
-			//	ImportNurbCurveShape(fbxScene, ngdScene, fbxNode, node, meshCache, materialCache, textureCache, usedMaterials);
-			//	break;
-			//}
-			//case FbxNodeAttribute::eMarker:
-			//case FbxNodeAttribute::eNurbs:
-			//case FbxNodeAttribute::ePatch:
-			//case FbxNodeAttribute::eCamera:
-			//case FbxNodeAttribute::eCameraStereo:
-			//case FbxNodeAttribute::eCameraSwitcher:
-			//case FbxNodeAttribute::eLight:
-			//case FbxNodeAttribute::eOpticalReference:
-			//case FbxNodeAttribute::eOpticalMarker:
-			//case FbxNodeAttribute::eTrimNurbsSurface:
-			//case FbxNodeAttribute::eBoundary:
-			//case FbxNodeAttribute::eNurbsSurface:
-			//case FbxNodeAttribute::eShape:
-			//case FbxNodeAttribute::eLODGroup:
-			//case FbxNodeAttribute::eSubDiv:
-			//case FbxNodeAttribute::eCachedEffect:
-			//case FbxNodeAttribute::eUnknown:
+
+			case ndOfbx::Object::Type::ROOT:
+			case ndOfbx::Object::Type::GEOMETRY:
+			case ndOfbx::Object::Type::SHAPE:
+			case ndOfbx::Object::Type::MATERIAL:
+			case ndOfbx::Object::Type::TEXTURE:
+			case ndOfbx::Object::Type::NODE_ATTRIBUTE:
+			case ndOfbx::Object::Type::CLUSTER:
+			case ndOfbx::Object::Type::SKIN:
+			case ndOfbx::Object::Type::BLEND_SHAPE:
+			case ndOfbx::Object::Type::BLEND_SHAPE_CHANNEL:
+			case ndOfbx::Object::Type::ANIMATION_STACK:
+			case ndOfbx::Object::Type::ANIMATION_LAYER:
+			case ndOfbx::Object::Type::ANIMATION_CURVE:
+			case ndOfbx::Object::Type::ANIMATION_CURVE_NODE:
+			case ndOfbx::Object::Type::POSE:
 			default:
 				ndAssert(0);
 				break;
@@ -918,15 +909,15 @@ void ndFbxMeshLoader::LoadAnimationCurve(ndTree <ndFbxAnimationTrack, ndString>&
 		ndFloat32 timestep = duration / ndFloat32 (framesCount);
 		for (ndInt32 i = 0; i <= framesCount; ++i)
 		{
-			scale.x = scale1.m_x;
-			scale.y = scale1.m_y;
-			scale.z = scale1.m_z;
-			rotation.x = euler0.m_x;
-			rotation.y = euler0.m_y;
-			rotation.z = euler0.m_z;
-			translation.x = transform.m_posit.m_x;
-			translation.y = transform.m_posit.m_y;
-			translation.z = transform.m_posit.m_z;
+			scale.x = ndFloat64(scale1.m_x);
+			scale.y = ndFloat64(scale1.m_y);
+			scale.z = ndFloat64(scale1.m_z);
+			rotation.x = ndFloat64(euler0.m_x);
+			rotation.y = ndFloat64(euler0.m_y);
+			rotation.z = ndFloat64(euler0.m_z);
+			translation.x = ndFloat64(transform.m_posit.m_x);
+			translation.y = ndFloat64(transform.m_posit.m_y);
+			translation.z = ndFloat64(transform.m_posit.m_z);
 
 			if (i == framesCount)
 			{
@@ -935,15 +926,15 @@ void ndFbxMeshLoader::LoadAnimationCurve(ndTree <ndFbxAnimationTrack, ndString>&
 
 			if (scaleNode)
 			{
-				scale = scaleNode->getNodeLocalTransform(timeAcc);
+				scale = scaleNode->getNodeLocalTransform(ndFloat64(timeAcc));
 			}
 			if (rotationNode)
 			{
-				rotation = rotationNode->getNodeLocalTransform(timeAcc);
+				rotation = rotationNode->getNodeLocalTransform(ndFloat64(timeAcc));
 			}
 			if (translationNode)
 			{
-				translation = translationNode->getNodeLocalTransform(timeAcc);
+				translation = translationNode->getNodeLocalTransform(ndFloat64(timeAcc));
 			}
 			ndMatrix matrix(ofbxMatrix2dMatrix(bone->evalLocal(translation, rotation, scale)));
 			track.AddKeyframe(timeAcc, matrix);
@@ -1236,17 +1227,15 @@ ndSharedPtr<ndMesh> ndFbxMeshLoader::LoadMesh(const char* const fullPathName, bo
 		return ndSharedPtr<ndMesh>(nullptr);
 	}
 
-	size_t readBytes = 0;
-	readBytes++;
 	fseek(file, 0, SEEK_END);
 	long file_size = ftell(file);
 	fseek(file, 0, SEEK_SET);
 	ndArray<ndOfbx::u8> content;
 	content.SetCount(file_size);
-	readBytes = fread(&content[0], 1, size_t(file_size), file);
+	fread(&content[0], 1, size_t(file_size), file);
 	fclose(file);
 
-	ndSharedPtr<ndOfbx::IScene> fbxScene(ndOfbx::load(&content[0], ndInt32(file_size), (ndOfbx::u64)ndOfbx::LoadFlags::TRIANGULATE));
+	ndSharedPtr<ndOfbx::IScene> fbxScene(ndOfbx::load(&content[0], ndInt32(file_size), ndOfbx::u64(ndOfbx::LoadFlags::TRIANGULATE)));
 	if (!(*fbxScene))
 	{
 		ndTrace(("file: %s not found", fullPathName));

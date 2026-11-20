@@ -39,7 +39,7 @@ ndFloat32 ndFastRay::PolygonIntersect (const ndVector& faceNormal, ndFloat32 max
 		const ndBigVector diff(m_diff);
 		const ndBigVector normal(faceNormal);
 		ndFloat64 tOut = normal.DotProduct(p0v0).GetScalar() / normal.DotProduct(diff).GetScalar();
-		if ((tOut >= ndFloat64(0.0f)) && (tOut <= maxT)) 
+		if ((tOut >= ndFloat64(0.0f)) && (tOut <= ndFloat64(maxT)))
 		{
 			const ndBigVector p (p0 + diff.Scale (tOut));
 			ndBigVector unitDir(m_unitDir);
@@ -51,7 +51,7 @@ ndFloat32 ndFastRay::PolygonIntersect (const ndVector& faceNormal, ndFloat32 max
 				const ndBigVector edge0(p - v0);
 				const ndBigVector edge1(v1 - v0);
 				ndFloat64 area = unitDir.DotProduct (edge0.CrossProduct(edge1)).GetScalar();
-				if (area < ndFloat32 (0.0f)) 
+				if (area < ndFloat64 (0.0f)) 
 				{
 					return ndFloat32 (1.2f);
 				}

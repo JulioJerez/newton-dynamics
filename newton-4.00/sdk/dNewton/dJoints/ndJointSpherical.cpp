@@ -427,7 +427,7 @@ void ndJointSpherical::JacobianDerivative(ndConstraintDescritor& desc)
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
 	ApplyBaseRows(matrix0, matrix1, desc);
-	if (m_axis.m_springDamperRegularizer && ((m_axis.m_springK > ndFloat32(0.0f)) || (m_axis.m_damperC > ndFloat32(0.0f))))
+	if ((m_axis.m_springDamperRegularizer > ndFloat32(1.0e-7f)) && ((m_axis.m_springK > ndFloat32(0.0f)) || (m_axis.m_damperC > ndFloat32(0.0f))))
 	{
 		SubmitSpringDamper(matrix0, matrix1, desc);
 	}

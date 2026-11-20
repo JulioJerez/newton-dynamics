@@ -63,7 +63,7 @@ bool ndMeshBodyDynamic::operator==(const ndMeshBody& other) const
 {
 	bool test = ndMeshBodyKinematic::operator==(other);
 
-	const ndMeshBodyDynamic* const otherBody = (ndMeshBodyDynamic*)&other;
+	const ndMeshBodyDynamic* const otherBody = static_cast<const ndMeshBodyDynamic*>(&other);
 
 	ndVector diff(m_intrinsicDamping - otherBody->m_intrinsicDamping);
 	test = test && diff.DotProduct(diff).GetScalar() < ndFloat32(1.0e-6f);
@@ -171,7 +171,7 @@ void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 	m_childNode = ndWeakPtr<ndMesh>(m_owner->GetRoot()->FindByName(childName));
 	m_parentNode = ndWeakPtr<ndMesh>(m_owner->GetRoot()->FindByName(parentName));
 
-	const nd::TiXmlElement* const xmlJoint = (nd::TiXmlElement*)parent->FirstChild("joint");
+	const nd::TiXmlElement* const xmlJoint = static_cast<const nd::TiXmlElement*>(parent->FirstChild("joint"));
 	ndAssert(xmlJoint);
 	m_joint = m_owner->LoadJoint(xmlJoint);
 }
@@ -188,7 +188,7 @@ ndMeshJointFix6dof::ndMeshJointFix6dof(const ndMesh* const owner, const ndJointB
 	:ndMeshJoint(owner, joint)
 {
 	ndAssert(joint->IsType(ndJointFix6dof::StaticClassName()));
-	const ndJointFix6dof* const fixJoint = (ndJointFix6dof*)joint;
+	const ndJointFix6dof* const fixJoint = static_cast<const ndJointFix6dof*>(joint);
 	m_softness = fixJoint->GetRegularizer();
 	m_maxForce = fixJoint->GetMaxForce();
 	m_maxTorque = fixJoint->GetMaxTorque();
@@ -213,7 +213,7 @@ bool ndMeshJointFix6dof::operator==(const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointFix6dof* const otherJoint = (ndMeshJointFix6dof*)&other;
+		const ndMeshJointFix6dof* const otherJoint = static_cast<const ndMeshJointFix6dof*>(&other);
 		test = test && (m_softness == otherJoint->m_softness);
 		test = test && (m_maxForce == otherJoint->m_maxForce);
 		test = test && (m_maxTorque == otherJoint->m_maxTorque);
@@ -257,7 +257,7 @@ ndMeshJointIkSwivelPositionEffector::ndMeshJointIkSwivelPositionEffector(const n
 	:ndMeshJoint(owner, joint)
 {
 	ndAssert(joint->IsType(ndIkSwivelPositionEffector::StaticClassName()));
-	const ndIkSwivelPositionEffector* const effector = (ndIkSwivelPositionEffector*)joint;
+	const ndIkSwivelPositionEffector* const effector = static_cast<const ndIkSwivelPositionEffector*>(joint);
 	m_restPosition = effector->GetRestPosit();
 
 	m_angularMaxTorque = effector->GetMaxTorque();
@@ -300,7 +300,7 @@ bool ndMeshJointIkSwivelPositionEffector::operator==(const ndMeshJoint& other) c
 
 	if (test)
 	{
-		const ndMeshJointIkSwivelPositionEffector* const otherJoint = (ndMeshJointIkSwivelPositionEffector*)&other;
+		const ndMeshJointIkSwivelPositionEffector* const otherJoint = static_cast<const ndMeshJointIkSwivelPositionEffector*>(&other);
 		test = test && (m_angularSpring == otherJoint->m_angularSpring);
 		test = test && (m_angularDamper == otherJoint->m_angularDamper);
 		test = test && (m_angularMaxTorque == otherJoint->m_angularMaxTorque);
@@ -388,7 +388,7 @@ ndMeshJointPlane::ndMeshJointPlane(const ndMesh* const owner, const ndJointBilat
 	:ndMeshJoint(owner, joint)
 {
 	ndAssert(joint->IsType(ndJointPlane::StaticClassName()));
-	const ndJointPlane* const subJoint = (ndJointPlane*)joint;
+	const ndJointPlane* const subJoint = static_cast<const ndJointPlane*>(joint);
 	m_controlRotation = subJoint->GetEnableControlRotation();
 }
 
@@ -409,7 +409,7 @@ bool ndMeshJointPlane::operator==(const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointPlane* const otherJoint = (ndMeshJointPlane*)&other;
+		const ndMeshJointPlane* const otherJoint = static_cast<const ndMeshJointPlane*>(&other);
 		test = test && (m_controlRotation == otherJoint->m_controlRotation);
 	}
 	return test;
@@ -445,7 +445,7 @@ ndMeshJointGear::ndMeshJointGear(const ndMesh* const owner)
 ndMeshJointGear::ndMeshJointGear(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
-	const ndJointGear* const subJoint = (ndJointGear*)joint;
+	const ndJointGear* const subJoint = static_cast<const ndJointGear*>(joint);
 	m_ratio = ndReal (subJoint->GetRatio());
 }
 
@@ -466,7 +466,7 @@ bool ndMeshJointGear::operator==(const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointGear* const otherJoint = (ndMeshJointGear*)&other;
+		const ndMeshJointGear* const otherJoint = static_cast<const ndMeshJointGear*>(&other);
 		test = test && (m_ratio == otherJoint->m_ratio);
 	}
 	return test;
@@ -502,7 +502,7 @@ ndMeshJointSlider::ndMeshJointSlider(const ndMesh* const owner)
 ndMeshJointSlider::ndMeshJointSlider(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
-	const ndJointSlider* const subJoint = (ndJointSlider*)joint;
+	const ndJointSlider* const subJoint = static_cast<const ndJointSlider*>(joint);
 	subJoint->GetSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
 	subJoint->GetLimits(m_axis.m_minLimit, m_axis.m_maxLimit);
 	m_axis.m_limitState = subJoint->GetLimitState();
@@ -525,7 +525,7 @@ bool ndMeshJointSlider::operator == (const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointSlider* const otherJoint = (ndMeshJointSlider*)&other;
+		const ndMeshJointSlider* const otherJoint = static_cast<const ndMeshJointSlider*>(&other);
 		test = test && (m_axis == otherJoint->m_axis);
 	}
 	return test;
@@ -575,7 +575,7 @@ ndMeshJointHinge::ndMeshJointHinge(const ndMesh* const owner, const ndJointBilat
 	,m_axis()
 {
 	ndAssert(joint->IsType(ndJointHinge::StaticClassName()));
-	const ndJointHinge* const subJoint = (ndJointHinge*)joint;
+	const ndJointHinge* const subJoint = static_cast<const ndJointHinge*>(joint);
 	subJoint->GetSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
 	subJoint->GetLimits(m_axis.m_minLimit, m_axis.m_maxLimit);
 	m_axis.m_limitState = subJoint->GetLimitState();
@@ -600,7 +600,7 @@ bool ndMeshJointHinge::operator == (const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointHinge* const otherJoint = (ndMeshJointHinge*)&other;
+		const ndMeshJointHinge* const otherJoint = static_cast<const ndMeshJointHinge*>(&other);
 		test = test && (m_axis == otherJoint->m_axis);
 	}
 	return test;
@@ -649,7 +649,7 @@ ndMeshJointDoubleHinge::ndMeshJointDoubleHinge(const ndMesh* const owner, const 
 	:ndMeshJoint(owner, joint)
 {
 	ndAssert(joint->IsType(ndJointDoubleHinge::StaticClassName()));
-	const ndJointDoubleHinge* const subJoint = (ndJointDoubleHinge*)joint;
+	const ndJointDoubleHinge* const subJoint = static_cast<const ndJointDoubleHinge*>(joint);
 
 	subJoint->GetSpringDamper0(m_axis0.m_springDamperRegularizer, m_axis0.m_springK, m_axis0.m_damperC);
 	subJoint->GetLimits0(m_axis0.m_minLimit, m_axis0.m_maxLimit);
@@ -682,7 +682,7 @@ bool ndMeshJointDoubleHinge::operator == (const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointDoubleHinge* const otherJoint = (ndMeshJointDoubleHinge*)&other;
+		const ndMeshJointDoubleHinge* const otherJoint = static_cast<const ndMeshJointDoubleHinge*>(&other);
 		test = test && (m_axis0 == otherJoint->m_axis0);
 		test = test && (m_axis1 == otherJoint->m_axis1);
 	}
@@ -716,7 +716,7 @@ void ndMeshJointDoubleHinge::DeserializeFromXml(const nd::TiXmlElement* const pa
 {
 	ndMeshJoint::DeserializeFromXml(parent);
 
-	const nd::TiXmlElement* const xmlAxis0 = (nd::TiXmlElement*)parent->FirstChild("axis0");
+	const nd::TiXmlElement* const xmlAxis0 = static_cast<const nd::TiXmlElement*>(parent->FirstChild("axis0"));
 	m_axis0.m_springK = xmlGetFloat(xmlAxis0, "springK");
 	m_axis0.m_damperC = xmlGetFloat(xmlAxis0, "damperC");
 	m_axis0.m_minLimit = xmlGetFloat(xmlAxis0, "minLimit");
@@ -724,7 +724,7 @@ void ndMeshJointDoubleHinge::DeserializeFromXml(const nd::TiXmlElement* const pa
 	m_axis0.m_springDamperRegularizer = xmlGetFloat(xmlAxis0, "springDamperRegularizer");
 	m_axis0.m_limitState = xmlGetInt(xmlAxis0, "limitState") ? true : false;
 
-	const nd::TiXmlElement* const xmlAxis1 = (nd::TiXmlElement*)parent->FirstChild("axis1");
+	const nd::TiXmlElement* const xmlAxis1 = static_cast<const nd::TiXmlElement*>(parent->FirstChild("axis1"));
 	m_axis1.m_springK = xmlGetFloat(xmlAxis1, "springK");
 	m_axis1.m_damperC = xmlGetFloat(xmlAxis1, "damperC");
 	m_axis1.m_minLimit = xmlGetFloat(xmlAxis1, "minLimit");
@@ -759,7 +759,7 @@ ndMeshJointCylinder::ndMeshJointCylinder(const ndMesh* const owner, const ndJoin
 	:ndMeshJoint(owner, joint)
 {
 	ndAssert(joint->IsType(ndJointCylinder::StaticClassName()));
-	const ndJointCylinder* const subJoint = (ndJointCylinder*)joint;
+	const ndJointCylinder* const subJoint = static_cast<const ndJointCylinder*>(joint);
 
 	subJoint->GetSpringDamperPosit(m_linearAxis.m_springDamperRegularizer, m_linearAxis.m_springK, m_linearAxis.m_damperC);
 	subJoint->GetLimitsPosit(m_linearAxis.m_minLimit, m_linearAxis.m_maxLimit);
@@ -790,7 +790,7 @@ bool ndMeshJointCylinder::operator == (const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointCylinder* const otherJoint = (ndMeshJointCylinder*)&other;
+		const ndMeshJointCylinder* const otherJoint = static_cast<const ndMeshJointCylinder*>(&other);
 		test = test && (m_linearAxis == otherJoint->m_linearAxis);
 		test = test && (m_angularAxis == otherJoint->m_angularAxis);
 	}
@@ -824,7 +824,7 @@ void ndMeshJointCylinder::DeserializeFromXml(const nd::TiXmlElement* const paren
 {
 	ndMeshJoint::DeserializeFromXml(parent);
 
-	const nd::TiXmlElement* const xmlAxis0 = (nd::TiXmlElement*)parent->FirstChild("axis0");
+	const nd::TiXmlElement* const xmlAxis0 = static_cast<const nd::TiXmlElement*>(parent->FirstChild("axis0"));
 	m_linearAxis.m_springK = xmlGetFloat(xmlAxis0, "linearSpringK");
 	m_linearAxis.m_damperC = xmlGetFloat(xmlAxis0, "linearDamperC");
 	m_linearAxis.m_minLimit = xmlGetFloat(xmlAxis0, "linearMinLimit");
@@ -832,7 +832,7 @@ void ndMeshJointCylinder::DeserializeFromXml(const nd::TiXmlElement* const paren
 	m_linearAxis.m_springDamperRegularizer = xmlGetFloat(xmlAxis0, "linearSpringDamperRegularizer");
 	m_linearAxis.m_limitState = xmlGetInt(xmlAxis0, "linearLimitState") ? true : false;
 
-	const nd::TiXmlElement* const xmlAxis1 = (nd::TiXmlElement*)parent->FirstChild("axis1");
+	const nd::TiXmlElement* const xmlAxis1 = static_cast<const nd::TiXmlElement*>(parent->FirstChild("axis1"));
 	m_angularAxis.m_springK = xmlGetFloat(xmlAxis1, "angularSpringK");
 	m_angularAxis.m_damperC = xmlGetFloat(xmlAxis1, "angularDamperC");
 	m_angularAxis.m_minLimit = xmlGetFloat(xmlAxis1, "angularMinLimit");
@@ -867,7 +867,7 @@ ndMeshJointRoller::ndMeshJointRoller(const ndMesh* const owner, const ndJointBil
 	:ndMeshJoint(owner, joint)
 {
 	ndAssert(joint->IsType(ndJointRoller::StaticClassName()));
-	const ndJointRoller* const subJoint = (ndJointRoller*)joint;
+	const ndJointRoller* const subJoint = static_cast<const ndJointRoller*>(joint);
 
 	subJoint->GetSpringDamperPosit(m_linearAxis.m_springDamperRegularizer, m_linearAxis.m_springK, m_linearAxis.m_damperC);
 	subJoint->GetLimitsPosit(m_linearAxis.m_minLimit, m_linearAxis.m_maxLimit);
@@ -898,7 +898,7 @@ bool ndMeshJointRoller::operator == (const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointRoller* const otherJoint = (ndMeshJointRoller*)&other;
+		const ndMeshJointRoller* const otherJoint = static_cast<const ndMeshJointRoller*>(&other);
 		test = test && (m_linearAxis == otherJoint->m_linearAxis);
 		test = test && (m_angularAxis == otherJoint->m_angularAxis);
 	}
@@ -932,7 +932,7 @@ void ndMeshJointRoller::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
 
-	const nd::TiXmlElement* const xmlAxis0 = (nd::TiXmlElement*)parent->FirstChild("positAxis");
+	const nd::TiXmlElement* const xmlAxis0 = static_cast<const nd::TiXmlElement*>(parent->FirstChild("positAxis"));
 	m_linearAxis.m_springK = xmlGetFloat(xmlAxis0, "linearSpringK");
 	m_linearAxis.m_damperC = xmlGetFloat(xmlAxis0, "linearDamperC");
 	m_linearAxis.m_minLimit = xmlGetFloat(xmlAxis0, "linearMinLimit");
@@ -940,7 +940,7 @@ void ndMeshJointRoller::DeserializeFromXml(const nd::TiXmlElement* const parent)
 	m_linearAxis.m_springDamperRegularizer = xmlGetFloat(xmlAxis0, "linearSpringDamperRegularizer");
 	m_linearAxis.m_limitState = xmlGetInt(xmlAxis0, "linearLimitState") ? true : false;
 
-	const nd::TiXmlElement* const xmlAxis1 = (nd::TiXmlElement*)parent->FirstChild("angleAxis");
+	const nd::TiXmlElement* const xmlAxis1 = static_cast<const nd::TiXmlElement*>(parent->FirstChild("angleAxis"));
 	m_angularAxis.m_springK = xmlGetFloat(xmlAxis1, "angularSpringK");
 	m_angularAxis.m_damperC = xmlGetFloat(xmlAxis1, "angularDamperC");
 	m_angularAxis.m_minLimit = xmlGetFloat(xmlAxis1, "angularMinLimit");
@@ -976,7 +976,7 @@ ndMeshJointWheel::ndMeshJointWheel(const ndMesh* const owner, const ndJointBilat
 	,m_desc(new ndWheelDescriptor)
 {
 	ndAssert(joint->IsType(ndJointWheel::StaticClassName()));
-	const ndJointWheel* const subJoint = (ndJointWheel*)joint;
+	const ndJointWheel* const subJoint = static_cast<const ndJointWheel*>(joint);
 	**m_desc = subJoint->GetInfo();
 }
 
@@ -997,7 +997,7 @@ bool ndMeshJointWheel::operator == (const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointWheel* const otherJoint = (ndMeshJointWheel*)&other;
+		const ndMeshJointWheel* const otherJoint = static_cast<const ndMeshJointWheel*>(&other);
 		test = test && (m_desc->m_springK == otherJoint->m_desc->m_springK);
 		test = test && (m_desc->m_damperC == otherJoint->m_desc->m_damperC);
 		test = test && (m_desc->m_upperStop == otherJoint->m_desc->m_upperStop);
@@ -1057,7 +1057,7 @@ ndMeshJointSpherical::ndMeshJointSpherical(const ndMesh* const owner, const ndJo
 	:ndMeshJoint(owner, joint)
 {
 	ndAssert(joint->IsType(ndJointSpherical::StaticClassName()));
-	const ndJointSpherical* const subJoint = (ndJointSpherical*)joint;
+	const ndJointSpherical* const subJoint = static_cast<const ndJointSpherical*>(joint);
 	subJoint->GetSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
 	subJoint->GetTwistLimits(m_axis.m_minLimit, m_axis.m_maxLimit);
 	m_axis.m_limitState = subJoint->GetTwistLimitState();
@@ -1087,7 +1087,7 @@ bool ndMeshJointSpherical::operator == (const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointSpherical* const otherJoint = (ndMeshJointSpherical*)&other;
+		const ndMeshJointSpherical* const otherJoint = static_cast<const ndMeshJointSpherical*>(&other);
 		test = test && (m_axis == otherJoint->m_axis);
 		test = test && (m_maxConeAngle == otherJoint->m_maxConeAngle);
 		test = test && (m_coneAngleState == otherJoint->m_coneAngleState);
@@ -1149,7 +1149,7 @@ ndMeshJointVehicleDifferential::ndMeshJointVehicleDifferential(const ndMesh* con
 	:ndMeshJoint(owner, joint)
 {
 	ndAssert(joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()));
-	const ndMultiBodyVehicleDifferential* const subJoint = (ndMultiBodyVehicleDifferential*)joint;
+	const ndMultiBodyVehicleDifferential* const subJoint = static_cast<const ndMultiBodyVehicleDifferential*>(joint);
 	m_limitedSlipOmega = ndReal(subJoint->GetSlipOmega());
 }
 
@@ -1170,7 +1170,7 @@ bool ndMeshJointVehicleDifferential::operator==(const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointVehicleDifferential* const otherJoint = (ndMeshJointVehicleDifferential*)&other;
+		const ndMeshJointVehicleDifferential* const otherJoint = static_cast<const ndMeshJointVehicleDifferential*>(&other);
 		test = test && (m_limitedSlipOmega == otherJoint->m_limitedSlipOmega);
 	}
 	return test;
@@ -1190,8 +1190,8 @@ void ndMeshJointVehicleDifferential::DeserializeFromXml(const nd::TiXmlElement* 
 
 ndJointBilateralConstraint* ndMeshJointVehicleDifferential::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
-	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
-	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	//const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	//const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndMultiBodyVehicleDifferential* const joint = new ndMultiBodyVehicleDifferential(child, parent, m_limitedSlipOmega);
 	return joint;
 }
@@ -1209,7 +1209,7 @@ ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMesh* const owner, cons
 	,m_topSpeed(ndReal(40.0f))
 {
 	joint->IsType(ndMultiBodyVehicleMotor::StaticClassName());
-	const ndMultiBodyVehicleMotor* const motor = (ndMultiBodyVehicleMotor*)joint;
+	const ndMultiBodyVehicleMotor* const motor = static_cast<const ndMultiBodyVehicleMotor*>(joint);
 	motor->IsType(ndMultiBodyVehicleMotor::StaticClassName());
 	m_engineCurve = motor->GetCurve();
 	m_topSpeed = ndReal(motor->GetTopSpeed());
@@ -1232,7 +1232,7 @@ bool ndMeshJointVehicleMotor::operator==(const ndMeshJoint& other) const
 	bool test = ndMeshJoint::operator==(other);
 	if (test)
 	{
-		const ndMeshJointVehicleMotor* const otherJoint = (ndMeshJointVehicleMotor*)&other;
+		const ndMeshJointVehicleMotor* const otherJoint = static_cast<const ndMeshJointVehicleMotor*>(&other);
 		test = test && (m_engineCurve == otherJoint->m_engineCurve);
 	}
 	return test;
@@ -1325,7 +1325,7 @@ bool ndMeshJointVehicleDifferentialAxle::operator==(const ndMeshJoint& other) co
 	bool test = ndMeshJoint::operator==(other);
 	if (test)
 	{
-		const ndMeshJointVehicleDifferentialAxle* const otherJoint = (ndMeshJointVehicleDifferentialAxle*)&other;
+		const ndMeshJointVehicleDifferentialAxle* const otherJoint = static_cast<const ndMeshJointVehicleDifferentialAxle*>(&other);
 		test = test && (m_gearRatio == otherJoint->m_gearRatio);
 	}
 	return test;
@@ -1393,7 +1393,7 @@ bool ndMeshJointVehicleTorsionBar::operator==(const ndMeshJoint& other) const
 	bool test = ndMeshJoint::operator==(other);
 	if (test)
 	{
-		const ndMeshJointVehicleTorsionBar* const otherJoint = (ndMeshJointVehicleTorsionBar*)&other;
+		const ndMeshJointVehicleTorsionBar* const otherJoint = static_cast<const ndMeshJointVehicleTorsionBar*>(&other);
 		test = test && (m_axis == otherJoint->m_axis);
 	}
 	return test;
@@ -1465,7 +1465,7 @@ bool ndMeshJointVehicleTireJoint::operator==(const ndMeshJoint& other) const
 	bool test = ndMeshJoint::operator==(other);
 	if (test)
 	{
-		const ndMeshJointVehicleTireJoint* const otherJoint = (ndMeshJointVehicleTireJoint*)&other;
+		const ndMeshJointVehicleTireJoint* const otherJoint = static_cast<const ndMeshJointVehicleTireJoint*>(&other);
 		test = test && (m_frictionModel == otherJoint->m_frictionModel);
 		test = test && (m_maxSideSlipAngle == otherJoint->m_maxSideSlipAngle);
 	}
@@ -1515,7 +1515,7 @@ ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner, 
 	,m_gearBox()
 {
 	ndAssert(joint->IsType(ndMultiBodyVehicleGearBox::StaticClassName()));
-	const ndMultiBodyVehicleGearBox* const subJoint = (ndMultiBodyVehicleGearBox*)joint;
+	const ndMultiBodyVehicleGearBox* const subJoint = static_cast<const ndMultiBodyVehicleGearBox*>(joint);
 	m_gearBox = subJoint->GetGearBox();
 }
 
@@ -1536,7 +1536,7 @@ bool ndMeshJointVehicleGearBox::operator==(const ndMeshJoint& other) const
 
 	if (test)
 	{
-		const ndMeshJointVehicleGearBox* const otherJoint = (ndMeshJointVehicleGearBox*)&other;
+		const ndMeshJointVehicleGearBox* const otherJoint = static_cast<const ndMeshJointVehicleGearBox*>(&other);
 		test = test && (m_gearBox == otherJoint->m_gearBox);
 	}
 	return test;

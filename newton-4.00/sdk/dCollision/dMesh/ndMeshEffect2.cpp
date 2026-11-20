@@ -855,7 +855,7 @@ ndMeshEffect* ndMeshEffect::CreateVoronoiConvexDecomposition(const ndArray<ndVec
 	}
 
 	voronoiPartition->EndBuild(false);
-	
+
 	voronoiPartition->AddMaterial(0);
 	voronoiPartition->AddMaterial(interiorMaterialIndex);
 

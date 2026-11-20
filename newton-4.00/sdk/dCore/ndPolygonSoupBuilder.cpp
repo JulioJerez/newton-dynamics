@@ -220,21 +220,21 @@ void ndPolygonSoupBuilder::LoadPLY(const char* const fileName)
 	FILE* const file = fopen(fileName, "rb");
 
 	char line[1024];
-	size_t count = 0;
-	const char* ptr;
-	ptr = fgets(line, sizeof (line) - 1, file);
+	//size_t count = 0;
+	//const char* ptr;
+	fgets(line, sizeof (line) - 1, file);
 	if (!strncmp(line, "ply", 3))
 	{
 		ndInt32 faceCount;
 		ndInt32 vertexCount;
-		ptr = fgets(line, sizeof(line) - 1, file);
-		count += fscanf(file, "%s %s %d\n", line, line, &vertexCount);
-		ptr = fgets(line, sizeof(line) - 1, file);
-		ptr = fgets(line, sizeof(line) - 1, file);
-		ptr = fgets(line, sizeof(line) - 1, file);
-		count += fscanf(file, "%s %s %d\n", line, line, &faceCount);
-		ptr = fgets(line, sizeof(line) - 1, file);
-		ptr = fgets(line, sizeof(line) - 1, file);
+		fgets(line, sizeof(line) - 1, file);
+		fscanf(file, "%s %s %d\n", line, line, &vertexCount);
+		fgets(line, sizeof(line) - 1, file);
+		fgets(line, sizeof(line) - 1, file);
+		fgets(line, sizeof(line) - 1, file);
+		fscanf(file, "%s %s %d\n", line, line, &faceCount);
+		fgets(line, sizeof(line) - 1, file);
+		fgets(line, sizeof(line) - 1, file);
 
 		ndArray<ndVector> vertexArray;
 		vertexArray.SetCount(vertexCount);
@@ -243,8 +243,8 @@ void ndPolygonSoupBuilder::LoadPLY(const char* const fileName)
 			ndReal x;
 			ndReal y;
 			ndReal z;
-			count += fscanf(file, "%f %f %f", &x, &y, &z);
-			vertexArray[i] = ndBigVector(ndFloat32(x), ndFloat32(y), ndFloat32(z), ndFloat32(0.0f));
+			fscanf(file, "%f %f %f", &x, &y, &z);
+			vertexArray[i] = ndBigVector(ndFloat64(x), ndFloat64(y), ndFloat64(z), ndFloat64(0.0f));
 		}
 
 		Begin();
@@ -252,11 +252,11 @@ void ndPolygonSoupBuilder::LoadPLY(const char* const fileName)
 		for (ndInt32 i = 0; i < faceCount; ++i)
 		{
 			ndInt32 indexCount;
-			count += fscanf(file, "%d", &indexCount);
+			fscanf(file, "%d", &indexCount);
 			for (ndInt32 j = 0; j < indexCount; ++j)
 			{
 				ndInt32 index;
-				count += fscanf(file, "%d", &index);
+				fscanf(file, "%d", &index);
 				face[j] = vertexArray[index];
 			}
 			AddFace(face, indexCount, 0);
@@ -289,7 +289,7 @@ void ndPolygonSoupBuilder::AddFaceIndirect(const ndVector* const vertex, ndInt32
 			const ndBigVector p1(m_vertexPoints[pool[j]]);
 			const ndBigVector edge(p1 - p0);
 			ndFloat64 mag2 = edge.DotProduct(edge).GetScalar();
-			if (mag2 < ndFloat32(1.0e-12f))
+			if (mag2 < ndFloat64(1.0e-12f))
 			{
 				//ndAssert(0);
 				ndTrace(("rejecting degenerated face, edge too small\n"));
@@ -306,7 +306,7 @@ void ndPolygonSoupBuilder::AddFaceIndirect(const ndVector* const vertex, ndInt32
 			ndAssert(edge1.m_w == ndFloat32(0.0f));
 			const ndBigVector normal(edge0.CrossProduct(edge1));
 			ndFloat64 mag2 = normal.DotProduct(normal).GetScalar();
-			if (mag2 < ndFloat32(1.0e-12f))
+			if (mag2 < ndFloat64(1.0e-12f))
 			{
 				//ndAssert(0);
 				ndTrace(("rejecting degenerated face, area too small\n"));
@@ -360,7 +360,7 @@ void ndPolygonSoupBuilder::PackArray()
 {
 	ndStack<ndInt32> indexMapPool (ndInt32(m_vertexPoints.GetCount()));
 	ndInt32* const indexMap = &indexMapPool[0];
-	ndInt32 vertexCount = ndVertexListToIndexList(&m_vertexPoints[0].m_x, sizeof (ndBigVector), 3, ndInt32(m_vertexPoints.GetCount()), &indexMap[0], ndFloat32 (1.0e-6f));
+	ndInt32 vertexCount = ndVertexListToIndexList(&m_vertexPoints[0].m_x, sizeof (ndBigVector), 3, ndInt32(m_vertexPoints.GetCount()), &indexMap[0], ndFloat64 (1.0e-6f));
 
 	ndInt32 k = 0;
 	for (ndInt32 i = 0; i < m_faceVertexCount.GetCount(); ++i)
@@ -389,7 +389,7 @@ void ndPolygonSoupBuilder::Finalize()
 		ndStack<ndInt32> indexMapPool(ndInt32(m_vertexPoints.GetCount()));
 
 		ndInt32* const indexMap = &indexMapPool[0];
-		ndInt32 vertexCount = ndVertexListToIndexList(&m_vertexPoints[0].m_x, sizeof (ndBigVector), 3, ndInt32(m_vertexPoints.GetCount()), &indexMap[0], ndFloat32 (1.0e-4f));
+		ndInt32 vertexCount = ndVertexListToIndexList(&m_vertexPoints[0].m_x, sizeof (ndBigVector), 3, ndInt32(m_vertexPoints.GetCount()), &indexMap[0], ndFloat64 (1.0e-4f));
 		ndAssert(vertexCount <= m_vertexPoints.GetCount());
 		m_vertexPoints.SetCount(vertexCount);
 
@@ -621,13 +621,13 @@ void ndPolygonSoupBuilder::End(bool optimize)
 			m_normalPoints[i].m_x = normal.m_x;
 			m_normalPoints[i].m_y = normal.m_y;
 			m_normalPoints[i].m_z = normal.m_z;
-			m_normalPoints[i].m_w = ndFloat32(0.0f);
+			m_normalPoints[i].m_w = ndFloat64(0.0f);
 			indexCount += faceIndexCount;
 		}
 
 		m_normalIndex.Resize(faceCount);;
 		m_normalIndex.SetCount(faceCount);
-		ndInt32 normalCount = ndVertexListToIndexList(&m_normalPoints[0].m_x, sizeof(ndBigVector), 3, faceCount, &m_normalIndex[0], ndFloat32(1.0e-6f));
+		ndInt32 normalCount = ndVertexListToIndexList(&m_normalPoints[0].m_x, sizeof(ndBigVector), 3, faceCount, &m_normalIndex[0], ndFloat64(1.0e-6f));
 		ndAssert(normalCount <= m_normalPoints.GetCount());
 		m_normalPoints.SetCount(normalCount);
 	}
@@ -712,8 +712,8 @@ void ndPolygonSoupBuilder::Optimize(ndInt32 faceId, const ndFaceBucket& faceBuck
 					const ndFaceInfo& faceInfo = array[faceStart + i]->GetInfo();
 					ndInt32 count1 = faceInfo.indexCount - 1;
 					ndInt32 start1 = faceInfo.indexStart;
-					ndBigVector p0 (ndFloat32 ( 1.0e10f), ndFloat32 ( 1.0e10f), ndFloat32 ( 1.0e10f), ndFloat32 (0.0f));
-					ndBigVector p1 (ndFloat32 (-1.0e10f), ndFloat32 (-1.0e10f), ndFloat32 (-1.0e10f), ndFloat32 (0.0f));
+					ndBigVector p0 (ndFloat64 ( 1.0e10f), ndFloat64( 1.0e10f), ndFloat64 ( 1.0e10f), ndFloat64 (0.0f));
+					ndBigVector p1 (ndFloat64 (-1.0e10f), ndFloat64(-1.0e10f), ndFloat64 (-1.0e10f), ndFloat64 (0.0f));
 					for (ndInt32 j = 0; j < count1; ++j) 
 					{
 						ndInt32 index = indexArray[start1 + j];
@@ -722,24 +722,24 @@ void ndPolygonSoupBuilder::Optimize(ndInt32 faceId, const ndFaceBucket& faceBuck
 						p0 = p0.GetMin(p);
 						p1 = p1.GetMax(p);
 					}
-					ndBigVector p ((p0 + p1).Scale (0.5f));
+					ndBigVector p ((p0 + p1).Scale (ndFloat64(0.5f)));
 					median += p;
 					varian += p * p;
 				}
 
-				varian = varian.Scale (ndFloat32 (faceCount)) - median * median;
+				varian = varian.Scale (ndFloat64 (faceCount)) - median * median;
 
 				ndInt32 axis = 0;
-				ndFloat32 maxVarian = ndFloat32 (-1.0e10f);
+				ndFloat64 maxVarian = ndFloat64 (-1.0e10f);
 				for (ndInt32 i = 0; i < 3; ++i) 
 				{
 					if (varian[i] > maxVarian) 
 					{
 						axis = i;
-						maxVarian = ndFloat32 (varian[i]);
+						maxVarian = ndFloat64 (varian[i]);
 					}
 				}
-				ndBigVector center = median.Scale (ndFloat32 (1.0f) / ndFloat32 (faceCount));
+				ndBigVector center = median.Scale (ndFloat64 (1.0f) / ndFloat64 (faceCount));
 				ndFloat64 axisVal = center[axis];
 
 				ndInt32 leftCount = 0;
@@ -838,7 +838,7 @@ ndInt32 ndPolygonSoupBuilder::FilterFace (ndInt32 count, ndInt32* const pool)
 			ndBigVector p1 (m_vertexPoints[pool[i]]);
 			ndBigVector edge (p1 - p0);
 			ndFloat64 mag2 = edge.DotProduct(edge).GetScalar();
-			if (mag2 < ndFloat32 (1.0e-6f)) 
+			if (mag2 < ndFloat64 (1.0e-6f)) 
 			{
 				count = 0;
 			}
@@ -855,7 +855,7 @@ ndInt32 ndPolygonSoupBuilder::FilterFace (ndInt32 count, ndInt32* const pool)
 			ndAssert(edge1.m_w == ndFloat32(0.0f));
 			ndAssert (normal.m_w == ndFloat32 (0.0f));
 			ndFloat64 mag2 = normal.DotProduct(normal).GetScalar();
-			if (mag2 < ndFloat32 (1.0e-8f)) 
+			if (mag2 < ndFloat64 (1.0e-8f)) 
 			{
 				count = 0;
 			}
@@ -892,7 +892,7 @@ ndInt32 ndPolygonSoupBuilder::FilterFace (ndInt32 count, ndInt32* const pool)
 					p1 = p1 & ndBigVector::m_triplexMask;
 					ndBigVector e0 (p1 - p0);
 					ndFloat64 mag2 = e0.DotProduct(e0).GetScalar();
-					if (mag2 < ndFloat32 (1.0e-6f)) 
+					if (mag2 < ndFloat64 (1.0e-6f)) 
 					{
 						count --;
 						flag = true;
@@ -915,7 +915,7 @@ ndInt32 ndPolygonSoupBuilder::FilterFace (ndInt32 count, ndInt32* const pool)
 			ndAssert (normal.m_w == ndFloat32 (0.0f));
 
 			ndAssert (normal.DotProduct(normal).GetScalar() > ndFloat32 (1.0e-10f)); 
-			normal = normal.Scale (ndFloat64 (1.0f) / sqrt (normal.DotProduct(normal).GetScalar() + ndFloat32 (1.0e-24f)));
+			normal = normal.Scale (ndFloat64 (1.0f) / sqrt (normal.DotProduct(normal).GetScalar() + ndFloat64 (1.0e-24f)));
 
 			while (flag) 
 			{
@@ -930,16 +930,16 @@ ndInt32 ndPolygonSoupBuilder::FilterFace (ndInt32 count, ndInt32* const pool)
 					p0 = p0 & ndBigVector::m_triplexMask;
 					p1 = p1 & ndBigVector::m_triplexMask;
 					ndBigVector e0 (p1 - p0);
-					e0 = e0.Scale (ndFloat64 (1.0f) / sqrt (e0.DotProduct(e0).GetScalar() + ndFloat32(1.0e-24f)));
+					e0 = e0.Scale (ndFloat64 (1.0f) / sqrt (e0.DotProduct(e0).GetScalar() + ndFloat64(1.0e-24f)));
 					do 
 					{
 						ndBigVector p2 (&m_vertexPoints[ptr->m_next->m_incidentVertex].m_x);
 						p2 = p2 & ndBigVector::m_triplexMask;
 						ndBigVector e1 (p2 - p1);
 
-						e1 = e1.Scale (ndFloat64 (1.0f) / sqrt (e1.DotProduct(e1).GetScalar() + ndFloat32(1.0e-24f)));
+						e1 = e1.Scale (ndFloat64 (1.0f) / sqrt (e1.DotProduct(e1).GetScalar() + ndFloat64(1.0e-24f)));
 						ndFloat64 mag2 = e1.DotProduct(e0).GetScalar();
-						if (mag2 > ndFloat32 (0.9999f)) 
+						if (mag2 > ndFloat64 (0.9999f)) 
 						{
 							count --;
 							flag = true;
@@ -954,7 +954,7 @@ ndInt32 ndPolygonSoupBuilder::FilterFace (ndInt32 count, ndInt32* const pool)
 						ndBigVector n (e0.CrossProduct(e1));
 						ndAssert (n.m_w == ndFloat32 (0.0f));
 						mag2 = n.DotProduct(normal).GetScalar();
-						if (mag2 < ndFloat32 (1.0e-5f)) 
+						if (mag2 < ndFloat64 (1.0e-5f)) 
 						{
 							count --;
 							flag = true;
@@ -977,7 +977,7 @@ ndInt32 ndPolygonSoupBuilder::FilterFace (ndInt32 count, ndInt32* const pool)
 		ndEdge* first = edge;
 		if (count >= 3) 
 		{
-			ndFloat64 best = ndFloat32 (2.0f);
+			ndFloat64 best = ndFloat64 (2.0f);
 			ndEdge* ptr = edge;
 
 			ndBigVector p0 (&m_vertexPoints[ptr->m_incidentVertex].m_x);
@@ -985,14 +985,14 @@ ndInt32 ndPolygonSoupBuilder::FilterFace (ndInt32 count, ndInt32* const pool)
 			p0 = p0 & ndBigVector::m_triplexMask;
 			p1 = p1 & ndBigVector::m_triplexMask;
 			ndBigVector e0 (p1 - p0);
-			e0 = e0.Scale (ndFloat64 (1.0f) / sqrt (e0.DotProduct(e0).GetScalar() + ndFloat32(1.0e-24f)));
+			e0 = e0.Scale (ndFloat64 (1.0f) / sqrt (e0.DotProduct(e0).GetScalar() + ndFloat64(1.0e-24f)));
 			do 
 			{
 				ndBigVector p2 (&m_vertexPoints[ptr->m_next->m_next->m_incidentVertex].m_x);
 				p2 = p2 & ndBigVector::m_triplexMask;
 				ndBigVector e1 (p2 - p1);
 
-				e1 = e1.Scale (ndFloat64 (1.0f) / sqrt (e1.DotProduct(e1).GetScalar() + ndFloat32(1.0e-24f)));
+				e1 = e1.Scale (ndFloat64 (1.0f) / sqrt (e1.DotProduct(e1).GetScalar() + ndFloat64(1.0e-24f)));
 				ndFloat64 mag2 = fabs (e1.DotProduct(e0).GetScalar());
 				if (mag2 < best) 
 				{
@@ -1075,7 +1075,7 @@ ndInt32 ndPolygonSoupBuilder::AddConvexFace (ndInt32 count, ndInt32* const pool,
 				ndBigVector p1 (&m_vertexPoints[ptr->m_next->m_incidentVertex].m_x);
 				ndBigVector e0 (p1 - p0);
 				ndFloat64 mag2 = e0.DotProduct(e0).GetScalar();
-				if (mag2 < ndFloat32 (1.0e-6f)) 
+				if (mag2 < ndFloat64 (1.0e-6f)) 
 				{
 					count --;
 					flag = 1;
@@ -1105,15 +1105,15 @@ ndInt32 ndPolygonSoupBuilder::AddConvexFace (ndInt32 count, ndInt32* const pool,
 				ndBigVector p0 (&m_vertexPoints[ptr->m_prev->m_incidentVertex].m_x);
 				ndBigVector p1 (&m_vertexPoints[ptr->m_incidentVertex].m_x);
 				ndBigVector e0 (p1 - p0);
-				e0 = e0.Scale (ndFloat64 (1.0f) / sqrt (e0.DotProduct(e0).GetScalar() + ndFloat32(1.0e-24f)));
+				e0 = e0.Scale (ndFloat64 (1.0f) / sqrt (e0.DotProduct(e0).GetScalar() + ndFloat64(1.0e-24f)));
 				do 
 				{
 					ndBigVector p2 (&m_vertexPoints[ptr->m_next->m_incidentVertex].m_x);
 					ndBigVector e1 (p2 - p1);
 
-					e1 = e1.Scale (ndFloat64 (1.0f) / sqrt (e1.DotProduct(e1).GetScalar() + ndFloat32(1.0e-24f)));
+					e1 = e1.Scale (ndFloat64 (1.0f) / sqrt (e1.DotProduct(e1).GetScalar() + ndFloat64(1.0e-24f)));
 					ndFloat64 mag2 = e1.DotProduct(e0).GetScalar();
-					if (mag2 > ndFloat32 (0.9999f)) 
+					if (mag2 > ndFloat64 (0.9999f)) 
 					{
 						count --;
 						flag = 1;
@@ -1134,7 +1134,7 @@ ndInt32 ndPolygonSoupBuilder::AddConvexFace (ndInt32 count, ndInt32* const pool,
 
 		ndBigVector normal (polyhedra.FaceNormal (edge, &m_vertexPoints[0].m_x, sizeof (ndBigVector)));
 		ndFloat64 mag2 = normal.DotProduct(normal).GetScalar();
-		if (mag2 < ndFloat32 (1.0e-8f)) 
+		if (mag2 < ndFloat64 (1.0e-8f)) 
 		{
 			return 0;
 		}
@@ -1146,17 +1146,17 @@ ndInt32 ndPolygonSoupBuilder::AddConvexFace (ndInt32 count, ndInt32* const pool,
 			ndBigVector p0 (&m_vertexPoints[ptr->m_prev->m_incidentVertex].m_x);
 			ndBigVector p1 (&m_vertexPoints[ptr->m_incidentVertex].m_x);
 			ndBigVector e0 (p1 - p0);
-			e0 = e0.Scale (ndFloat64 (1.0f) / sqrt (e0.DotProduct(e0).GetScalar() + ndFloat32(1.0e-24f)));
+			e0 = e0.Scale (ndFloat64 (1.0f) / sqrt (e0.DotProduct(e0).GetScalar() + ndFloat64(1.0e-24f)));
 			do 
 			{
 				ndBigVector p2 (&m_vertexPoints[ptr->m_next->m_incidentVertex].m_x);
 				ndBigVector e1 (p2 - p1);
 
-				e1 = e1.Scale (ndFloat64 (1.0f) / sqrt (e1.DotProduct(e1).GetScalar() + ndFloat32(1.0e-24f)));
+				e1 = e1.Scale (ndFloat64 (1.0f) / sqrt (e1.DotProduct(e1).GetScalar() + ndFloat64(1.0e-24f)));
 
 				ndBigVector n (e0.CrossProduct(e1));
 				ndFloat64 magnitud2 = n.DotProduct(normal).GetScalar();
-				if (magnitud2 < ndFloat32 (1.0e-5f)) 
+				if (magnitud2 < ndFloat64 (1.0e-5f)) 
 				{
 					isconvex = 0;
 					break;

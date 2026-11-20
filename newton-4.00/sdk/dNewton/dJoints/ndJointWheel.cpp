@@ -239,14 +239,14 @@ void ndJointWheel::GetJacobian(ndJacobianPair& lateral, ndJacobianPair& longitud
 	CalculateGlobalMatrix(matrix0, matrix1);
 
 	// calculate position and speed	
-	const ndVector veloc0(m_body0->GetVelocityAtPoint(matrix0.m_posit));
-	const ndVector veloc1(m_body1->GetVelocityAtPoint(matrix1.m_posit));
+	//const ndVector veloc0(m_body0->GetVelocityAtPoint(matrix0.m_posit));
+	//const ndVector veloc1(m_body1->GetVelocityAtPoint(matrix1.m_posit));
 
 	const ndVector& pin = matrix1[0];
 	const ndVector& p0 = matrix0.m_posit;
 	const ndVector& p1 = matrix1.m_posit;
 	const ndVector prel(p0 - p1);
-	const ndVector vrel(veloc0 - veloc1);
+	//const ndVector vrel(veloc0 - veloc1);
 	const ndVector projectedPoint = p1 + pin.Scale(pin.DotProduct(prel).GetScalar());
 
 	desc.m_rowsCount = 0;

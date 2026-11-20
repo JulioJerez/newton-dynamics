@@ -124,7 +124,11 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 			//	}
 			//	break;
 			//}
-			case m_box:
+
+			case m_boxMesh_uv:
+			case m_capsuleMesh_uv:
+			case m_sphericalMesh_uv: 
+			case m_cylindricalMesh_uv:
 			default:
 			{
 				m_mesh->UniformBoxMapping(0, ndGetIdentityMatrix());
@@ -500,7 +504,7 @@ const ndCloseLoopConstraints* ndMesh::GetLoopJoints() const
 	const ndMesh* mesh = GetRoot()->FindByName(ndCloseLoopConstraints::StaticClassName());
 	if (!mesh)
 	{
-		ndMesh* const rootNode = ((ndMesh*)this)->GetRoot();
+		ndMesh* const rootNode = const_cast<ndMesh*>(this)->GetRoot();
 		ndAssert(rootNode);
 		ndSharedPtr<ndMesh> loops(new ndCloseLoopConstraints());
 		loops->m_parent = rootNode;
@@ -536,7 +540,7 @@ const ndCollidingPairs* ndMesh::GetCollingPairs() const
 	ndMesh* mesh = GetRoot()->FindByName(ndCollidingPairs::StaticClassName());
 	if (!mesh)
 	{
-		ndMesh* const rootNode = ((ndMesh*)this)->GetRoot();
+		ndMesh* const rootNode = const_cast<ndMesh*>(this)->GetRoot();
 		ndAssert(rootNode);
 		ndSharedPtr<ndMesh> pairs(new ndCollidingPairs());
 		pairs->m_parent = rootNode;
@@ -596,7 +600,7 @@ const ndMesh* ndMesh::GetRoot() const
 
 ndMesh* ndMesh::FindByName(const ndString& name) const
 {
-	ndMesh* const self = (ndMesh*)this;
+	ndMesh* const self = const_cast<ndMesh*>(this);
 	for (ndMesh* node = self->IteratorFirst(); node; node = node->IteratorNext(self))
 	{
 		if (name.CompareIgnoreCase(node->m_name))
@@ -615,7 +619,7 @@ ndMesh* ndMesh::FindByClosestMatch(const ndString& name) const
 		ndString lowerCaseName(name);
 		lowerCaseName.ToLower();
 
-		ndMesh* const self = (ndMesh*)this;
+		ndMesh* const self = const_cast<ndMesh*>(this);
 		for (ndMesh* node = self->IteratorFirst(); node; node = node->IteratorNext(self))
 		{
 			ndString nodeName(node->m_name);
@@ -841,15 +845,15 @@ void ndMesh::ApplyBonesRotation(const ndMatrix& rotation)
 				scaleValue.m_y = 1.0f;
 				scaleValue.m_z = 1.0f;
 
-				auto GetKeyframe = [](const ndCurveValue& scale, const ndCurveValue& position, const ndCurveValue& rotation)
+				auto GetKeyframe = [](const ndCurveValue& scale, const ndCurveValue& posit, const ndCurveValue& rot)
 				{
 					ndMatrix scaleMatrix(ndGetIdentityMatrix());
 					scaleMatrix[0][0] = scale.m_x;
 					scaleMatrix[1][1] = scale.m_y;
 					scaleMatrix[2][2] = scale.m_z;
-					ndMatrix matrix(scaleMatrix * ndPitchMatrix(rotation.m_x) * ndYawMatrix(rotation.m_y) * ndRollMatrix(rotation.m_z));
-					matrix.m_posit = ndVector(position.m_x, position.m_y, position.m_z, 1.0f);
-					return matrix;
+					ndMatrix localMatrix(scaleMatrix * ndPitchMatrix(rot.m_x) * ndYawMatrix(rot.m_y) * ndRollMatrix(rot.m_z));
+					localMatrix.m_posit = ndVector(posit.m_x, posit.m_y, posit.m_z, ndFloat32(1.0f));
+					return localMatrix;
 				};
 
 				for (ndInt32 i = 0; i < positCurve.GetCount(); ++i)
@@ -891,35 +895,36 @@ void ndMesh::ApplyPivotsRotation(const ndMatrix& rotation)
 	const ndMatrix invRotation(rotation.OrthoInverse());
 
 	auto PivotRotation = [&rotation, &invRotation](ndMesh* const node)
+	//auto PivotRotation = [&rotation, &invRotation](ndMesh* const)
 	{
-		auto ApplyChildTransforms = [&rotation, &invRotation](ndMesh* const node)
+		auto ApplyChildTransforms = [&rotation, &invRotation](ndMesh* const nodePtr)
 		{
-			node->SetBasePoseMatrix(rotation * node->GetBasePoseMatrix());
+			nodePtr->SetBasePoseMatrix(rotation * nodePtr->GetBasePoseMatrix());
 
-			const ndMatrix geoMatrix(node->GetGeometryMatrix());
+			const ndMatrix geoMatrix(nodePtr->GetGeometryMatrix());
 			const ndMatrix rotatedGeoMatrix(geoMatrix * invRotation);
-			node->SetGeometryMatrix(rotatedGeoMatrix);
-			node->SetBoneTarget(invRotation.TransformVector(node->GetBoneTarget()));
+			nodePtr->SetGeometryMatrix(rotatedGeoMatrix);
+			nodePtr->SetBoneTarget(invRotation.TransformVector(nodePtr->GetBoneTarget()));
 
-			ndMesh::ndCurve& positCurve = node->GetPositCurve();
-			ndMesh::ndCurve& rotationCurve = node->GetRotationCurve();
+			ndMesh::ndCurve& positCurve = nodePtr->GetPositCurve();
+			ndMesh::ndCurve& rotationCurve = nodePtr->GetRotationCurve();
 			if (positCurve.GetCount() || rotationCurve.GetCount())
 			{
-				ndMesh::ndCurve::ndNode* positNode = node->GetPositCurve().GetFirst();
-				ndMesh::ndCurve::ndNode* rotationNode = node->GetRotationCurve().GetFirst();
+				ndMesh::ndCurve::ndNode* positNode = nodePtr->GetPositCurve().GetFirst();
+				ndMesh::ndCurve::ndNode* rotationNode = nodePtr->GetRotationCurve().GetFirst();
 
 				ndMesh::ndCurveValue scaleValue;
 				scaleValue.m_x = 1.0f;
 				scaleValue.m_y = 1.0f;
 				scaleValue.m_z = 1.0f;
 
-				auto GetKeyframe = [](const ndCurveValue& scale, const ndCurveValue& position, const ndCurveValue& rotation)
+				auto GetKeyframe = [](const ndCurveValue& scale, const ndCurveValue& position, const ndCurveValue& rot)
 				{
 					ndMatrix scaleMatrix(ndGetIdentityMatrix());
 					scaleMatrix[0][0] = scale.m_x;
 					scaleMatrix[1][1] = scale.m_y;
 					scaleMatrix[2][2] = scale.m_z;
-					ndMatrix matrix(scaleMatrix * ndPitchMatrix(rotation.m_x) * ndYawMatrix(rotation.m_y) * ndRollMatrix(rotation.m_z));
+					ndMatrix matrix(scaleMatrix * ndPitchMatrix(rot.m_x) * ndYawMatrix(rot.m_y) * ndRollMatrix(rot.m_z));
 					matrix.m_posit = ndVector(position.m_x, position.m_y, position.m_z, 1.0f);
 					return matrix;
 				};
@@ -946,11 +951,11 @@ void ndMesh::ApplyPivotsRotation(const ndMatrix& rotation)
 				}
 			}
 
-			ndSharedPtr<ndMeshBody>& body(node->GetRigidBody());
+			ndSharedPtr<ndMeshBody>& body(nodePtr->GetRigidBody());
 			if (body)
 			{
 				// scale center of mass
-				ndMeshBodyDynamic* const dynBody = (ndMeshBodyDynamic*)*body;
+				ndMeshBodyDynamic* const dynBody = static_cast<ndMeshBodyDynamic*>(*body);
 				dynBody->m_localCentreOfMass = invRotation.RotateVector(dynBody->m_localCentreOfMass);
 
 				// scale the diagonal inertia matrix (assume of box pinciapl axis)
@@ -978,7 +983,7 @@ void ndMesh::ApplyPivotsRotation(const ndMatrix& rotation)
 				ndMeshShapeInstance& shapeInstance = dynBody->m_shapeInstance;
 				shapeInstance.m_localMatrix = shapeInstance.m_localMatrix * invRotation;
 
-				ndSharedPtr<ndMeshJoint>& joint(node->GetJoint());
+				ndSharedPtr<ndMeshJoint>& joint(nodePtr->GetJoint());
 				if (joint)
 				{
 					joint->m_localFrame0 = rotation * joint->m_localFrame0 * invRotation;
@@ -1012,11 +1017,11 @@ void ndMesh::ApplyCoordinateRotation(const ndMatrix& rotation)
 
 	auto CoordinateRotation = [&rotation, &invRotation](ndMesh* const node)
 	{
-		const ndMatrix matrix(node->m_matrix);
+		const ndMatrix nodeMatrix(node->m_matrix);
 		const ndMatrix basePoseMatrix(node->m_basePoseMatrix);
 		const ndMatrix geoMatrix(node->GetGeometryMatrix());
 
-		const ndMatrix rotatedMatrix(invRotation * matrix * rotation);
+		const ndMatrix rotatedMatrix(invRotation * nodeMatrix * rotation);
 		const ndMatrix rotatedGeoMatrix(invRotation * geoMatrix * rotation);
 		const ndMatrix rotatedBasePoseMatrix(invRotation * basePoseMatrix * rotation);
 
@@ -1043,13 +1048,13 @@ void ndMesh::ApplyCoordinateRotation(const ndMatrix& rotation)
 			scaleValue.m_y = 1.0f;
 			scaleValue.m_z = 1.0f;
 
-			auto GetKeyframe = [](const ndCurveValue& scale, const ndCurveValue& position, const ndCurveValue& rotation)
+			auto GetKeyframe = [](const ndCurveValue& scale, const ndCurveValue& position, const ndCurveValue& rot)
 			{
 				ndMatrix scaleMatrix(ndGetIdentityMatrix());
 				scaleMatrix[0][0] = scale.m_x;
 				scaleMatrix[1][1] = scale.m_y;
 				scaleMatrix[2][2] = scale.m_z;
-				ndMatrix matrix(scaleMatrix * ndPitchMatrix(rotation.m_x) * ndYawMatrix(rotation.m_y) * ndRollMatrix(rotation.m_z));
+				ndMatrix matrix(scaleMatrix * ndPitchMatrix(rot.m_x) * ndYawMatrix(rot.m_y) * ndRollMatrix(rot.m_z));
 				matrix.m_posit = ndVector(position.m_x, position.m_y, position.m_z, 1.0f);
 				return matrix;
 			};
@@ -1085,7 +1090,7 @@ void ndMesh::ApplyCoordinateRotation(const ndMatrix& rotation)
 		if (body)
 		{
 			// scale center of mass
-			ndMeshBodyDynamic* const dynBody = (ndMeshBodyDynamic*)*body;
+			ndMeshBodyDynamic* const dynBody = static_cast<ndMeshBodyDynamic*>(*body);
 			dynBody->m_localCentreOfMass = rotation.RotateVector(dynBody->m_localCentreOfMass);
 
 			// scale the diagonal inertia matrix (assume of box pinciapl axis)
@@ -1194,7 +1199,7 @@ void ndMesh::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) c
 			}
 		}
 	};
-	((ndMesh*)this)->NodeIterator(GetAabb);
+	const_cast<ndMesh*>(this)->NodeIterator(GetAabb);
 	if ((p1.m_x - p0.m_x) < ndFloat32(0.0f))
 	{
 		p0 = ndVector::m_zero;
@@ -1287,7 +1292,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTire()
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionConvex()
 {
 	ndAssert(*m_mesh);
-	ndSharedPtr<ndShapeInstance>shape(m_mesh->CreateConvexCollision(1.0e-3f));
+	ndSharedPtr<ndShapeInstance>shape(m_mesh->CreateConvexCollision(ndFloat64(1.0e-3f)));
 	if (!(*shape))
 	{
 		shape = ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeNull()));
@@ -1310,7 +1315,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionConvexApproximation(bool low
 		meshPoints.PushBack(ndReal(pointsBuffer[i * pointsStride + 2]));
 	}
 	
-	ndArray<ndInt32> indices;
+	ndArray<uint32_t> indices;
 	ndInt32 mark = m_mesh->IncLRU();
 	ndPolyhedra::Iterator iter(**m_mesh);
 	for (iter.Begin(); iter; iter++)
@@ -1320,16 +1325,16 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionConvexApproximation(bool low
 		{
 			ndEdge* ptr = face;
 			ptr->m_mark = mark;
-			indices.PushBack(ptr->m_incidentVertex);
+			indices.PushBack(uint32_t(ptr->m_incidentVertex));
 	
 			ptr = ptr->m_next;
 			ptr->m_mark = mark;
-			indices.PushBack(ptr->m_incidentVertex);
+			indices.PushBack(uint32_t(ptr->m_incidentVertex));
 	
 			ptr = ptr->m_next;
 			do
 			{
-				indices.PushBack(ptr->m_incidentVertex);
+				indices.PushBack(uint32_t(ptr->m_incidentVertex));
 				ptr->m_mark = mark;
 	
 				ptr = ptr->m_next;
@@ -1339,8 +1344,8 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionConvexApproximation(bool low
 	
 	ndSharedPtr<nd::VHACD::IVHACD> interfaceVHACD (nd::VHACD::CreateVHACD());
 	nd::VHACD::IVHACD::Parameters paramsVHACD;
-	paramsVHACD.m_concavityToVolumeWeigh = lowDetail ? 1.0f : 0.5f;
-	interfaceVHACD->Compute(&meshPoints[0], uint32_t(meshPoints.GetCount() / 3), (uint32_t*)&indices[0], uint32_t(indices.GetCount() / 3), paramsVHACD);
+	paramsVHACD.m_concavityToVolumeWeigh = ndFloat64(lowDetail ? 1.0f : 0.5f);
+	interfaceVHACD->Compute(&meshPoints[0], uint32_t(meshPoints.GetCount() / 3), &indices[0], uint32_t(indices.GetCount() / 3), paramsVHACD);
 	
 	ndSharedPtr<ndShapeInstance> compoundShapeInstance(new ndShapeInstance(new ndShapeCompound()));
 	ndShapeCompound* const compoundShape = compoundShapeInstance->GetShape()->GetAsShapeCompound();

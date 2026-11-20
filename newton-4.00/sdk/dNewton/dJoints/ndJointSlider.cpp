@@ -317,7 +317,7 @@ void ndJointSlider::JacobianDerivative(ndConstraintDescritor& desc)
 	ApplyBaseRows(desc, matrix0, matrix1);
 
 	SubmitLimits(desc, matrix0, matrix1);
-	if (m_axis.m_springDamperRegularizer && ((m_axis.m_springK > ndFloat32(0.0f)) || (m_axis.m_damperC > ndFloat32(0.0f))))
+	if ((m_axis.m_springDamperRegularizer > ndFloat32(1.0e-7f)) && ((m_axis.m_springK > ndFloat32(0.0f)) || (m_axis.m_damperC > ndFloat32(0.0f))))
 	{
 		SubmitSpringDamper(desc, matrix0, matrix1);
 	}

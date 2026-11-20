@@ -105,8 +105,8 @@ ndBigVector ndPointToTriangleDistance(const ndBigVector& point, const ndBigVecto
 	const ndFloat64 a01 = e10.DotProduct(e20).GetScalar();
 
 	const ndFloat64 det = a00 * a11 - a01 * a01;
-	ndAssert(det >= ndFloat32(0.0f));
-	if (ndAbs(det) > ndFloat32(1.0e-24f)) 
+	ndAssert(det >= ndFloat64(0.0f));
+	if (ndAbs(det) > ndFloat64(1.0e-24f)) 
 	{
 		ndBigVector p0Point (point - p0);
 		const ndFloat64 b0 = e10.DotProduct(p0Point).GetScalar();
@@ -114,11 +114,11 @@ ndBigVector ndPointToTriangleDistance(const ndBigVector& point, const ndBigVecto
 
 		const ndFloat64 beta = b1 * a00 - a01 * b0;
 		const ndFloat64 alpha = b0 * a11 - a01 * b1;
-		if (beta < ndFloat32(0.0f)) 
+		if (beta < ndFloat64(0.0f)) 
 		{
 			return ndPointToRayDistance (point, p0, p1);
 		} 
-		else if (alpha < ndFloat32(0.0f)) 
+		else if (alpha < ndFloat64(0.0f)) 
 		{
 			return ndPointToRayDistance (point, p0, p2);
 		} 
@@ -137,7 +137,7 @@ ndBigVector ndPointToPolygonDistance(const ndBigVector& point, const ndBigVector
 {
 	const ndBigVector p0(points[0]);
 	ndBigVector p1(points[1]);
-	ndFloat64 dist2 = ndFloat32(1.0e10f);
+	ndFloat64 dist2 = ndFloat64(1.0e10f);
 	ndBigVector minPoint(p0);
 	for (ndInt32 i = 2; i < vertexCount; ++i)
 	{
@@ -330,7 +330,7 @@ void ndRayToPolygonDistance(const ndBigVector& ray_p0, const ndBigVector& ray_p1
 	ndFloat64 param = ndClamp(-normal.DotProduct(ray_p0 - points[0]).GetScalar() / (normal.DotProduct(segment).GetScalar()), ndFloat64(0.0f), ndFloat64(1.0f));
 	p0Out = ray_p0 + segment.Scale(param);
 
-	ndFloat64 distance2 = ndFloat32(1.0e10f);
+	ndFloat64 distance2 = ndFloat64(1.0e10f);
 	for (ndInt32 i = 2; i < vertexCount; ++i)
 	{
 		ndBigVector p (ndPointToTriangleDistance(p0Out, points[0], points[i-1], points[i]));
@@ -451,33 +451,33 @@ ndFloat32 ndRayCastSphere (const ndVector& p0, const ndVector& p1, const ndVecto
 		ndBigVector dp(p1 - p0);
 		ndAssert(dp.m_w == ndFloat32(0.0f));
 		ndFloat64 a = dp.DotProduct(dp).GetScalar();
-		ndFloat64 b = ndFloat32(2.0f) * p0Origin1.DotProduct(dp).GetScalar();
-		ndFloat64 c = p0Origin1.DotProduct(p0Origin1).GetScalar() - ndFloat64(radius) * radius;
-		ndFloat64 desc = b * b - ndFloat32(4.0f) * a * c;
-		if (desc >= 0.0f)
+		ndFloat64 b = ndFloat64(2.0f) * p0Origin1.DotProduct(dp).GetScalar();
+		ndFloat64 c = p0Origin1.DotProduct(p0Origin1).GetScalar() - ndFloat64(radius * radius);
+		ndFloat64 desc = b * b - ndFloat64(4.0f) * a * c;
+		if (desc >= ndFloat64(0.0f))
 		{
 			desc = sqrt(desc);
-			ndFloat64 den = ndFloat32(0.5f) / a;
+			ndFloat64 den = ndFloat64(0.5f) / a;
 			ndFloat64 t0 = (-b + desc) * den;
 			ndFloat64 t1 = (-b - desc) * den;
-			if ((t0 >= ndFloat32(0.0f)) && (t1 >= ndFloat32(0.0f)))
+			if ((t0 >= ndFloat64(0.0f)) && (t1 >= ndFloat64(0.0f)))
 			{
 				t0 = ndMin(t0, t1);
-				if (t0 <= ndFloat32(1.0f))
+				if (t0 <= ndFloat64(1.0f))
 				{
 					return ndFloat32(t0);
 				}
 			}
-			else if (t0 >= ndFloat32(0.0f))
+			else if (t0 >= ndFloat64(0.0f))
 			{
-				if (t0 <= ndFloat32(1.0f))
+				if (t0 <= ndFloat64(1.0f))
 				{
 					return ndFloat32(t0);
 				}
 			}
 			else
 			{
-				if ((t1 >= ndFloat32(0.0f)) && (t1 <= ndFloat32(1.0f)))
+				if ((t1 >= ndFloat64(0.0f)) && (t1 <= ndFloat64(1.0f)))
 				{
 					return ndFloat32(t1);
 				}

@@ -53,7 +53,7 @@ class ndMeshEffect: public ndPolyhedra
 	ndMeshEffect* Intersection (const dMatrix& matrix, const ndMeshEffect* const clipper) const;
 	void ClipMesh (const dMatrix& matrix, const ndMeshEffect* const clipper, ndMeshEffect** const top, ndMeshEffect** const bottom) const;
 	//bool PlaneClip (const dBigPlane& plane);
-		
+	
 	dEdge* SpliteFace (dInt32 v0, dInt32 v1);
 
 	dInt32 GetTotalFaceCount() const;

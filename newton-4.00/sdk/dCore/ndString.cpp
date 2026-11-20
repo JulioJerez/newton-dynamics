@@ -17,10 +17,10 @@
 #include "ndMemory.h"
 
 //#define D_USE_POOL_BUKECT_ALLOCATOR
-#define D_STRING_MEM_GRANULARITY		16
-#define D_STRING_MEM_MAX_BUCKET_SIZE	256
-#define D_STRING_MEM_BUCKETS			(D_STRING_MEM_MAX_BUCKET_SIZE / D_STRING_MEM_GRANULARITY)
-#define D_DSTRING_ENTRIES_IN_FREELIST	32
+//#define D_STRING_MEM_GRANULARITY		16
+//#define D_STRING_MEM_MAX_BUCKET_SIZE	256
+//#define D_STRING_MEM_BUCKETS			(D_STRING_MEM_MAX_BUCKET_SIZE / D_STRING_MEM_GRANULARITY)
+//#define D_DSTRING_ENTRIES_IN_FREELIST	32
 
 class ndString::ndStringAllocator
 {
@@ -151,7 +151,7 @@ class ndString::ndStringAllocator
 	#else 
 		char* Alloc(ndInt32 size)
 		{
-			return (char*) ndMemory::Malloc (size_t(size));
+			return reinterpret_cast<char*>(ndMemory::Malloc (size_t(size)));
 		}
 
 		void Free(char* const ptr)
@@ -341,8 +341,7 @@ void ndString::LoadFile (FILE* const file)
 	}
 	fseek (file, 0, SEEK_SET);
 	Expand (size);
-	size_t readBytes = 0;
-	readBytes += fread (m_string, 1, size_t(size), file);
+	fread (m_string, 1, size_t(size), file);
 	m_string[size-1] = 0;
 	m_size = size-1;
 	m_capacity = m_size + 1;

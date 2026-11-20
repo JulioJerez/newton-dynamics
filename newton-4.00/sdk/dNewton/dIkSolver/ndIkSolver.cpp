@@ -358,14 +358,14 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 
 	ndInt32 surrogateBodiesIndex = 1;
 	ndInt32 surrogateContactIndex = 0;
-	for (ndInt32 i = m_skeleton->m_nodeList.GetCount() - 1; i >= 0 ; --i)
+	for (ndInt32 k = m_skeleton->m_nodeList.GetCount() - 1; k >= 0 ; --k)
 	{
-		ndSkeletonContainer::ndNode* const node = m_skeleton->m_nodesOrder[i];
-		ndBodyKinematic* const body = node->m_body;
+		ndSkeletonContainer::ndNode* const node = m_skeleton->m_nodesOrder[k];
+		ndBodyKinematic* const nodeBody = node->m_body;
 
-		if (body->GetInvMass() > ndFloat32(0.0f))
+		if (nodeBody->GetInvMass() > ndFloat32(0.0f))
 		{ 
-			ndBodyKinematic::ndContactMap& contactMap = body->GetContactMap();
+			ndBodyKinematic::ndContactMap& contactMap = nodeBody->GetContactMap();
 			ndBodyKinematic::ndContactMap::Iterator it(contactMap);
 
 			for (it.Begin(); it; it++)
@@ -409,7 +409,7 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 
 						ndBodyKinematic* const body0 = contact->GetBody0()->GetAsBodyKinematic();
 						ndBodyKinematic* const body1 = contact->GetBody1()->GetAsBodyKinematic();
-						if (body0 == body)
+						if (body0 == nodeBody)
 						{
 							if (body1->GetInvMass() == ndFloat32(0.0f))
 							{
@@ -432,7 +432,7 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 						}
 						else
 						{
-							ndAssert(body1 == body);
+							ndAssert(body1 == nodeBody);
 							ndAssert(body1->GetInvMass() > ndFloat32(0.0f));
 							ndBodyKinematic* const surrogateBody = GetSurrogateBody(body0);
 

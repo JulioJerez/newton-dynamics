@@ -464,13 +464,13 @@ void ndJointRoller::JacobianDerivative(ndConstraintDescritor& desc)
 
 	ApplyBaseRows(desc, matrix0, matrix1);
 	
-	if (m_rotationAxis.m_springDamperRegularizer && ((m_rotationAxis.m_springK > ndFloat32(0.0f)) || (m_rotationAxis.m_damperC > ndFloat32(0.0f))))
+	if ((m_rotationAxis.m_springDamperRegularizer > ndFloat32(1.0e-7f)) && ((m_rotationAxis.m_springK > ndFloat32(0.0f)) || (m_rotationAxis.m_damperC > ndFloat32(0.0f))))
 	{
 		// spring damper with limits
 		SubmitSpringDamperAngle(desc, matrix0, matrix1);
 	}
 
-	if (m_positionAxis.m_springDamperRegularizer && ((m_positionAxis.m_springK > ndFloat32(0.0f)) || (m_positionAxis.m_damperC > ndFloat32(0.0f))))
+	if ((m_positionAxis.m_springDamperRegularizer > ndFloat32(1.0e-7f)) && ((m_positionAxis.m_springK > ndFloat32(0.0f)) || (m_positionAxis.m_damperC > ndFloat32(0.0f))))
 	{
 		// spring damper with limits
 		SubmitSpringDamperPosit(desc, matrix0, matrix1);

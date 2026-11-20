@@ -184,10 +184,10 @@ ndBigPlane ndConvexHull3dFace::GetPlaneEquation (const ndBigVector* const pointA
 
 	isvalid = false;
 	double mag2 = plane.DotProduct(plane & ndBigVector::m_triplexMask).GetScalar();
-	if (mag2 > ndFloat32 (1.0e-16f))
+	if (mag2 > ndFloat64 (1.0e-16f))
 	{
 		isvalid = true;
-		plane = plane.Scale(ndFloat32 (1.0f) / sqrt(mag2));
+		plane = plane.Scale(ndFloat64 (1.0f) / sqrt(mag2));
 	}
 	return plane;
 }
@@ -324,8 +324,8 @@ ndConvexHull3dAABBTreeNode* ndConvexHull3d::BuildTree (ndConvexHull3dAABBTreeNod
 	ndConvexHull3dAABBTreeNode* tree = nullptr;
 
 	ndAssert (count);
-	ndBigVector minP ( ndFloat32 (1.0e15f));
-	ndBigVector maxP (-ndFloat32 (1.0e15f));
+	ndBigVector minP ( ndFloat64 (1.0e15f));
+	ndBigVector maxP (-ndFloat64 (1.0e15f));
 	if (count <= DG_CONVEXHULL_3D_VERTEX_CLUSTER_SIZE) 
 	{
 		ndConvexHull3dPointCluster* const clump = new (*memoryPool) ndConvexHull3dPointCluster;
@@ -363,7 +363,7 @@ ndConvexHull3dAABBTreeNode* ndConvexHull3d::BuildTree (ndConvexHull3dAABBTreeNod
 			varian += p * p;
 		}
 
-		varian = varian.Scale(ndFloat32(count)) - median * median;
+		varian = varian.Scale(ndFloat64(count)) - median * median;
 		ndInt32 index = 0;
 		ndFloat64 maxVarian = ndFloat64 (-1.0e10f);
 		for (ndInt32 i = 0; i < 3; ++i) 
@@ -483,7 +483,8 @@ ndInt32 ndConvexHull3d::InitVertexArray(ndConvexHull3dVertex* const points, ndIn
 		m_points.SetCount(0);
 		return count;
 	}
-	ndConvexHull3dAABBTreeNode* tree = BuildTree (nullptr, &points[0], count, 0, (ndInt8**) &memoryPool, maxMemSize);
+	ndInt8* memoryAllocator = reinterpret_cast<ndInt8*>(memoryPool);
+	ndConvexHull3dAABBTreeNode* tree = BuildTree (nullptr, &points[0], count, 0, static_cast<ndInt8**>(&memoryAllocator), maxMemSize);
 
 	m_points.SetCount(count);
 	m_aabbP0 = tree->m_box[0];
@@ -491,7 +492,7 @@ ndInt32 ndConvexHull3d::InitVertexArray(ndConvexHull3dVertex* const points, ndIn
 
 	ndBigVector boxSize (tree->m_box[1] - tree->m_box[0]);
 	ndAssert (boxSize.m_w == ndFloat32 (0.0f));
-	m_diag = ndFloat32 (sqrt (boxSize.DotProduct(boxSize).GetScalar()));
+	m_diag = ndFloat64 (sqrt (boxSize.DotProduct(boxSize).GetScalar()));
 
 	const ndNormalMap& normalMap = ndNormalMap::GetNormaMap();
 
@@ -507,9 +508,9 @@ ndInt32 ndConvexHull3d::InitVertexArray(ndConvexHull3dVertex* const points, ndIn
 		ndAssert (index.m_vertexIndex >= 0);
 
 		e1 = points[index.m_vertexIndex] - m_points[0];
-		ndAssert (e1.m_w == ndFloat32 (0.0f));
+		ndAssert (e1.m_w == ndFloat64 (0.0f));
 		ndFloat64 error2 = e1.DotProduct(e1).GetScalar();
-		if (error2 > (ndFloat32 (1.0e-4f) * m_diag * m_diag)) 
+		if (error2 > (ndFloat64 (1.0e-4f) * m_diag * m_diag)) 
 		{
 			validTetrahedrum = true;
 			m_points[1] = points[index.m_vertexIndex];
@@ -536,7 +537,7 @@ ndInt32 ndConvexHull3d::InitVertexArray(ndConvexHull3dVertex* const points, ndIn
 		ndAssert (e2.m_w == ndFloat32 (0.0f));
 		ndAssert (normal.m_w == ndFloat32 (0.0f));
 		ndFloat64 error2 = sqrt (normal.DotProduct(normal).GetScalar());
-		if (error2 > (ndFloat32 (1.0e-4f) * m_diag * m_diag)) 
+		if (error2 > (ndFloat64 (1.0e-4f) * m_diag * m_diag)) 
 		{
 			validTetrahedrum = true;
 			m_points[2] = points[index.m_vertexIndex];
@@ -679,7 +680,7 @@ ndConvexHull3d::ndSupportPoint ndConvexHull3d::SupportVertex (ndConvexHull3dAABB
 	const ndBigVector dir(dirPlane & ndBigPlane::m_triplexMask);
 
 	stackPool.PushBack(*treePointer);
-	aabbProjection.PushBack(ndFloat32(1.0e20f));
+	aabbProjection.PushBack(ndFloat64(1.0e20f));
 
 	ndFloat64 maxProj = ndFloat64 (-1.0e20f);
 	ndInt32 ix = (dir[0] > ndFloat64 (0.0f)) ? 1 : 0;
@@ -696,10 +697,10 @@ ndConvexHull3d::ndSupportPoint ndConvexHull3d::SupportVertex (ndConvexHull3dAABB
 		{
 			if (me->m_left && me->m_right) 
 			{
-				const ndBigVector leftSupportPoint (me->m_left->m_box[ix].m_x, me->m_left->m_box[iy].m_y, me->m_left->m_box[iz].m_z, ndFloat32 (0.0f));
+				const ndBigVector leftSupportPoint (me->m_left->m_box[ix].m_x, me->m_left->m_box[iy].m_y, me->m_left->m_box[iz].m_z, ndFloat64 (0.0f));
 				ndFloat64 leftSupportDist = leftSupportPoint.DotProduct(dir).GetScalar();
 
-				const ndBigVector rightSupportPoint (me->m_right->m_box[ix].m_x, me->m_right->m_box[iy].m_y, me->m_right->m_box[iz].m_z, ndFloat32 (0.0f));
+				const ndBigVector rightSupportPoint (me->m_right->m_box[ix].m_x, me->m_right->m_box[iy].m_y, me->m_right->m_box[iz].m_z, ndFloat64 (0.0f));
 				ndFloat64 rightSupportDist = rightSupportPoint.DotProduct(dir).GetScalar();
 
 				if (rightSupportDist >= leftSupportDist) 
@@ -719,7 +720,7 @@ ndConvexHull3d::ndSupportPoint ndConvexHull3d::SupportVertex (ndConvexHull3dAABB
 			} 
 			else 
 			{
-				ndConvexHull3dPointCluster* const cluster = (ndConvexHull3dPointCluster*) me;
+				ndConvexHull3dPointCluster* const cluster = static_cast<ndConvexHull3dPointCluster*>(const_cast<ndConvexHull3dAABBTreeNode*>(me));
 				const ndInt32* const indices = cluster->m_indices;
 
 				for (ndInt32 i = cluster->m_count - 1; i >= 0; --i)
@@ -818,13 +819,13 @@ bool ndConvexHull3d::CheckFlatSurface(ndConvexHull3dAABBTreeNode* tree, ndConvex
 	m_points[3] = points[index.m_vertexIndex];
 
 	ndFloat64 volume = TetrahedrumVolume(m_points[0], m_points[1], m_points[2], m_points[3]);
-	if (ndAbs(volume) < ndFloat32(1.0e-9f)) 
+	if (ndAbs(volume) < ndFloat64(1.0e-9f)) 
 	{
-		normal = normal.Scale(ndFloat32(-1.0f));
+		normal = normal.Scale(ndFloat64(-1.0f));
 		index = SupportVertex(&tree, points, normal);
 		m_points[3] = points[index.m_vertexIndex];
 		volume = TetrahedrumVolume(m_points[0], m_points[1], m_points[2], m_points[3]);
-		if (ndAbs(volume) < ndFloat32(1.0e-9f)) 
+		if (ndAbs(volume) < ndFloat64(1.0e-9f)) 
 		{
 			return true;
 		}
@@ -1051,8 +1052,8 @@ void ndConvexHull3d::CalculateConvexHull3d (ndConvexHull3dAABBTreeNode* vertexTr
 
 void ndConvexHull3d::CalculateVolumeAndSurfaceArea (ndFloat64& volume, ndFloat64& surfaceArea) const
 {
-	ndFloat64 areaAcc = ndFloat32 (0.0f);
-	ndFloat64  volumeAcc = ndFloat32 (0.0f);
+	ndFloat64 areaAcc = ndFloat64 (0.0f);
+	ndFloat64  volumeAcc = ndFloat64 (0.0f);
 	for (ndNode* node = GetFirst(); node; node = node->GetNext()) 
 	{
 		const ndConvexHull3dFace* const face = &node->GetInfo();
@@ -1079,7 +1080,7 @@ void ndConvexHull3d::CalculateVolumeAndSurfaceArea (ndFloat64& volume, ndFloat64
 // this code has linear time complexity on the number of faces
 ndFloat64 ndConvexHull3d::RayCast (const ndBigVector& localP0, const ndBigVector& localP1) const
 {
-	ndFloat64 interset = ndFloat32 (1.2f);
+	ndFloat64 interset = ndFloat64 (1.2f);
 	ndFloat64 tE = ndFloat64 (0.0f);	// for the maximum entering segment parameter;
 	ndFloat64 tL = ndFloat64 (1.0f);	// for the minimum leaving segment parameter;
 	ndBigVector dS (localP1 - localP0); // is the segment direction vector;

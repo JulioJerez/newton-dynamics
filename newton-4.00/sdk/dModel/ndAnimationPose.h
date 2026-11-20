@@ -70,3 +70,4 @@ class ndAnimationLocalPose: public ndAnimationPose
 };
 
 #endif
+

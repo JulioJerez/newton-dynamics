@@ -15,7 +15,7 @@
 #include "ndMesh.h"
 class ndAnimationSequence;
 
-using namespace ndOfbx;
+//using namespace ndOfbx;
 
 #define ND_FBX_MAX_CHILDREN	1024
 

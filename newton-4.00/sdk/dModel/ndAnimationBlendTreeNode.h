@@ -28,3 +28,4 @@ class ndAnimationBlendTreeNode: public ndContainersFreeListAlloc<ndAnimationBlen
 };
 
 #endif
+

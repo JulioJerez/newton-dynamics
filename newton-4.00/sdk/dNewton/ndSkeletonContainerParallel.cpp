@@ -974,23 +974,23 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 	};
 
 	#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
-		auto DebugIndentity = [](const CholeskyTile& A, const CholeskyTile& B)
+	auto DebugIndentity = [](const CholeskyTile& A, const CholeskyTile& B)
+	{
+		CholeskyTile tile;
+		bool pass = true;
+		ndMatrixTimeMatrix(ND_SKELETON_TILE_SIZE, &A.m_element[0][0], &B.m_element[0][0], &tile.m_element[0][0]);
+		for (ndInt32 j = 0; j < ND_SKELETON_TILE_SIZE; ++j)
 		{
-			CholeskyTile tile;
-			bool pass = true;
-			ndMatrixTimeMatrix(ND_SKELETON_TILE_SIZE, &A.m_element[0][0], &B.m_element[0][0], &tile.m_element[0][0]);
-			for (ndInt32 j = 0; j < ND_SKELETON_TILE_SIZE; ++j)
+			ndFloat32 error = tile.m_element[j][j] - ndFloat32(1.0f);
+			pass = pass && (ndAbs(error) < ndFloat32(1.0e-6f));
+			for (ndInt32 k = j + 1; k < ND_SKELETON_TILE_SIZE; ++k)
 			{
-				ndFloat32 error = tile.m_element[j][j] - ndFloat32(1.0f);
-				pass = pass && (ndAbs(error) < ndFloat32(1.0e-6f));
-				for (ndInt32 k = j + 1; k < ND_SKELETON_TILE_SIZE; ++k)
-				{
-					pass = pass && (ndAbs(tile.m_element[j][k]) < ndFloat32(1.0e-6f));
-					pass = pass && (ndAbs(tile.m_element[k][j]) < ndFloat32(1.0e-6f));
-				}
+				pass = pass && (ndAbs(tile.m_element[j][k]) < ndFloat32(1.0e-6f));
+				pass = pass && (ndAbs(tile.m_element[k][j]) < ndFloat32(1.0e-6f));
 			}
-			return pass;
-		};
+		}
+		return pass;
+	};
 	#endif
 
 	const ndInt32 maxSize = size / ND_SKELETON_TILE_SIZE;
@@ -1024,7 +1024,7 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 				
 				InverseTile(invTile, tile);
 				#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
-					ndAssert(DebugIndentity(GetTile(i, i), invTile));
+				ndAssert(DebugIndentity(GetTile(i, i), invTile));
 				#endif
 			}
 		}

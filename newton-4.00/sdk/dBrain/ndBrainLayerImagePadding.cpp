@@ -209,3 +209,4 @@ void ndBrainLayerImagePadding::InputDerivative(const ndBrainVector&, const ndBra
 		outputOffset += outputSize;
 	}
 }
+
