@@ -778,6 +778,11 @@ void ndSkeletonContainer::ParallelRegularizeLcp() const
 	ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
 	if (!ParallelTestPSDmatrix(size, m_auxiliaryRowCount, matrix))
 	{
+		ndTrace(("Warning: The mass matrix is ill-conditioned.\n"))
+		ndTrace(("  Possible causes include extreme mass ratios or redudant joints.\n"))
+		ndTrace(("  The matrix will be heavily regularized.\n"))
+		ndTrace(("  Possible solution: try using double precision.\n"))
+
 		ndFloat32* const regularizer = ndAlloca(ndFloat32, size);
 		ndMemSet(regularizer, ndFloat32(1.01f), size);
 		ndInt32 step = m_auxiliaryRowCount + 1;

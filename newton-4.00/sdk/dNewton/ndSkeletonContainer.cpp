@@ -1231,6 +1231,10 @@ void ndSkeletonContainer::RegularizeLcp() const
 		ndFloat32* const buffer = GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount);
 		if (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix, &buffer[0]))
 		{
+			ndTrace(("Warning: The mass matrix is ill-conditioned.\n"))
+			ndTrace(("  Possible causes include extreme mass ratios or redudant joints.\n"))
+			ndTrace(("  The matrix will be heavily regularized.\n"))
+			ndTrace(("  Possible solution: try using double precision.\n"))
 			ndFloat32* const regularizer = ndAlloca(ndFloat32, size);
 			ndMemSet(regularizer, ndFloat32(1.01f), size);
 			ndInt32 step = m_auxiliaryRowCount + 1;
