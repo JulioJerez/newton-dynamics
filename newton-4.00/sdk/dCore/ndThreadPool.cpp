@@ -26,7 +26,7 @@
 #include "ndThreadPool.h"
 #include "ndThreadSyncUtils.h"
 
-#define	ND_THREAD_IDLE_ITERATIONS		32
+//#define	ND_THREAD_IDLE_ITERATIONS		32
 
 ndThreadPool::ndWorker::ndWorker()
 	:ndThread()

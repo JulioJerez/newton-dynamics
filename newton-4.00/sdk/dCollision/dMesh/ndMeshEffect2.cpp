@@ -728,13 +728,13 @@ ndMeshEffect* ndMeshEffect::CreateVoronoiConvexDecomposition(const ndArray<ndVec
 	ndFloat64 quantizeFactor = ndFloat64(16.0f);
 	ndFloat64 invQuantizeFactor = ndFloat64(1.0f) / quantizeFactor;
 	
-	ndBigVector pMin(0.0f);
-	ndBigVector pMax(0.0f);
+	ndBigVector pMin(ndBigVector::m_zero);
+	ndBigVector pMax(ndBigVector::m_zero);
 	for (ndInt32 i = 0; i <pointCloud.GetCount(); ++i)
 	{
-		ndFloat64 x = pointCloud[i].m_x;
-		ndFloat64 y = pointCloud[i].m_y;
-		ndFloat64 z = pointCloud[i].m_z;
+		ndFloat64 x = ndFloat64(pointCloud[i].m_x);
+		ndFloat64 y = ndFloat64(pointCloud[i].m_y);
+		ndFloat64 z = ndFloat64(pointCloud[i].m_z);
 		x = floor(x * quantizeFactor) * invQuantizeFactor;
 		y = floor(y * quantizeFactor) * invQuantizeFactor;
 		z = floor(z * quantizeFactor) * invQuantizeFactor;
@@ -779,7 +779,7 @@ ndMeshEffect* ndMeshEffect::CreateVoronoiConvexDecomposition(const ndArray<ndVec
 	pool[count + 7] = ndBigVector(pMax.m_x, pMax.m_y, pMax.m_z, ndFloat64(0.0f));
 	count += 8;
 	
-	ndDelaunayTetrahedralization delaunayTetrahedras(&pool[0].m_x, count, sizeof(ndBigVector), ndFloat32(0.0f));
+	ndDelaunayTetrahedralization delaunayTetrahedras(&pool[0].m_x, count, sizeof(ndBigVector), ndFloat64(0.0f));
 	delaunayTetrahedras.RemoveUpperHull();
 	
 	//	delaunayTetrahedras.Save("xxx0.txt");
@@ -841,7 +841,7 @@ ndMeshEffect* ndMeshEffect::CreateVoronoiConvexDecomposition(const ndArray<ndVec
 				if (convexMesh.GetCount()) 
 				{
 					convexMesh.m_materials.SetCount(interiorMaterialIndex + 1);
-					convexMesh.CalculateNormals(normalAngleInRadians);
+					convexMesh.CalculateNormals(ndFloat64(normalAngleInRadians));
 					convexMesh.UniformBoxMapping(interiorMaterialIndex, textureProjectionMatrix);
 					for (ndInt32 i = 0; i < convexMesh.m_points.m_vertex.GetCount(); ++i) 
 					{

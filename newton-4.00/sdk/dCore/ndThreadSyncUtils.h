@@ -45,7 +45,7 @@ class ndFloatExceptions
 	D_CORE_API ndFloatExceptions(ndUnsigned32 mask = D_FLOAT_EXCEPTIONS_MASK);
 	D_CORE_API ~ndFloatExceptions();
 
-	private:
+	protected:
 	ndUnsigned32 m_floatMask;
 	ndUnsigned32 m_simdMask;
 };

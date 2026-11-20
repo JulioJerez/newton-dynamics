@@ -905,16 +905,6 @@ void ndMarchingCubeIsoSurface::GenerateMesh()
 		densityWindow0.Swap(densityWindow1);
 	}
 
-	class ndTriangleClassifier
-	{
-		public:
-		ndTriangleClassifier(void* const) {}
-		ndInt32 GetKey(const ndTriangle& triangle) const
-		{
-			return (triangle.m_p0.m_w < ndFloat32(1.0e-6f)) ? 1 : 0;
-		}
-	};
-
 	ndUnsigned32 scans[4];
 	m_meshNormals.SetCount(m_meshPoints.GetCount());
 	ndTriangle* const triangles = reinterpret_cast<ndTriangle*>(&m_meshPoints[0]);

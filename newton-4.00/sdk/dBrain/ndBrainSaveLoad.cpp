@@ -65,23 +65,20 @@ ndBrain* ndBrainLoad::Load(const char* const pathName)
 		ndInt32 ReadInt() const override
 		{
 			ndInt32 value;
-			size_t readValues = 0;
-			readValues += fscanf(m_file, "%d", &value);
+			fscanf(m_file, "%d", &value);
 			return value;
 		}
 
 		ndFloat32 ReadFloat() const override
 		{
 			ndReal value;
-			size_t readValues = 0;
-			readValues += fscanf(m_file, "%f", &value);
+			fscanf(m_file, "%f", &value);
 			return ndFloat32 (value);
 		}
 
 		void ReadString(char* const buffer) const override
 		{
-			size_t readValues = 0;
-			readValues += fscanf(m_file, "%s", buffer);
+			fscanf(m_file, "%s", buffer);
 		}
 
 		FILE* m_file;
@@ -195,7 +192,19 @@ void ndBrainSave::Save(const ndBrain* const brain)
 		va_list v_args;
 		buffer[0] = 0;
 		va_start(v_args, fmt);
+
+		#if defined(__clang__)
+			#pragma clang diagnostic push
+			#pragma clang diagnostic ignored "-Wformat-nonliteral"
+		#endif
+
 		vsnprintf(buffer, sizeof(buffer), fmt, v_args);
+
+		#if defined(__clang__)
+			#pragma clang diagnostic pop
+		#endif
+
+
 		va_end(v_args);
 		WriteData(buffer);
 	};

@@ -25,12 +25,12 @@
 // 
 // also improvement from paper: ABF++: Fast and Robust Angle Based Flattening
 // http://hal.archives-ouvertes.fr/docs/00/10/56/89/PDF/abf_plus_plus_temp.pdf
-// by: Alla Sheffer, Bruno Lévy, Inria Lorraine, Maxim Mogilnitsky and Alexander Bogomyakov
+// by: Alla Sheffer, Bruno Levy, Inria Lorraine, Maxim Mogilnitsky and Alexander Bogomyakov
 //
 // also looking at paper
 // Least Squares Conformal Maps for Automatic Texture Atlas Generation
 // http://www.cs.jhu.edu/~misha/Fall09/Levy02.pdf
-// by Bruno Lévy Sylvain Petitjean Nicolas Ray Jérome Maillot
+// by Bruno Levy Sylvain Petitjean Nicolas Ray Jerome Maillot
 // for automatic seam and atlas generation 
 
 #include "ndCoreStdafx.h"
@@ -1785,7 +1785,7 @@ void ndMeshEffect::BoxMapping(ndInt32 front, ndInt32 side, ndInt32 top, const nd
 			ndBigVector n(e0.CrossProduct(e1));
 
 			ndInt32 index = 0;
-			ndFloat64 maxProjection = ndFloat32(0.0f);
+			ndFloat64 maxProjection = ndFloat64(0.0f);
 
 			for (ndInt32 i = 0; i < 3; ++i) 
 			{
@@ -1806,7 +1806,8 @@ void ndMeshEffect::BoxMapping(ndInt32 front, ndInt32 side, ndInt32 top, const nd
 			ndEdge* ptr = edge;
 			do 
 			{
-				ndVector p(scale * buffer[ptr->m_incidentVertex] - ndFloat32(0.5f));
+				//ndVector p(scale * buffer[ptr->m_incidentVertex] - ndFloat32(0.5f));
+				ndVector p(scale * buffer[ptr->m_incidentVertex] - ndBigVector::m_half);
 				ndUV uv(p[u], p[v]);
 				m_attrib.m_uv0Channel[ndInt32(ptr->m_userData)] = uv;
 				m_attrib.m_materialChannel[ndInt32(ptr->m_userData)] = materialArray[index];
@@ -1888,8 +1889,8 @@ void ndMeshEffect::SphericalMapping(ndInt32 material, const ndMatrix& textureMat
 		ndVector point(textureMatrix.RotateVector(geoPoint.Normalize()));
 		point.m_x = ndClamp(point.m_x, ndFloat32(-1.0f + 1.0e-6f), ndFloat32(1.0f - 1.0e-6f));
 
-		ndFloat64 v = ndClamp(ndAsin(point.m_x) / ndPi + ndFloat64(0.5f), ndFloat64(0.0f), ndFloat64(1.0f));
-		ndFloat64 u = ndClamp(ndAtan2(point.m_y, point.m_z) / (ndFloat32(2.0f) * ndPi) + ndFloat64(0.5f), ndFloat64(0.0f), ndFloat64(1.0f));
+		ndFloat64 v = ndClamp(ndFloat64(ndAsin(point.m_x) / ndPi) + ndFloat64(0.5f), ndFloat64(0.0f), ndFloat64(1.0f));
+		ndFloat64 u = ndClamp(ndFloat64(ndAtan2(point.m_y, point.m_z)) / (ndFloat64(2.0f) * ndFloat64(ndPi)) + ndFloat64(0.5f), ndFloat64(0.0f), ndFloat64(1.0f));
 		sphere[i].m_x = u;
 		sphere[i].m_y = v;
 	}
@@ -1990,12 +1991,12 @@ void ndMeshEffect::CylindricalMapping(ndInt32 material, const ndMatrix& textureM
 			ndBigVector e0(p1 - p0);
 			ndBigVector e1(p2 - p0);
 			ndBigVector n(e0.CrossProduct(e1).Normalize());
-			if (ndAbs(n.m_x) > ndFloat32 (0.85f))
+			if (ndAbs(n.m_x) > ndFloat64 (0.85f))
 			{
 				ndEdge* ptr = edge;
 				do
 				{
-					ndVector p(scale * buffer[ptr->m_incidentVertex] - ndFloat32(0.5f));
+					ndVector p(scale * buffer[ptr->m_incidentVertex] - ndFloat64(0.5f));
 					ndUV uv(p.m_y, p.m_z);
 					m_attrib.m_uv0Channel[ndInt32(ptr->m_userData)] = uv;
 					m_attrib.m_materialChannel[ndInt32(ptr->m_userData)] = material;
@@ -2013,7 +2014,7 @@ void ndMeshEffect::CylindricalMapping(ndInt32 material, const ndMatrix& textureM
 				do
 				{
 					ndVector p(buffer[ptr->m_incidentVertex]);
-					ndFloat32 u = ndFloat32(scale.m_x * p.m_x - ndFloat32(0.5f));
+					ndFloat32 u = ndFloat32(scale.m_x) * p.m_x - ndFloat32(0.5f);
 					ndFloat32 v = ndAtan2(p.m_y, p.m_z) / ndPi;
 					ndUV uv(u, v);
 					aliasUV.PushBack(uv);
