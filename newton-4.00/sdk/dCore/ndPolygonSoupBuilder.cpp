@@ -1015,7 +1015,7 @@ ndInt32 ndPolygonSoupBuilder::FilterFace (ndInt32 count, ndInt32* const pool)
 			} while (ptr != first);
 		}
 
-	#ifdef _DEBUG
+	#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		if (count >= 3) 
 		{
 			ndInt32 j0 = count - 2;  

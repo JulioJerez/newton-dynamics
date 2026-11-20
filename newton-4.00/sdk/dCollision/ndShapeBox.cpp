@@ -27,6 +27,11 @@
 #include "ndContactSolver.h"
 #include "ndMeshBaseComponents.h"
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 ndInt32 ndShapeBox::m_initSimplex = 0;
 ndShapeConvex::ndConvexSimplexEdge ndShapeBox::m_edgeArray[24];
 ndShapeConvex::ndConvexSimplexEdge* ndShapeBox::m_edgeEdgeMap[12];
@@ -43,6 +48,10 @@ ndInt32 ndShapeBox::m_faces[][4] =
 
 ndVector ndShapeBox::m_indexMark(ndFloat32(1.0f), ndFloat32(2.0f), ndFloat32(4.0f), ndFloat32(0.0f));
 ndVector ndShapeBox::m_penetrationTol(D_PENETRATION_TOL, D_PENETRATION_TOL, D_PENETRATION_TOL, ndFloat32(0.0f));
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 ndShapeBox::ndShapeBox(ndFloat32 size_x, ndFloat32 size_y, ndFloat32 size_z)
 	:ndShapeConvex(m_box)
@@ -303,7 +312,7 @@ ndFloat32 ndShapeBox::RayCast(ndRayCastNotify&, const ndVector& localP0, const n
 
 const ndShapeConvex::ndConvexSimplexEdge** ndShapeBox::GetVertexToEdgeMapping() const
 {
-	return (const ndConvexSimplexEdge**)&m_vertexToEdgeMap[0];
+	return const_cast<const ndConvexSimplexEdge**>(&m_vertexToEdgeMap[0]);
 }
 
 ndInt32 ndShapeBox::CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const

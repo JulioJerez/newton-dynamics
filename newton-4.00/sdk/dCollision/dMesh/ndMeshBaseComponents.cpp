@@ -132,7 +132,7 @@ bool ndMeshCollisionShapeSphere::operator==(const ndMeshCollisionShape& other) c
 	bool test = ndMeshCollisionShape::operator==(other);
 	if (test)
 	{
-		const ndMeshCollisionShapeSphere* const otherShape = (ndMeshCollisionShapeSphere*)&other;
+		const ndMeshCollisionShapeSphere* const otherShape = static_cast<const ndMeshCollisionShapeSphere*>(&other);
 		test = test && (m_radius == otherShape->m_radius);
 	}
 	return test;
@@ -183,7 +183,7 @@ bool ndMeshCollisionShapeBox::operator==(const ndMeshCollisionShape& other) cons
 	bool test = ndMeshCollisionShape::operator==(other);
 	if (test)
 	{
-		const ndMeshCollisionShapeBox* const otherShape = (ndMeshCollisionShapeBox*)&other;
+		const ndMeshCollisionShapeBox* const otherShape = static_cast<const ndMeshCollisionShapeBox*>(&other);
 		test = test && (m_x == otherShape->m_x);
 		test = test && (m_y == otherShape->m_y);
 		test = test && (m_z == otherShape->m_z);
@@ -242,7 +242,7 @@ bool ndMeshCollisionShapeCapsule::operator==(const ndMeshCollisionShape& other) 
 	bool test = ndMeshCollisionShape::operator==(other);
 	if (test)
 	{
-		const ndMeshCollisionShapeCapsule* const otherShape = (ndMeshCollisionShapeCapsule*)&other;
+		const ndMeshCollisionShapeCapsule* const otherShape = static_cast<const ndMeshCollisionShapeCapsule*>(&other);
 		test = test && (m_height == otherShape->m_height);
 		test = test && (m_radius0 == otherShape->m_radius0);
 		test = test && (m_radius1 == otherShape->m_radius1);
@@ -301,7 +301,7 @@ bool ndMeshCollisionShapeCylinder::operator==(const ndMeshCollisionShape& other)
 	bool test = ndMeshCollisionShape::operator==(other);
 	if (test)
 	{
-		const ndMeshCollisionShapeCylinder* const otherShape = (ndMeshCollisionShapeCylinder*)&other;
+		const ndMeshCollisionShapeCylinder* const otherShape = static_cast<const ndMeshCollisionShapeCylinder*>(&other);
 		test = test && (m_height == otherShape->m_height);
 		test = test && (m_radius0 == otherShape->m_radius0);
 		test = test && (m_radius1 == otherShape->m_radius1);
@@ -359,7 +359,7 @@ bool ndMeshCollisionShapeChamferCylinder::operator==(const ndMeshCollisionShape&
 	bool test = ndMeshCollisionShape::operator==(other);
 	if (test)
 	{
-		const ndMeshCollisionShapeChamferCylinder* const otherShape = (ndMeshCollisionShapeChamferCylinder*)&other;
+		const ndMeshCollisionShapeChamferCylinder* const otherShape = static_cast<const ndMeshCollisionShapeChamferCylinder*>(&other);
 		test = test && (m_height == otherShape->m_height);
 		test = test && (m_radius == otherShape->m_radius);
 	}
@@ -460,7 +460,7 @@ bool ndMeshCollisionShapeConvexHull::operator==(const ndMeshCollisionShape& othe
 	bool test = ndMeshCollisionShape::operator==(other);
 	if (test)
 	{
-		const ndMeshCollisionShapeConvexHull* const otherShape = (ndMeshCollisionShapeConvexHull*)&other;
+		const ndMeshCollisionShapeConvexHull* const otherShape = static_cast<const ndMeshCollisionShapeConvexHull*>(&other);
 		test = test && (m_tolarence == otherShape->m_tolarence);
 		test = test && (m_maxPointCount == otherShape->m_maxPointCount);
 		for (ndInt32 i = 0; test && (i < m_points.GetCount()); ++i)
@@ -575,7 +575,7 @@ void ndMeshCollisionShapeTree::SerializeToXml(nd::TiXmlElement* const parent) co
 		ndNodesList(const ndArray<ndAabbPolygonSoup::ndNode>& nodes)
 			:ndArray<ndInt32>()
 		{
-			m_array = (ndInt32*)&nodes[0];
+			m_array = reinterpret_cast<ndInt32*>(const_cast<ndAabbPolygonSoup::ndNode*>(&nodes[0]));
 			m_size = ndInt64(nodes.GetCount() * sizeof(ndAabbPolygonSoup::ndNode) / sizeof(ndInt32));
 		}
 
@@ -605,7 +605,7 @@ void ndMeshCollisionShapeTree::DeserializeFromXml(const nd::TiXmlElement* const 
 	for (ndInt32 i = 0; i < nodesCount; ++i)
 	{
 		ndAabbPolygonSoup::ndNode data;
-		ndInt32* const ptr = (ndInt32*)&data;
+		ndInt32* const ptr = reinterpret_cast<ndInt32*>(&data);
 		for (ndInt32 j = 0; j < nodesSize; ++j)
 		{
 			ptr[j] = nodes[i * nodesSize + j];
@@ -646,7 +646,7 @@ bool ndMeshCollisionShapeCompound::operator==(const ndMeshCollisionShape& other)
 	bool test = ndMeshCollisionShape::operator==(other);
 	if (test)
 	{
-		const ndMeshCollisionShapeCompound* const otherShape = (ndMeshCollisionShapeCompound*)&other;
+		const ndMeshCollisionShapeCompound* const otherShape = static_cast<const ndMeshCollisionShapeCompound*>(&other);
 		test = test && (m_subShapes.GetCount() == otherShape->m_subShapes.GetCount());
 		ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* selftNode = m_subShapes.GetFirst();
 		for (ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* node = otherShape->m_subShapes.GetFirst(); node; node = node->GetNext())
@@ -711,7 +711,7 @@ void ndMeshCollisionShapeCompound::DeserializeFromXml(const nd::TiXmlElement* co
 	for (const nd::TiXmlNode* node = parent->FirstChild("collisionInstance"); node; node = node->NextSibling("collisionInstance"))
 	{
 		ndSharedPtr<ndMeshShapeInstance> instance(new ndMeshShapeInstance);
-		instance->DeserializeFromXml((nd::TiXmlElement*)node);
+		instance->DeserializeFromXml(static_cast<const nd::TiXmlElement*>(node));
 		m_subShapes.Append(instance);
 	}
 }
@@ -816,7 +816,7 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 		m_collidable = xmlGetInt(parent, "collidable") ? true : false;
 	}
 
-	const nd::TiXmlElement* const xmlShape = (nd::TiXmlElement*)parent->FirstChild("shape");
+	const nd::TiXmlElement* const xmlShape = static_cast<const nd::TiXmlElement*>(parent->FirstChild("shape"));
 	ndAssert(xmlShape);
 
 	const char* const constructor = xmlGetString(xmlShape, "constructor");
@@ -976,7 +976,7 @@ bool ndMeshBodyKinematic::operator==(const ndMeshBody& other) const
 		return diff.DotProduct(diff).GetScalar() < ndFloat32(1.0e-6f);
 	};
 
-	const ndMeshBodyKinematic* const otherBody = (ndMeshBodyKinematic*)&other;
+	const ndMeshBodyKinematic* const otherBody = static_cast<const ndMeshBodyKinematic*>(&other);
 	test = test && (m_shapeInstance == otherBody->m_shapeInstance);
 	test = test && Compare(m_invMass, otherBody->m_invMass);
 	test = test && Compare(m_inertiaPrincipalAxis & ndVector::m_triplexMask, otherBody->m_inertiaPrincipalAxis & ndVector::m_triplexMask);
@@ -1018,7 +1018,7 @@ void ndMeshBodyKinematic::DeserializeFromXml(const nd::TiXmlElement* const paren
 		m_massVolumeWeigh = xmlGetFloat(parent, "massVolumeWeigh");
 	}
 
-	const nd::TiXmlElement* const xmlShape = (nd::TiXmlElement*)parent->FirstChild("collisionInstance");
+	const nd::TiXmlElement* const xmlShape = static_cast<const nd::TiXmlElement*>(parent->FirstChild("collisionInstance"));
 	ndAssert(xmlShape);
 	m_shapeInstance.DeserializeFromXml(xmlShape);
 }
@@ -1326,7 +1326,7 @@ ndMeshTransformModifier* ndMeshTransformModifierUserDefined::Duplicate() const
 
 bool ndMeshTransformModifierUserDefined::operator==(const ndMeshTransformModifier& other) const
 {
-	const ndMeshTransformModifierUserDefined* const otherUser = (ndMeshTransformModifierUserDefined*)&other;
+	const ndMeshTransformModifierUserDefined* const otherUser = static_cast<const ndMeshTransformModifierUserDefined*>(&other);
 	bool test = ndMeshTransformModifier::operator==(other);
 	return test && (m_userConstructor == otherUser->m_userConstructor);
 }
@@ -1397,7 +1397,7 @@ ndMeshCustomPropertyFloat::ndMeshCustomPropertyFloat(ndMesh* const owner, const 
 bool ndMeshCustomPropertyFloat::operator==(const ndMeshCustomProperty& other) const
 {
 	bool test = ndMeshCustomProperty::operator==(other);
-	const ndMeshCustomPropertyFloat* const otherProp = (ndMeshCustomPropertyFloat*)&other;
+	const ndMeshCustomPropertyFloat* const otherProp = static_cast<const ndMeshCustomPropertyFloat*>(&other);
 	return test && (m_value == otherProp->m_value);
 }
 
@@ -1434,7 +1434,7 @@ ndMeshCustomPropertyString::ndMeshCustomPropertyString(ndMesh* const owner, cons
 bool ndMeshCustomPropertyString::operator==(const ndMeshCustomProperty& other) const
 {
 	bool test = ndMeshCustomProperty::operator==(other);
-	const ndMeshCustomPropertyString* const otherProp = (ndMeshCustomPropertyString*)&other;
+	const ndMeshCustomPropertyString* const otherProp = static_cast<const ndMeshCustomPropertyString*>(&other);
 	return test && (m_value == otherProp->m_value);
 }
 

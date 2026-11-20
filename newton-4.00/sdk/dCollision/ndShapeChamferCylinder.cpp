@@ -26,10 +26,19 @@
 #include "ndMeshBaseComponents.h"
 #include "ndShapeChamferCylinder.h"
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 ndInt32 ndShapeChamferCylinder::m_shapeRefCount = 0;
 ndVector ndShapeChamferCylinder::m_yzMask (0, 0xffffffff, 0xffffffff, 0);
 ndVector ndShapeChamferCylinder::m_shapesDirs[DG_MAX_CHAMFERCYLINDER_DIR_COUNT];
 ndShapeConvex::ndConvexSimplexEdge ndShapeChamferCylinder::m_edgeArray[(4 * DG_CHAMFERCYLINDER_SLICES + 2)* DG_CHAMFERCYLINDER_BRAKES];
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 ndShapeChamferCylinder::ndShapeChamferCylinder(ndFloat32 radius, ndFloat32 height)
 	:ndShapeConvex(m_chamferCylinder)

@@ -116,8 +116,8 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 		ndNode ()
 			:m_indexBox0(0)
 			,m_indexBox1(0)
-			,m_left(0)
-			,m_right(0)
+			,m_leftInfo(0)
+			,m_rightInfo(0)
 		{
 		}
 
@@ -199,8 +199,8 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 
 		ndInt32 m_indexBox0;
 		ndInt32 m_indexBox1;
-		ndLeafNodePtr m_left;
-		ndLeafNodePtr m_right;
+		ndLeafNodePtr m_leftInfo;
+		ndLeafNodePtr m_rightInfo;
 	};
 
 	class ndSplitInfo;
@@ -265,14 +265,14 @@ inline ndAabbPolygonSoup::ndNode* ndAabbPolygonSoup::GetRootNode() const
 /// Return nullptr if node was a leaf.
 inline ndAabbPolygonSoup::ndNode* ndAabbPolygonSoup::GetBackNode(const ndNode* const node) const
 {
-	return node->m_left.IsLeaf() ? nullptr : node->m_left.GetNode(m_aabb);
+	return node->m_leftInfo.IsLeaf() ? nullptr : node->m_leftInfo.GetNode(m_aabb);
 }
 
 /// Returns the front child node of the hierarchy.
 /// Return nullptr if node was a leaf.
 inline ndAabbPolygonSoup::ndNode* ndAabbPolygonSoup::GetFrontNode(const ndNode* const node) const
 {
-	return node->m_right.IsLeaf() ? nullptr : node->m_right.GetNode(m_aabb);
+	return node->m_rightInfo.IsLeaf() ? nullptr : node->m_rightInfo.GetNode(m_aabb);
 }
 
 /// Returns the bounding box of node in point p0 and p1.

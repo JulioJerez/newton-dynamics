@@ -167,7 +167,7 @@ ndUnsigned64 ndCRC64(const char* const name, ndUnsigned64 crcAcc)
 
 ndUnsigned64 ndCRC64(const void* const buffer, ndInt32 size, ndUnsigned64 crcAcc)
 {
-	const unsigned char* const ptr = (unsigned char*)buffer;
+	const unsigned char* const ptr = reinterpret_cast<const unsigned char*>(buffer);
 	for (ndInt32 i = 0; i < size; ++i)
 	{
         unsigned char c = ptr[i];

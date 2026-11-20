@@ -214,7 +214,7 @@ ndMatrix ndMatrix::Inverse4x4 () const
 		inv[i] = den * (inv[i] - acc);
 	}
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	tmp = *this * inv;
 	for (ndInt32 i = 0; i < 4; ++i) 
 	{
@@ -357,7 +357,7 @@ ndVector ndMatrix::CalcPitchYawRoll (ndVector& euler1) const
 	euler0[3] = ndFloat32(0.0f);
 	euler1[3] = ndFloat32(0.0f);
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndMatrix m0 (ndPitchMatrix (euler0[0]) * ndYawMatrix(euler0[1]) * ndRollMatrix(euler0[2]));
 	ndMatrix m1 (ndPitchMatrix (euler1[0]) * ndYawMatrix(euler1[1]) * ndRollMatrix(euler1[2]));
 	for (ndInt32 i = 0; i < 3; ++i) 
@@ -608,7 +608,7 @@ ndMatrix ndCalculateMatrix(const ndQuaternion& quat, const ndVector& position)
 	const ndFloat32 y2 = quat0.m_y * quat1.m_y;
 	const ndFloat32 z2 = quat0.m_z * quat1.m_z;
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndFloat32 w2 = quat0.m_w * quat1.m_w;
 	ndAssert(ndAbs(w2 + x2 + y2 + z2 - ndFloat32(2.0f)) < ndFloat32(1.0e-3f));
 #endif

@@ -87,6 +87,8 @@ class ndMemory
 
 	private:
 	static ndAtomic<ndUnsigned64> m_memoryUsed;
+	static ndMemFreeCallback m_freeMemory;
+	static ndMemAllocCallback m_allocMemory;
 };
 
 #endif

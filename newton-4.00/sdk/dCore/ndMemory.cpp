@@ -29,10 +29,18 @@
 #define D_MEMORY_ALIGMNET			32
 #define ndGetBufferPaddingInBytes	size_t(D_MEMORY_ALIGMNET - 1 + sizeof (ndMemoryHeader))
 
-ndAtomic<ndUnsigned64> ndMemory::m_memoryUsed(0);
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
 
-static ndMemFreeCallback m_freeMemory = free;
-static ndMemAllocCallback m_allocMemory = malloc;
+ndAtomic<ndUnsigned64> ndMemory::m_memoryUsed(0);
+ndMemFreeCallback ndMemory::m_freeMemory = free;
+ndMemAllocCallback ndMemory::m_allocMemory = malloc;
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 size_t ndMemory::GetMemoryAligment()
 {
@@ -46,13 +54,13 @@ size_t ndMemory::CalculateBufferSize(size_t size)
 
 size_t ndMemory::GetSize(void* const ptr)
 {
-	const ndMemoryHeader* const info = ((ndMemoryHeader*)ptr) - 1;
+	const ndMemoryHeader* const info = reinterpret_cast<ndMemoryHeader*>(ptr) - 1;
 	return info->m_bufferSize;
 }
 
 size_t ndMemory::GetOriginalSize(void* const ptr)
 {
-	const ndMemoryHeader* const info = ((ndMemoryHeader*)ptr) - 1;
+	const ndMemoryHeader* const info = reinterpret_cast<ndMemoryHeader*>(ptr) - 1;
 	return info->m_requestedSize;
 }
 
@@ -76,7 +84,7 @@ void ndMemory::GetMemoryAllocators(ndMemAllocCallback& alloc, ndMemFreeCallback&
 bool ndMemory::CheckMemoryHeap()
 {
 	bool ret = true;
-#if defined (WIN32) || defined(_WIN32)
+#if !defined(__clang__) && (defined (WIN32) || defined(_WIN32))
 	ret = _CrtCheckMemory() ? true : false;
 #elif defined (__linux__)
 	// linux OS memory check
@@ -102,7 +110,7 @@ void* ndMemory::Malloc(size_t size)
 	ndUnsigned64 val = ndUnsigned64(metToVal.m_int) + ndGetBufferPaddingInBytes;
 	ndInt64 mask = -ndInt64(D_MEMORY_ALIGMNET);
 	val = val & mask;
-	ndMemoryHeader* const ret = (ndMemoryHeader*)val;
+	ndMemoryHeader* const ret = reinterpret_cast<ndMemoryHeader*>(val);
 	ndMemoryHeader* const info = ret - 1;
 	ndAssert((char*)info >= (char*)metToVal.m_ptr);
 	info->m_allocatedPtr = metToVal.m_ptr;
@@ -120,7 +128,7 @@ void ndMemory::Free(void* const ptr)
 #endif
 	if (ptr)
 	{
-		const ndMemoryHeader* const info = ((ndMemoryHeader*)ptr) - 1;
+		const ndMemoryHeader* const info = reinterpret_cast<ndMemoryHeader*>(ptr) - 1;
 		m_memoryUsed.fetch_sub(ndUnsigned64(info->m_bufferSize));
 		m_freeMemory(info->m_allocatedPtr);
 	}

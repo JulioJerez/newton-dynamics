@@ -96,7 +96,7 @@ void ndJointRoller::SetLimitStateAngle(bool state)
 
 void ndJointRoller::SetLimitsAngle(ndFloat32 minLimit, ndFloat32 maxLimit)
 {
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	if (minLimit > 0.0f)
 	{
 		ndTrace(("warning: %s minLimit %f larger than zero\n", __FUNCTION__, minLimit))
@@ -189,7 +189,7 @@ void ndJointRoller::SetLimitsPosit(ndFloat32 minLimit, ndFloat32 maxLimit)
 {
 	ndAssert(minLimit <= 0.0f);
 	ndAssert(maxLimit >= 0.0f);
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	if (minLimit > 0.0f)
 	{
 		ndTrace(("warning: %s minLimit %f larger than zero\n", __FUNCTION__, minLimit))

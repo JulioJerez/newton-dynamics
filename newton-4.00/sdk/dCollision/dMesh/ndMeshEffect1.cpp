@@ -188,7 +188,7 @@ class ndMeshEffect::ndFormat::ndSortCluster
 
 inline ndInt32 ndMeshEffect::ndFormat::CompareVertex(const ndSortKey* const ptr0, const ndSortKey* const ptr1, void* const context)
 {
-	const ndVertexSortData* const sortContext = (ndVertexSortData*)context;
+	const ndVertexSortData* const sortContext = reinterpret_cast<ndVertexSortData*>(context);
 	const ndInt32 compIndex = sortContext->m_vertexSortIndex;
 	const ndChannel<ndBigVector, m_point>& points = *sortContext->m_points;
 	const ndFloat64 x0 = points[ptr0->m_vertexIndex][compIndex];
@@ -209,8 +209,8 @@ void ndMeshEffect::ndPointFormat::CompressData(
 	ndPointFormat& output, ndInt32* const indexList, 
 	ndSortKey* const remapIndex, const ndSortCluster& cluster, ndFloat32 tol)
 {
-	const ndBigVector origin(cluster.m_sum.Scale(ndFloat64(1.0f) / (ndFloat64)cluster.m_count));
-	const ndBigVector x2c(cluster.m_sum2.Scale(ndFloat64(1.0f) / (ndFloat64)cluster.m_count) - origin * origin);
+	const ndBigVector origin(cluster.m_sum.Scale(ndFloat64(1.0f) / ndFloat64(cluster.m_count)));
+	const ndBigVector x2c(cluster.m_sum2.Scale(ndFloat64(1.0f) / ndFloat64(cluster.m_count)) - origin * origin);
 	const ndBigVector variance((x2c.GetMax(ndVector::m_zero)).Sqrt());
 
 	ndInt32 firstSortAxis = 0;
@@ -348,9 +348,10 @@ void ndMeshEffect::ndPointFormat::CompactVertexData(ndInt32* const indexList, nd
 			stack--;
 			cluster = spliteStack[stack];
 			ndSortKey* const remapIndex = &indirectList[cluster.m_start];
-
-			const ndBigVector origin(cluster.m_sum.Scale(ndFloat64(1.0f) / (ndFloat64)cluster.m_count));
-			const ndBigVector variance2(cluster.m_sum2.Scale(ndFloat64(1.0f) / (ndFloat64)cluster.m_count) - origin * origin);
+			
+			//const ndBigVector variance2(cluster.m_sum2.Scale(ndFloat64(1.0f) / (ndFloat64)cluster.m_count) - origin * origin);
+			const ndBigVector origin(cluster.m_sum.Scale(ndFloat64(1.0f) / ndFloat64(cluster.m_count)));
+			const ndBigVector variance2(cluster.m_sum2.Scale(ndFloat64(1.0f) / ndFloat64(cluster.m_count)) - origin * origin);
 
 			ndFloat64 maxVariance2 = ndMax(ndMax(variance2.m_x, variance2.m_y), variance2.m_z);
 			if ((cluster.m_count <= ND_VERTEXLIST_INDEX_LIST_BATCH) || (stack > (ndInt32 (sizeof(spliteStack) / sizeof(spliteStack[0])) - 4)) || (maxVariance2 < ndFloat64(4.0f)))
@@ -2384,12 +2385,12 @@ void ndMeshEffect::GetVertexChannel(ndInt32 strideInByte, ndReal* const bufferOu
 
 void ndMeshEffect::GetVertexWeightChannel(ndInt32 strideInByte, ndVertexWeight* const bufferOut) const
 {
-	char* ptr = (char*)bufferOut;
+	char* ptr = reinterpret_cast<char*>(bufferOut);
 	for (ndInt32 i = 0; i < m_attrib.m_pointChannel.GetCount(); ++i)
 	{
 		const ndInt32 index = m_attrib.m_pointChannel[i];
 		const ndVertexWeight& p = m_points.m_skinWeights[index];
-		ndVertexWeight* const dst = (ndVertexWeight*)ptr;
+		ndVertexWeight* const dst = reinterpret_cast<ndVertexWeight*>(ptr);
 		*dst = p;
 		ptr += strideInByte;
 	}
@@ -2546,18 +2547,18 @@ ndInt32 ndMeshEffect::GenerateVertexFormat(ndMeshVertexFormat& format, ndArray<n
 	}
 
 	buffer.SetCount(totalSize);
-	format.m_vertex.m_data = (ndFloat64*)&buffer[vertexOffset];
-	format.m_vertex.m_indexList = (ndInt32*)&buffer[vertexIndexOffset];
-	ndInt32* const faceIndexBuffer = (ndInt32*)&buffer[faceCountOffset];
-	ndInt32* const faceMaterialBuffer = (ndInt32*)&buffer[faceMaterialOffset];
+	format.m_vertex.m_data = reinterpret_cast<ndFloat64*>(&buffer[vertexOffset]);
+	format.m_vertex.m_indexList = reinterpret_cast<ndInt32*>(&buffer[vertexIndexOffset]);
+	ndInt32* const faceIndexBuffer = reinterpret_cast<ndInt32*>(&buffer[faceCountOffset]);
+	ndInt32* const faceMaterialBuffer = reinterpret_cast<ndInt32*>(&buffer[faceMaterialOffset]);
 
-	format.m_uv0.m_data = m_attrib.m_uv0Channel.m_isValid ? (ndReal*)&buffer[uvOffset] : nullptr;
-	format.m_normal.m_data = m_attrib.m_normalChannel.m_isValid ? (ndReal*)&buffer[normalOffset] : nullptr;
-	format.m_vertexWeight.m_data = m_points.m_skinWeights.m_isValid ? (ndVertexWeight*)&buffer[vertexWeightsOffset] : nullptr;
+	format.m_uv0.m_data = m_attrib.m_uv0Channel.m_isValid ? reinterpret_cast<ndReal*>(&buffer[uvOffset]) : nullptr;
+	format.m_normal.m_data = m_attrib.m_normalChannel.m_isValid ? reinterpret_cast<ndReal*>(&buffer[normalOffset]) : nullptr;
+	format.m_vertexWeight.m_data = m_points.m_skinWeights.m_isValid ? reinterpret_cast<ndVertexWeight*>(&buffer[vertexWeightsOffset]) : nullptr;
 
-	format.m_uv0.m_indexList = m_attrib.m_uv0Channel.m_isValid ? (ndInt32*)&buffer[uvIndexOffset] : nullptr;
-	format.m_normal.m_indexList = m_attrib.m_normalChannel.m_isValid ? (ndInt32*)&buffer[normalIndexOffset] : nullptr;
-	format.m_vertexWeight.m_indexList = m_points.m_skinWeights.m_isValid ? (ndInt32*)&buffer[weightsIndexOffset] : nullptr;
+	format.m_uv0.m_indexList = m_attrib.m_uv0Channel.m_isValid ? reinterpret_cast<ndInt32*>(&buffer[uvIndexOffset]) : nullptr;
+	format.m_normal.m_indexList = m_attrib.m_normalChannel.m_isValid ? reinterpret_cast<ndInt32*>(&buffer[normalIndexOffset]) : nullptr;
+	format.m_vertexWeight.m_indexList = m_points.m_skinWeights.m_isValid ? reinterpret_cast<ndInt32*>(&buffer[weightsIndexOffset]) : nullptr;
 	
 	format.m_faceCount = faceCount;
 	format.m_faceIndexCount = faceIndexBuffer;
@@ -2797,8 +2798,9 @@ ndIndexArray* ndMeshEffect::MaterialGeometryBegin()
 
 	ndInt32 count = 0;
 
-	ndIndexArray* const array = (ndIndexArray*)ndMemory::Malloc(size_t(4 * sizeof(ndInt32) * GetCount() + sizeof(ndIndexArray) + 2048));
-	array->m_indexList = (ndInt32*)&array[1];
+	ndIndexArray* const array = reinterpret_cast<ndIndexArray*>(ndMemory::Malloc(size_t(4 * sizeof(ndInt32) * GetCount() + sizeof(ndIndexArray) + 2048)));
+	//array->m_indexList = (ndInt32*)&array[1];
+	array->m_indexList = &array[1].m_materialCount;
 
 	ndInt32 mark = IncLRU();
 	ndPolyhedra::Iterator iter(*this);
@@ -2909,9 +2911,9 @@ void ndMeshEffect::GetMaterialGetIndexStream(ndIndexArray* const handle, ndInt32
 	{
 		if (handle->m_indexList[j * 4 + 3] == textureID)
 		{
-			indexArray[index + 0] = (ndInt16)handle->m_indexList[j * 4 + 0];
-			indexArray[index + 1] = (ndInt16)handle->m_indexList[j * 4 + 1];
-			indexArray[index + 2] = (ndInt16)handle->m_indexList[j * 4 + 2];
+			indexArray[index + 0] = ndInt16(handle->m_indexList[j * 4 + 0]);
+			indexArray[index + 1] = ndInt16(handle->m_indexList[j * 4 + 1]);
+			indexArray[index + 2] = ndInt16(handle->m_indexList[j * 4 + 2]);
 			index += 3;
 		}
 	}
@@ -3044,7 +3046,7 @@ ndMeshEffect::ndMeshEffect(const ndFloat64* const vertexCloud, ndInt32 count, nd
 			format.m_faceCount = convexHull.GetCount();
 			format.m_faceIndexCount = &faceCountPool[0];
 			format.m_vertex.m_indexList = &vertexIndexListPool[0];
-			format.m_vertex.m_data = (ndFloat64*)&convexHull.GetVertexPool()[0].m_x;
+			format.m_vertex.m_data = const_cast<ndFloat64*>(&convexHull.GetVertexPool()[0].m_x);
 			format.m_vertex.m_strideInBytes = sizeof(ndBigVector);
 			for (ndConvexHull3d::ndNode* faceNode = convexHull.GetFirst(); faceNode; faceNode = faceNode->GetNext()) 
 			{
@@ -3100,11 +3102,11 @@ ndMeshEffect::ndMeshEffect(const ndShapeInstance& shapeInstance)
 	dgMeshEffectBuilder builder;
 
 	Init();
-	if (((ndShape*)shapeInstance.GetShape())->GetAsShapeCompound())
+	if (const_cast<ndShape*>(shapeInstance.GetShape())->GetAsShapeCompound())
 	{
 		ndInt32 brush = 0;
 		ndMatrix matrix(shapeInstance.GetLocalMatrix());
-		const ndShapeCompound* const compound = ((ndShape*)shapeInstance.GetShape())->GetAsShapeCompound();
+		const ndShapeCompound* const compound = const_cast<ndShape*>(shapeInstance.GetShape())->GetAsShapeCompound();
 		const ndShapeCompound::ndTreeArray& array = compound->GetTree();
 		ndShapeCompound::ndTreeArray::Iterator iter(array);
 		for (iter.Begin(); iter; iter++)
@@ -3642,7 +3644,7 @@ void ndMeshEffect::SerializeToXml(nd::TiXmlElement* const xmlNode, const ndTree<
 
 				for (ndInt32 j = 0; j < ND_VERTEX_WEIGHT_SIZE; ++j)
 				{
-					if (weight.m_boneId[j] != -1)
+					if (weight.m_boneId[j] != ndUnsigned32 (-1))
 					{
 						const ndTree<ndString, ndUnsigned32>::ndNode* const nameNode = boneMap.Find(ndUnsigned32(weight.m_boneId[j]));
 						ndAssert(nameNode);
@@ -3864,7 +3866,7 @@ void ndMeshEffect::DeserializeFromXml(const nd::TiXmlElement* const xmlNode)
 	ndArray<ndInt32> faceIndexCountArray;
 	if (xmlNode->FirstChild("faces"))
 	{
-		const nd::TiXmlElement* const node = (nd::TiXmlElement*)xmlNode->FirstChild("faces");
+		const nd::TiXmlElement* const node = static_cast<const nd::TiXmlElement*>(xmlNode->FirstChild("faces"));
 		ndAssert(node);
 		xmlGetInt(node, "faceMaterial", faceMaterialArray);
 		xmlGetInt(node, "faceIndexCount", faceIndexCountArray);
@@ -3879,7 +3881,7 @@ void ndMeshEffect::DeserializeFromXml(const nd::TiXmlElement* const xmlNode)
 	ndArray<ndInt32> vertexIndexArray;
 	{
 		// get the vertexData
-		const nd::TiXmlElement* const xmlVertexNode = (nd::TiXmlElement*)xmlNode->FirstChild("vertices");
+		const nd::TiXmlElement* const xmlVertexNode = static_cast<const nd::TiXmlElement*>(xmlNode->FirstChild("vertices"));
 		ndAssert(xmlVertexNode);
 
 		xmlGetInt(xmlVertexNode, "indices", vertexIndexArray);
@@ -3890,7 +3892,7 @@ void ndMeshEffect::DeserializeFromXml(const nd::TiXmlElement* const xmlNode)
 		format.m_vertex.m_strideInBytes = sizeof(ndBigVector);
 
 		// import skin if there is any
-		const nd::TiXmlElement* const xmlVertexWeightsNode = (nd::TiXmlElement*)xmlVertexNode->FirstChild("vertexWeights");
+		const nd::TiXmlElement* const xmlVertexWeightsNode = static_cast<const nd::TiXmlElement*>(xmlVertexNode->FirstChild("vertexWeights"));
 		if (xmlVertexWeightsNode)
 		{
 			const char* const boneNames[] = { "bone0", "bone1", "bone2", "bone3" };
@@ -3899,7 +3901,7 @@ void ndMeshEffect::DeserializeFromXml(const nd::TiXmlElement* const xmlNode)
 			vertexWeights.SetCount(vertices.GetCount());
 			for (const nd::TiXmlNode* node = xmlVertexWeightsNode->FirstChild("vert"); node; node = node->NextSibling("vert"))
 			{
-				const nd::TiXmlElement* const linkNode = (nd::TiXmlElement*)node;
+				const nd::TiXmlElement* const linkNode = static_cast<const nd::TiXmlElement*>(node);
 				ndAssert(strcmp(linkNode->Value(), "vert") == 0);
 
 				ndVertexWeight weight;
@@ -3927,7 +3929,7 @@ void ndMeshEffect::DeserializeFromXml(const nd::TiXmlElement* const xmlNode)
 	ndArray<ndInt32> normalIndexArray;
 	if (xmlNode->FirstChild("normal"))
 	{
-		const nd::TiXmlElement* const node = (nd::TiXmlElement*)xmlNode->FirstChild("normal");
+		const nd::TiXmlElement* const node = static_cast<const nd::TiXmlElement*>(xmlNode->FirstChild("normal"));
 		ndAssert(node);
 		xmlGetInt(node, "indices", normalIndexArray);
 		xmlGetFloatArray3(node, "normals", normalArray);
@@ -3941,7 +3943,7 @@ void ndMeshEffect::DeserializeFromXml(const nd::TiXmlElement* const xmlNode)
 	ndArray<ndInt32> uvIndexArray;
 	if (xmlNode->FirstChild("uvs"))
 	{
-		const nd::TiXmlElement* const node = (nd::TiXmlElement*)xmlNode->FirstChild("uvs");
+		const nd::TiXmlElement* const node = static_cast<const nd::TiXmlElement*>(xmlNode->FirstChild("uvs"));
 		ndAssert(node);
 		xmlGetInt(node, "indices", uvIndexArray);
 		xmlGetFloatArray3(node, "uv", uvArray);

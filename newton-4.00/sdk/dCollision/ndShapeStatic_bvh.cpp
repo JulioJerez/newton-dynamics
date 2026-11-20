@@ -124,7 +124,7 @@ void ndShapeStatic_bvh::operator delete (void* ptr)
 
 ndIntersectStatus ndShapeStatic_bvh::GetTriangleCount(void* const context, const ndVector* const, const ndInt32* const, ndInt32 indexCount, ndFloat32)
 {
-	ndMeshVertexListIndexList& data = (*(ndMeshVertexListIndexList*)context);
+	ndMeshVertexListIndexList& data = *reinterpret_cast<ndMeshVertexListIndexList*>(context);
 
 	if ((data.m_triangleCount + indexCount - 2) * 3 > data.m_maxIndexCount) 
 	{
@@ -150,7 +150,7 @@ ndIntersectStatus ndShapeStatic_bvh::ShowDebugPolygon(void* const context, const
 	ndVector poly[128];
 	ndShapeDebugNotify::ndEdgeType edgeType[128];
 
-	ndCollisionBvhShowPolyContext& data = *(ndCollisionBvhShowPolyContext*)context;
+	ndCollisionBvhShowPolyContext& data = *reinterpret_cast<ndCollisionBvhShowPolyContext*>(context);
 	for (ndInt32 i = 0; i < indexCount; ++i) 
 	{
 		const ndVector& p = vextexBuffer[indexArray[i]];
@@ -167,7 +167,7 @@ void ndShapeStatic_bvh::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& d
 	ndCollisionBvhShowPolyContext context;
 
 	context.m_matrix = matrix;
-	context.m_userData = (void*)this;
+	context.m_userData = const_cast<ndShapeStatic_bvh*>(this);
 	context.m_callback = &debugCallback;
 
 	ndFastAabb box(ndGetIdentityMatrix(), ndVector(1.0e15f));
@@ -176,7 +176,7 @@ void ndShapeStatic_bvh::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& d
 
 ndFloat32 ndShapeStatic_bvh::RayHit(void* const context, const ndVector* const vertexBuffer, const ndInt32* const indexArray, ndInt32 indexCount)
 {
-	ndBvhRay& me = *((ndBvhRay*)context);
+	ndBvhRay& me = *reinterpret_cast<ndBvhRay*>(context);
 	const ndVector normal(vertexBuffer[indexArray[indexCount + 1]]);
 	ndFloat32 t = me.PolygonIntersect(normal, me.m_t, vertexBuffer, indexArray, indexCount);
 	if (t <= (me.m_t * ndFloat32(1.0001f))) 
@@ -193,7 +193,8 @@ ndFloat32 ndShapeStatic_bvh::RayCast(ndRayCastNotify& callback, const ndVector& 
 	ndBvhRay ray(localP0, localP1);
 	ray.m_t = ndFloat32(1.0f);
 	ray.m_me = this;
-	ray.m_myBody = ((ndBody*)body)->GetAsBodyKinematic();
+	//ray.m_myBody = ((ndBody*)body)->GetAsBodyKinematic();
+	ray.m_myBody = const_cast<ndBody*>(body)->GetAsBodyKinematic();
 	ray.m_callback = &callback;
 	ndFloat32 t = ndFloat32 (1.2f);
 	ForAllSectorsRayHit(ray, maxT, RayHit, &ray);
@@ -213,7 +214,7 @@ ndIntersectStatus ndShapeStatic_bvh::CalculateHash(
 	void* const context, const ndVector* const vertexBuffer,
 	const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32)
 {
-	ndUnsigned64* hash = (ndUnsigned64*)context;
+	ndUnsigned64* hash = reinterpret_cast<ndUnsigned64*>(context);
 
 	for (ndInt32 i = 0; i < indexCount; ++i)
 	{
@@ -248,7 +249,7 @@ ndIntersectStatus ndShapeStatic_bvh::GetBoxTest(void* const context, const ndVec
 {
 	// if any polygon interset the aabb, we stop the search
 	// we can do a better test here. 
-	ndPatchMesh& data = (*(ndPatchMesh*)context);
+	ndPatchMesh& data = *reinterpret_cast<ndPatchMesh*>(context);
 	data.m_pointArray.PushBack(ndVector::m_zero);
 	return m_stopSearch;
 }
@@ -263,7 +264,7 @@ void ndShapeStatic_bvh::GetFacesPatch(ndPatchMesh& patch) const
 
 ndIntersectStatus ndShapeStatic_bvh::GetPolygon(void* const context, const ndVector* const, const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance)
 {
-	ndPolygonMeshDesc& data = (*(ndPolygonMeshDesc*)context);
+	ndPolygonMeshDesc& data = *reinterpret_cast<ndPolygonMeshDesc*>(context);
 	ndPolygonMeshDesc::ndStaticMeshFaceQuery& query = *data.m_staticMeshQuery;
 
 	ndInt32 count = indexCount * 2 + 3;

@@ -28,9 +28,18 @@
 
 #define D_SPHERE_EDGE_COUNT 96
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 ndInt32 ndShapeSphere::m_shapeRefCount = 0;
 ndVector ndShapeSphere::m_unitSphere[D_SPHERE_VERTEX_COUNT];
 ndShapeConvex::ndConvexSimplexEdge ndShapeSphere::m_edgeArray[D_SPHERE_EDGE_COUNT];
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 ndShapeSphere::ndShapeSphere(ndFloat32 radius)
 	:ndShapeConvex(m_sphere)
@@ -109,7 +118,7 @@ void ndShapeSphere::Init(ndFloat32 radius)
 		TesselateTriangle(index, p5, p3, p1, count, tmpVectex);
 		TesselateTriangle(index, p5, p0, p3, count, tmpVectex);
 
-		ndInt32 vertexCount = ndVertexListToIndexList(&tmpVectex[0].m_x, sizeof(ndVector), 3, count, indexList, 0.001f);
+		ndInt32 vertexCount = ndVertexListToIndexList(&tmpVectex[0].m_x, sizeof(ndVector), 3, count, indexList, ndFloat64(0.001f));
 
 		ndAssert(vertexCount == D_SPHERE_VERTEX_COUNT);
 		for (ndInt32 i = 0; i < vertexCount; ++i) 
@@ -122,7 +131,7 @@ void ndShapeSphere::Init(ndFloat32 radius)
 		polyhedra.BeginFace();
 		for (ndInt32 i = 0; i < count; i += 3) 
 		{
-			#ifdef _DEBUG
+			#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 			ndEdge* const edge = polyhedra.AddFace(indexList[i], indexList[i + 1], indexList[i + 2]);
 			ndAssert(edge);
 			#else 

@@ -96,7 +96,7 @@ class ndFreeListDictionary: public ndFixSizeArray<ndFreeListHeader, D_FREELIST_D
 		ndScopeSpinLock lock(m_lock);
 		ndFreeListHeader* const header = FindEntry(ndInt32(ndMemory::GetSize(ptr)));
 		ndAssert(header);
-		ndMemory::ndMemoryHeader* const self = ((ndMemory::ndMemoryHeader*)ptr) - 1;
+		ndMemory::ndMemoryHeader* const self = reinterpret_cast<ndMemory::ndMemoryHeader*>(ptr) - 1;
 
 		#if defined (D_MEMORY_SANITY_CHECK)
 			ndAssert(ndMemory::CheckMemoryHeap());

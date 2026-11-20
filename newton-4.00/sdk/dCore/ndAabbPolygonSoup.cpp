@@ -40,8 +40,6 @@ class ndAabbPolygonSoup::ndNodeBuilder: public ndAabbPolygonSoup::ndNode
 		,m_left (nullptr)
 		,m_right (nullptr)
 		,m_parent (nullptr)
-		,m_indexBox0(0)
-		,m_indexBox1(0)
 		,m_enumeration(-1)
 		,m_faceIndex(0)
 		,m_indexCount(0)
@@ -55,8 +53,6 @@ class ndAabbPolygonSoup::ndNodeBuilder: public ndAabbPolygonSoup::ndNode
 		,m_left (nullptr)
 		,m_right (nullptr)
 		,m_parent (nullptr)
-		,m_indexBox0(0)
-		,m_indexBox1(0)
 		,m_enumeration(-1)
 		,m_faceIndex(faceIndex)
 		,m_indexCount(indexCount)
@@ -83,8 +79,6 @@ class ndAabbPolygonSoup::ndNodeBuilder: public ndAabbPolygonSoup::ndNode
 		,m_left(left)
 		,m_right(right)
 		,m_parent(nullptr)
-		,m_indexBox0(0)
-		,m_indexBox1(0)
 		,m_enumeration(-1)
 		,m_faceIndex(0)
 		,m_indexCount(0)
@@ -109,8 +103,6 @@ class ndAabbPolygonSoup::ndNodeBuilder: public ndAabbPolygonSoup::ndNode
 	ndNodeBuilder* m_left;
 	ndNodeBuilder* m_right;
 	ndNodeBuilder* m_parent;
-	ndInt32 m_indexBox0;
-	ndInt32 m_indexBox1;
 	ndInt32 m_enumeration;
 	ndInt32 m_faceIndex;
 	ndInt32 m_indexCount;
@@ -326,7 +318,7 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 
 	ndInt32 mark = adjacentMesh.IncLRU();
 	ndPolyhedra::Iterator iter(adjacentMesh);
-	const ndVector* const vertexArray = (ndVector*)GetLocalVertexPool();
+	const ndVector* const vertexArray = const_cast<ndVector*>(GetLocalVertexPool());
 
 	for (iter.Begin(); iter; iter++)
 	{
@@ -337,8 +329,8 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 			ndInt32 indexCount1 = 0;
 			ndInt32 offsetIndex0 = -1;
 			ndInt32 offsetIndex1 = -1;
-			ndInt32* const indexArray0 = (ndInt32*)edge->m_userData;
-			ndInt32* const indexArray1 = (ndInt32*)edge->m_twin->m_userData;
+			ndInt32* const indexArray0 = reinterpret_cast<ndInt32*>(edge->m_userData);
+			ndInt32* const indexArray1 = reinterpret_cast<ndInt32*>(edge->m_twin->m_userData);
 			ndEdge* ptr = edge;
 			do
 			{
@@ -355,15 +347,11 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 
 			const ndVector n0(vertexArray[indexArray0[indexCount0 + 1]]);
 			const ndVector q0(vertexArray[indexArray0[0]]);
-			//n0 = n0 & ndVector::m_triplexMask;
-			//q0 = q0 & ndVector::m_triplexMask;
 			ndAssert(n0.m_w == ndFloat32(0.0f));
 			ndAssert(q0.m_w == ndFloat32(0.0f));
 
 			const ndVector n1(vertexArray[indexArray1[indexCount1 + 1]]);
 			const ndVector q1(vertexArray[indexArray1[0]]);
-			//n1 = n1 & ndVector::m_triplexMask;
-			//q1 = q1 & ndVector::m_triplexMask;
 			ndAssert(n1.m_w == ndFloat32(0.0f));
 			ndAssert(q1.m_w == ndFloat32(0.0f));
 
@@ -418,12 +406,12 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 	for (ndInt32 i = 0; i < m_nodesCount; ++i) 
 	{
 		const ndNode* const node = &m_aabb[i];
-		if (node->m_left.IsLeaf()) 
+		if (node->m_leftInfo.IsLeaf())
 		{
-			ndInt32 vCount = ndInt32 (node->m_left.GetCount());
+			ndInt32 vCount = ndInt32 (node->m_leftInfo.GetCount());
 			if (vCount) 
 			{
-				ndInt32 index = ndInt32 (node->m_left.GetIndex());
+				ndInt32 index = ndInt32 (node->m_leftInfo.GetIndex());
 				ndInt32* const face = &m_indices[index];
 	
 				ndInt32 j0 = 2 * (vCount + 1) - 1;
@@ -455,12 +443,12 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 			}
 		}
 	
-		if (node->m_right.IsLeaf()) 
+		if (node->m_rightInfo.IsLeaf())
 		{
-			ndInt32 vCount = ndInt32 (node->m_right.GetCount());
+			ndInt32 vCount = ndInt32 (node->m_rightInfo.GetCount());
 			if (vCount) 
 			{
-				ndInt32 index = ndInt32 (node->m_right.GetIndex());
+				ndInt32 index = ndInt32 (node->m_rightInfo.GetIndex());
 				ndInt32* const face = &m_indices[index];
 	
 				ndInt32 j0 = 2 * (vCount + 1) - 1;
@@ -496,8 +484,8 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 		ndInt32 newNormalCount = ndVertexListToIndexList (&pool[0].m_x, sizeof (ndVector), 3, normalCount, &indexArray[0], ndFloat64 (1.0e-6f));
 	
 		ndInt32 oldCount = GetVertexCount();
-		ndVector* const vertexArray1 = (ndVector*)ndMemory::Malloc (sizeof (ndVector) * (oldCount + newNormalCount));
-		ndMemCpy(vertexArray1, (ndVector*)GetLocalVertexPool(), oldCount);
+		ndVector* const vertexArray1 = reinterpret_cast<ndVector*>(ndMemory::Malloc (sizeof (ndVector) * (oldCount + newNormalCount)));
+		ndMemCpy(vertexArray1, const_cast<ndVector*>(GetLocalVertexPool()), oldCount);
 		ndMemCpy(&vertexArray1[oldCount], &pool[0], newNormalCount);
 
 		ndMemory::Free(GetLocalVertexPool());
@@ -508,10 +496,10 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 		for (ndInt32 i = 0; i < m_nodesCount; ++i) 
 		{
 			const ndNode* const node = &m_aabb[i];
-			if (node->m_left.IsLeaf()) 
+			if (node->m_leftInfo.IsLeaf())
 			{
-				ndInt32 vCount = ndInt32 (node->m_left.GetCount());
-				ndInt32 index = ndInt32 (node->m_left.GetIndex());
+				ndInt32 vCount = ndInt32 (node->m_leftInfo.GetCount());
+				ndInt32 index = ndInt32 (node->m_leftInfo.GetIndex());
 				ndInt32* const face = &m_indices[index];
 				for (ndInt32 j = 0; j < vCount; ++j) 
 				{
@@ -529,10 +517,10 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 				}
 			}
 	
-			if (node->m_right.IsLeaf()) 
+			if (node->m_rightInfo.IsLeaf())
 			{
-				ndInt32 vCount = ndInt32 (node->m_right.GetCount());
-				ndInt32 index = ndInt32 (node->m_right.GetIndex());
+				ndInt32 vCount = ndInt32 (node->m_rightInfo.GetCount());
+				ndInt32 index = ndInt32 (node->m_rightInfo.GetIndex());
 				ndInt32* const face = &m_indices[index];
 				for (ndInt32 j = 0; j < vCount; ++j) 
 				{
@@ -557,10 +545,10 @@ ndIntersectStatus ndAabbPolygonSoup::CalculateAllFaceEdgeNormals(void* const con
 {
 	ndInt32 face[256];
 	ndInt64 data[256];
-	ndPolyhedra& adjacency = *((ndPolyhedra*)context);
+	ndPolyhedra& adjacency = *reinterpret_cast<ndPolyhedra*>(context);
 
 	ndIntPtr userData;
-	userData.m_ptr = (void*)indexArray;
+	userData.m_ptr = static_cast<void*>(const_cast<ndInt32 *>(indexArray));
 	for (ndInt32 i = 0; i < indexCount; ++i)
 	{
 		face[i] = indexArray[i];
@@ -604,7 +592,7 @@ void ndAabbPolygonSoup::Create (const ndPolygonSoupBuilder& builder)
 	}
 	ndAssert (builder.m_faceVertexCount.GetCount() >= 1);
 	m_nodesCount = ((builder.m_faceVertexCount.GetCount() - 1) < 1) ? 1 : ndInt32(builder.m_faceVertexCount.GetCount()) - 1;
-	m_aabb = (ndNode*) ndMemory::Malloc (sizeof (ndNode) * m_nodesCount);
+	m_aabb = reinterpret_cast<ndNode*>(ndMemory::Malloc (sizeof (ndNode) * m_nodesCount));
 	m_indexCount = ndInt32(builder.m_vertexIndex.GetCount() * 2 + builder.m_faceVertexCount.GetCount());
 
 	if (builder.m_faceVertexCount.GetCount() == 1) 
@@ -612,7 +600,7 @@ void ndAabbPolygonSoup::Create (const ndPolygonSoupBuilder& builder)
 		m_indexCount *= 2;
 	}
 
-	m_indices = (ndInt32*) ndMemory::Malloc (sizeof (ndInt32) * m_indexCount);
+	m_indices = reinterpret_cast<ndInt32*>(ndMemory::Malloc (sizeof (ndInt32) * m_indexCount));
 	ndStack<ndVector> tmpVertexArrayCount(ndInt32(builder.m_vertexPoints.GetCount() + builder.m_normalPoints.GetCount() + builder.m_faceVertexCount.GetCount() * 2 + 4));
 
 	ndVector* const tmpVertexArray = &tmpVertexArrayCount[0];
@@ -693,12 +681,12 @@ void ndAabbPolygonSoup::Create (const ndPolygonSoupBuilder& builder)
 			{
 				if (node->m_parent->m_left == node)
 				{
-					m_aabb[node->m_parent->m_enumeration].m_left = ndNode::ndLeafNodePtr (ndUnsigned32 (&m_aabb[node->m_enumeration] - m_aabb));
+					m_aabb[node->m_parent->m_enumeration].m_leftInfo = ndNode::ndLeafNodePtr (ndUnsigned32 (&m_aabb[node->m_enumeration] - m_aabb));
 				}
 				else 
 				{
 					ndAssert (node->m_parent->m_right == node);
-					m_aabb[node->m_parent->m_enumeration].m_right = ndNode::ndLeafNodePtr (ndUnsigned32 (&m_aabb[node->m_enumeration] - m_aabb));
+					m_aabb[node->m_parent->m_enumeration].m_rightInfo = ndNode::ndLeafNodePtr (ndUnsigned32 (&m_aabb[node->m_enumeration] - m_aabb));
 				}
 			}
 
@@ -719,12 +707,12 @@ void ndAabbPolygonSoup::Create (const ndPolygonSoupBuilder& builder)
 			{
 				if (node->m_parent->m_left == node)
 				{
-					m_aabb[node->m_parent->m_enumeration].m_left = ndNode::ndLeafNodePtr (ndUnsigned32(node->m_indexCount), ndUnsigned32(indexMap));
+					m_aabb[node->m_parent->m_enumeration].m_leftInfo = ndNode::ndLeafNodePtr (ndUnsigned32(node->m_indexCount), ndUnsigned32(indexMap));
 				}
 				else 
 				{
 					ndAssert (node->m_parent->m_right == node);
-					m_aabb[node->m_parent->m_enumeration].m_right = ndNode::ndLeafNodePtr (ndUnsigned32(node->m_indexCount), ndUnsigned32(indexMap));
+					m_aabb[node->m_parent->m_enumeration].m_rightInfo = ndNode::ndLeafNodePtr (ndUnsigned32(node->m_indexCount), ndUnsigned32(indexMap));
 				}
 			}
 
@@ -759,7 +747,7 @@ void ndAabbPolygonSoup::Create (const ndPolygonSoupBuilder& builder)
 	ndInt32 aabbPointCount = ndVertexListToIndexList (&aabbPoints[0].m_x, sizeof (ndVector), 3, vertexIndex, &indexArray[0], ndFloat64 (1.0e-6f));
 
 	m_vertexCount = aabbBase + aabbPointCount;
-	m_localVertex = (ndVector*) ndMemory::Malloc (sizeof (ndVector) * m_vertexCount);
+	m_localVertex = reinterpret_cast<ndVector*>(ndMemory::Malloc (sizeof (ndVector) * m_vertexCount));
 	
 	for (ndInt32 i = 0; i < m_vertexCount; ++i) 
 	{
@@ -775,31 +763,29 @@ void ndAabbPolygonSoup::Create (const ndPolygonSoupBuilder& builder)
 
 		ndInt32 j = box.m_indexBox0 - aabbBase;
 		box.m_indexBox0 = indexArray[j] + aabbBase;
-
 		j = box.m_indexBox1 - aabbBase;
 		box.m_indexBox1 = indexArray[j] + aabbBase;
 	}
 
 	if (builder.m_faceVertexCount.GetCount() == 1) 
 	{
-		m_aabb[0].m_right = ndNode::ndLeafNodePtr (0, 0);
+		m_aabb[0].m_rightInfo = ndNode::ndLeafNodePtr (0, 0);
 	}
 }
 
 void ndAabbPolygonSoup::Serialize (const char* const path) const
 {
 	FILE* const file = fopen(path, "wb");
-	size_t sizeWrite = 0;
 	if (file)
 	{
-		sizeWrite += fwrite(&m_vertexCount, sizeof(ndInt32), 1, file);
-		sizeWrite += fwrite(&m_indexCount, sizeof(ndInt32), 1, file);
-		sizeWrite += fwrite(&m_nodesCount, sizeof(ndInt32), 1, file);
+		fwrite(&m_vertexCount, sizeof(ndInt32), 1, file);
+		fwrite(&m_indexCount, sizeof(ndInt32), 1, file);
+		fwrite(&m_nodesCount, sizeof(ndInt32), 1, file);
 		if (m_aabb)
 		{
-			sizeWrite += fwrite(m_localVertex, sizeof(ndVector) * m_vertexCount, 1, file);
-			sizeWrite += fwrite(m_indices, sizeof(ndInt32) * m_indexCount, 1, file);
-			sizeWrite += fwrite(m_aabb, sizeof(ndNode) * m_nodesCount, 1, file);
+			fwrite(m_localVertex, sizeof(ndVector) * m_vertexCount, 1, file);
+			fwrite(m_indices, sizeof(ndInt32) * m_indexCount, 1, file);
+			fwrite(m_aabb, sizeof(ndNode) * m_nodesCount, 1, file);
 		}
 		fclose(file);
 	}
@@ -808,22 +794,21 @@ void ndAabbPolygonSoup::Serialize (const char* const path) const
 void ndAabbPolygonSoup::Deserialize (const char* const path)
 {
 	FILE* const file = fopen(path, "rb");
-	size_t sizeRead = 0;
 	if (file)
 	{
-		sizeRead += fread(&m_vertexCount, sizeof(ndInt32), 1, file);
-		sizeRead += fread(&m_indexCount, sizeof(ndInt32), 1, file);
-		sizeRead += fread(&m_nodesCount, sizeof(ndInt32), 1, file);
+		fread(&m_vertexCount, sizeof(ndInt32), 1, file);
+		fread(&m_indexCount, sizeof(ndInt32), 1, file);
+		fread(&m_nodesCount, sizeof(ndInt32), 1, file);
 
 		if (m_vertexCount) 
 		{
-			m_localVertex = (ndVector*)ndMemory::Malloc(sizeof(ndVector) * m_vertexCount);
-			m_indices = (ndInt32*)ndMemory::Malloc(sizeof(ndInt32) * m_indexCount);
-			m_aabb = (ndNode*)ndMemory::Malloc(sizeof(ndNode) * m_nodesCount);
+			m_localVertex = reinterpret_cast<ndVector*>(ndMemory::Malloc(sizeof(ndVector) * m_vertexCount));
+			m_indices = reinterpret_cast<ndInt32*>(ndMemory::Malloc(sizeof(ndInt32) * m_indexCount));
+			m_aabb = reinterpret_cast<ndNode*>(ndMemory::Malloc(sizeof(ndNode) * m_nodesCount));
 
-			sizeRead += fread(m_localVertex, sizeof(ndVector) * m_vertexCount, 1, file);
-			sizeRead += fread(m_indices, sizeof(ndInt32) * m_indexCount, 1, file);
-			sizeRead += fread(m_aabb, sizeof(ndNode) * m_nodesCount, 1, file);
+			fread(m_localVertex, sizeof(ndVector) * m_vertexCount, 1, file);
+			fread(m_indices, sizeof(ndInt32) * m_indexCount, 1, file);
+			fread(m_aabb, sizeof(ndNode) * m_nodesCount, 1, file);
 		}
 		else 
 		{
@@ -861,11 +846,11 @@ ndVector ndAabbPolygonSoup::ForAllSectorsSupportVertex (const ndVector& dir) con
 			{
 				ndFloat32 backSupportDist = ndFloat32 (0.0f);
 				ndFloat32 frontSupportDist = ndFloat32 (0.0f);
-				if (me->m_left.IsLeaf()) 
+				if (me->m_leftInfo.IsLeaf())
 				{
 					backSupportDist = ndFloat32 (-1.0e20f);
-					const ndInt32 index = ndInt32 (me->m_left.GetIndex());
-					const ndInt32 vCount = ndInt32 (me->m_left.GetCount());
+					const ndInt32 index = ndInt32 (me->m_leftInfo.GetIndex());
+					const ndInt32 vCount = ndInt32 (me->m_leftInfo.GetCount());
 					ndVector vertex (ndVector::m_zero);
 					for (ndInt32 j = 0; j < vCount; ++j) 
 					{
@@ -889,7 +874,7 @@ ndVector ndAabbPolygonSoup::ForAllSectorsSupportVertex (const ndVector& dir) con
 				else 
 				{
 					ndVector box[2];
-					const ndNode* const node = me->m_left.GetNode(m_aabb);
+					const ndNode* const node = me->m_leftInfo.GetNode(m_aabb);
 					box[0].m_x = boxArray[node->m_indexBox0].m_x;
 					box[0].m_y = boxArray[node->m_indexBox0].m_y;
 					box[0].m_z = boxArray[node->m_indexBox0].m_z;
@@ -901,11 +886,11 @@ ndVector ndAabbPolygonSoup::ForAllSectorsSupportVertex (const ndVector& dir) con
 					backSupportDist = supportPoint.DotProduct(dir).GetScalar();
 				}
 
-				if (me->m_right.IsLeaf()) 
+				if (me->m_rightInfo.IsLeaf())
 				{
 					frontSupportDist = ndFloat32 (-1.0e20f);
-					const ndInt32 index = ndInt32 (me->m_right.GetIndex());
-					const ndInt32 vCount = ndInt32 (me->m_right.GetCount());
+					const ndInt32 index = ndInt32 (me->m_rightInfo.GetIndex());
+					const ndInt32 vCount = ndInt32 (me->m_rightInfo.GetCount());
 					ndVector vertex(ndVector::m_zero);
 					for (ndInt32 j = 0; j < vCount; ++j) 
 					{
@@ -928,7 +913,7 @@ ndVector ndAabbPolygonSoup::ForAllSectorsSupportVertex (const ndVector& dir) con
 				else 
 				{
 					ndVector box[2];
-					const ndNode* const node = me->m_right.GetNode(m_aabb);
+					const ndNode* const node = me->m_rightInfo.GetNode(m_aabb);
 					box[0].m_x = boxArray[node->m_indexBox0].m_x;
 					box[0].m_y = boxArray[node->m_indexBox0].m_y;
 					box[0].m_z = boxArray[node->m_indexBox0].m_z;
@@ -942,31 +927,31 @@ ndVector ndAabbPolygonSoup::ForAllSectorsSupportVertex (const ndVector& dir) con
 
 				if (frontSupportDist >= backSupportDist) 
 				{
-					if (!me->m_left.IsLeaf()) 
+					if (!me->m_leftInfo.IsLeaf())
 					{
 						aabbProjection.PushBack(backSupportDist);
-						stackPool.PushBack(me->m_left.GetNode(m_aabb));
+						stackPool.PushBack(me->m_leftInfo.GetNode(m_aabb));
 					}
 
-					if (!me->m_right.IsLeaf()) 
+					if (!me->m_rightInfo.IsLeaf())
 					{
 						aabbProjection.PushBack(frontSupportDist);
-						stackPool.PushBack(me->m_right.GetNode(m_aabb));
+						stackPool.PushBack(me->m_rightInfo.GetNode(m_aabb));
 					}
 
 				} 
 				else 
 				{
-					if (!me->m_right.IsLeaf()) 
+					if (!me->m_rightInfo.IsLeaf())
 					{
 						aabbProjection.PushBack(frontSupportDist);
-						stackPool.PushBack(me->m_right.GetNode(m_aabb));
+						stackPool.PushBack(me->m_rightInfo.GetNode(m_aabb));
 					}
 
-					if (!me->m_left.IsLeaf()) 
+					if (!me->m_leftInfo.IsLeaf())
 					{
 						aabbProjection.PushBack(backSupportDist);
-						stackPool.PushBack(me->m_left.GetNode(m_aabb));
+						stackPool.PushBack(me->m_leftInfo.GetNode(m_aabb));
 					}
 				}
 			}
@@ -995,12 +980,12 @@ void ndAabbPolygonSoup::ForAllSectorsRayHit (const ndFastRay& raySrc, ndFloat32 
 		} 
 		else 
 		{
-			if (me->m_left.IsLeaf()) 
+			if (me->m_leftInfo.IsLeaf())
 			{
-				ndInt32 vCount = ndInt32 (me->m_left.GetCount());
+				ndInt32 vCount = ndInt32 (me->m_leftInfo.GetCount());
 				if (vCount > 0) 
 				{
-					ndInt32 index = ndInt32 (me->m_left.GetIndex());
+					ndInt32 index = ndInt32 (me->m_leftInfo.GetIndex());
 					ndFloat32 param = callback(context, vertexArray, &m_indices[index], vCount);
 					ndAssert (param >= ndFloat32 (0.0f));
 					if (param < maxParam) 
@@ -1015,7 +1000,7 @@ void ndAabbPolygonSoup::ForAllSectorsRayHit (const ndFastRay& raySrc, ndFloat32 
 			} 
 			else 
 			{
-				const ndNode* const node = me->m_left.GetNode(m_aabb);
+				const ndNode* const node = me->m_leftInfo.GetNode(m_aabb);
 				ndFloat32 dist1 = node->RayDistance(ray, vertexArray);
 				if (dist1 < maxParam) 
 				{
@@ -1032,12 +1017,12 @@ void ndAabbPolygonSoup::ForAllSectorsRayHit (const ndFastRay& raySrc, ndFloat32 
 				}
 			}
 	
-			if (me->m_right.IsLeaf()) 
+			if (me->m_rightInfo.IsLeaf())
 			{
-				ndInt32 vCount = ndInt32 (me->m_right.GetCount());
+				ndInt32 vCount = ndInt32 (me->m_rightInfo.GetCount());
 				if (vCount > 0) 
 				{
-					ndInt32 index = ndInt32 (me->m_right.GetIndex());
+					ndInt32 index = ndInt32 (me->m_rightInfo.GetIndex());
 					ndFloat32 param = callback(context, vertexArray, &m_indices[index], vCount);
 					ndAssert (param >= ndFloat32 (0.0f));
 					if (param < maxParam) 
@@ -1052,7 +1037,7 @@ void ndAabbPolygonSoup::ForAllSectorsRayHit (const ndFastRay& raySrc, ndFloat32 
 			} 
 			else 
 			{
-				const ndNode* const node = me->m_right.GetNode(m_aabb);
+				const ndNode* const node = me->m_rightInfo.GetNode(m_aabb);
 				ndFloat32 dist1 = node->RayDistance(ray, vertexArray);
 				if (dist1 < maxParam) 
 				{
@@ -1103,10 +1088,10 @@ void ndAabbPolygonSoup::ForAllSectors (const ndFastAabb& obbAabbInfo, const ndVe
 				const ndNode* const me = stackPool.Pop();
 				if (dist > ndFloat32 (0.0f)) 
 				{
-					if (me->m_left.IsLeaf()) 
+					if (me->m_leftInfo.IsLeaf())
 					{
-						ndInt32 index = ndInt32 (me->m_left.GetIndex());
-						ndInt32 vCount = ndInt32 (me->m_left.GetCount());
+						ndInt32 index = ndInt32 (me->m_leftInfo.GetIndex());
+						ndInt32 vCount = ndInt32 (me->m_leftInfo.GetCount());
 						if (vCount > 0) 
 						{
 							const ndInt32* const indices = &m_indices[index];
@@ -1130,7 +1115,7 @@ void ndAabbPolygonSoup::ForAllSectors (const ndFastAabb& obbAabbInfo, const ndVe
 					} 
 					else 
 					{
-						const ndNode* const node = me->m_left.GetNode(m_aabb);
+						const ndNode* const node = me->m_leftInfo.GetNode(m_aabb);
 						ndFloat32 dist1 = node->BoxPenetration(obbAabbInfo, vertexArray);
 						if (dist1 > ndFloat32 (0.0f)) 
 						{
@@ -1151,10 +1136,10 @@ void ndAabbPolygonSoup::ForAllSectors (const ndFastAabb& obbAabbInfo, const ndVe
 						}
 					}
 
-					if (me->m_right.IsLeaf()) 
+					if (me->m_rightInfo.IsLeaf())
 					{
-						ndInt32 index = ndInt32 (me->m_right.GetIndex());
-						ndInt32 vCount = ndInt32 (me->m_right.GetCount());
+						ndInt32 index = ndInt32 (me->m_rightInfo.GetIndex());
+						ndInt32 vCount = ndInt32 (me->m_rightInfo.GetCount());
 						if (vCount > 0) 
 						{
 							const ndInt32* const indices = &m_indices[index];
@@ -1178,7 +1163,7 @@ void ndAabbPolygonSoup::ForAllSectors (const ndFastAabb& obbAabbInfo, const ndVe
 					} 
 					else 
 					{
-						const ndNode* const node = me->m_right.GetNode(m_aabb);
+						const ndNode* const node = me->m_rightInfo.GetNode(m_aabb);
 						ndFloat32 dist1 = node->BoxPenetration(obbAabbInfo, vertexArray);
 						if (dist1 > ndFloat32 (0.0f)) 
 						{
@@ -1214,10 +1199,10 @@ void ndAabbPolygonSoup::ForAllSectors (const ndFastAabb& obbAabbInfo, const ndVe
 				const ndNode* const me = stackPool.Pop();
 				if (dist < ndFloat32 (1.0f)) 
 				{
-					if (me->m_left.IsLeaf()) 
+					if (me->m_leftInfo.IsLeaf())
 					{
-						ndInt32 index = ndInt32 (me->m_left.GetIndex());
-						ndInt32 vCount = ndInt32 (me->m_left.GetCount());
+						ndInt32 index = ndInt32 (me->m_leftInfo.GetIndex());
+						ndInt32 vCount = ndInt32 (me->m_leftInfo.GetCount());
 						if (vCount > 0) 
 						{
 							const ndInt32* const indices = &m_indices[index];
@@ -1236,7 +1221,7 @@ void ndAabbPolygonSoup::ForAllSectors (const ndFastAabb& obbAabbInfo, const ndVe
 					} 
 					else 
 					{
-						const ndNode* const node = me->m_left.GetNode(m_aabb);
+						const ndNode* const node = me->m_leftInfo.GetNode(m_aabb);
 						ndFloat32 dist1 = node->BoxIntersect (ray, obbRay, obbAabbInfo, vertexArray);
 						if (dist1 < ndFloat32 (1.0f)) 
 						{
@@ -1253,10 +1238,10 @@ void ndAabbPolygonSoup::ForAllSectors (const ndFastAabb& obbAabbInfo, const ndVe
 						}
 					}
 
-					if (me->m_right.IsLeaf()) 
+					if (me->m_rightInfo.IsLeaf())
 					{
-						ndInt32 index = ndInt32 (me->m_right.GetIndex());
-						ndInt32 vCount = ndInt32 (me->m_right.GetCount());
+						ndInt32 index = ndInt32 (me->m_rightInfo.GetIndex());
+						ndInt32 vCount = ndInt32 (me->m_rightInfo.GetCount());
 						if (vCount > 0) 
 						{
 							const ndInt32* const indices = &m_indices[index];
@@ -1274,7 +1259,7 @@ void ndAabbPolygonSoup::ForAllSectors (const ndFastAabb& obbAabbInfo, const ndVe
 					} 
 					else 
 					{
-						const ndNode* const node = me->m_right.GetNode(m_aabb);
+						const ndNode* const node = me->m_rightInfo.GetNode(m_aabb);
 						ndFloat32 dist1 = node->BoxIntersect (ray, obbRay, obbAabbInfo, vertexArray);
 						if (dist1 < ndFloat32 (1.0f)) 
 						{
@@ -1320,10 +1305,10 @@ void ndAabbPolygonSoup::ForThisSector(const ndAabbPolygonSoup::ndNode* const nod
 			}
 			if (dist > ndFloat32(0.0f))
 			{
-				if (node->m_left.IsLeaf())
+				if (node->m_leftInfo.IsLeaf())
 				{
-					ndInt32 index = ndInt32(node->m_left.GetIndex());
-					ndInt32 vCount = ndInt32(node->m_left.GetCount());
+					ndInt32 index = ndInt32(node->m_leftInfo.GetIndex());
+					ndInt32 vCount = ndInt32(node->m_leftInfo.GetCount());
 					if (vCount > 0)
 					{
 						const ndInt32* const indices = &m_indices[index];
@@ -1340,10 +1325,10 @@ void ndAabbPolygonSoup::ForThisSector(const ndAabbPolygonSoup::ndNode* const nod
 					}
 				}
 			
-				if (node->m_right.IsLeaf())
+				if (node->m_rightInfo.IsLeaf())
 				{
-					ndInt32 index = ndInt32(node->m_right.GetIndex());
-					ndInt32 vCount = ndInt32(node->m_right.GetCount());
+					ndInt32 index = ndInt32(node->m_rightInfo.GetIndex());
+					ndInt32 vCount = ndInt32(node->m_rightInfo.GetCount());
 					if (vCount > 0)
 					{
 						const ndInt32* const indices = &m_indices[index];
