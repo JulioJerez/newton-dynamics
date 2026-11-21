@@ -520,6 +520,11 @@ class ndMarchingCubes::ndGridHashSteps
 	ndInt8 m_cellType[8];
 };
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 ndVector ndMarchingCubes::m_gridCorners[] =
 {
 	ndVector(ndFloat32(0.0f), ndFloat32(-1.0f), ndFloat32(-1.0f), ndFloat32(0.0f)),
@@ -3025,6 +3030,10 @@ ndVector ndMarchingCubes::GetInvGridSize() const
 {
 	return m_invGridSize;
 }
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 // ***********************************************************
 //

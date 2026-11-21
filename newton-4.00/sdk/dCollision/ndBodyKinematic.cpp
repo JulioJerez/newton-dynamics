@@ -36,7 +36,16 @@
 #define D_MINIMUM_MASS	ndFloat32(1.0e-5f)
 #define D_INFINITE_MASS	ndFloat32(1.0e15f)
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 ndVector ndBodyKinematic::m_velocTol(ndVector(ndFloat32(1.0e-8f)) & ndVector::m_triplexMask);
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 ndBodyKinematic::ndContactkey::ndContactkey(ndUnsigned32 tag0, ndUnsigned32 tag1)
 	:m_tagLow(ndMin(tag0, tag1))
@@ -300,7 +309,7 @@ ndBodyKinematic* ndBodyKinematic::GetAsBodyKinematic()
 
 ndScene* ndBodyKinematic::GetScene() const
 {
-	return (ndScene*)*m_scene;
+	return const_cast<ndScene*>(*m_scene);
 }
 
 void ndBodyKinematic::SetSceneNodes(ndScene* const scene, ndBodyListView::ndNode* const node)
@@ -398,7 +407,7 @@ const ndBodyKinematic::ndJointList& ndBodyKinematic::GetJointList() const
 
 ndShapeInstance& ndBodyKinematic::GetCollisionShape()
 {
-	return (ndShapeInstance&)m_shapeInstance;
+	return m_shapeInstance;
 }
 
 const ndShapeInstance& ndBodyKinematic::GetCollisionShape() const
@@ -429,7 +438,7 @@ void ndBodyKinematic::SetAutoSleep(bool state)
 
 ndModel* ndBodyKinematic::GetModel() const
 {
-	return (ndModel*) *m_model;
+	return const_cast<ndModel*>(*m_model);
 }
 
 void ndBodyKinematic::SetModel(ndModel* const model)
@@ -439,7 +448,7 @@ void ndBodyKinematic::SetModel(ndModel* const model)
 
 ndSkeletonContainer* ndBodyKinematic::GetSkeleton() const
 {
-	return (ndSkeletonContainer*)*m_skeletonContainer;
+	return const_cast<ndSkeletonContainer*>(*m_skeletonContainer);
 }
 
 void ndBodyKinematic::SetSkeleton(ndSkeletonContainer* const skeleton)
@@ -972,7 +981,7 @@ void ndBodyKinematic::IntegrateVelocity(ndFloat32 timestep)
 
 	const ndFloat32 omegaMag2 = m_omega.DotProduct(m_omega).GetScalar();
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	const ndFloat32 angular2 = omegaMag2 * timestep * timestep;
 	const ndFloat32 linear2 = m_veloc.DotProduct(m_veloc).GetScalar() * timestep * timestep;;
 	const ndFloat32 maxAngularStep2 = m_maxAngleStep * m_maxAngleStep;
@@ -1179,7 +1188,7 @@ void ndBodyKinematic::SaveNdMesh(const char* const path) const
 void ndBodyKinematic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
 {
 	ndBody::Serialize(meshBody);
-	ndMeshBodyKinematic* const meshKinematicBody = (ndMeshBodyKinematic*)*meshBody;
+	ndMeshBodyKinematic* const meshKinematicBody = static_cast<ndMeshBodyKinematic*>(const_cast<ndMeshBody*>(*meshBody));
 	meshKinematicBody->m_invMass = m_invMass;
 	ndVector euler;
 	ndVector axisOfInertia(m_inertiaPrincipalAxis.CalcPitchYawRoll(euler));
@@ -1194,7 +1203,7 @@ void ndBodyKinematic::Deserialize(const ndMeshBody* const meshBody)
 {
 	ndBody::Deserialize(meshBody);
 	
-	ndMeshBodyKinematic* const kinematic = (ndMeshBodyKinematic*)meshBody;
+	ndMeshBodyKinematic* const kinematic = static_cast<ndMeshBodyKinematic*>(const_cast<ndMeshBody*>(meshBody));
 
 	ndAssert(meshBody->m_owner);
 	const ndMatrix matrix(meshBody->m_owner->CalculateGlobalMatrix());

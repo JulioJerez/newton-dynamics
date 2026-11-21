@@ -42,7 +42,19 @@
 	#ifndef WIN32_LEAN_AND_MEAN
 		#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 	#endif
+
+	#if defined(__clang__)
+		#pragma clang diagnostic push
+		#pragma clang diagnostic ignored "-Wnonportable-system-include-path"
+	#endif
+
 	#include <windows.h>
+
+	#if defined(__clang__)
+		#pragma clang diagnostic pop
+	#endif
+
+
 #elif __MACH__
 	#include <mach/mach.h>
 #else

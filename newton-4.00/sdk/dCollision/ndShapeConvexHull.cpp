@@ -1564,7 +1564,7 @@ ndBigVector ndShapeConvexHull::FaceNormal(const ndEdge* face, const ndBigVector*
 		ndBigVector p2(pool[edge->m_incidentVertex]);
 		ndBigVector e2(p2 - p0);
 		ndBigVector n1(e1.CrossProduct(e2));
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		ndAssert(n1.m_w == ndFloat32(0.0f));
 		ndFloat64 mag = normal.DotProduct(n1).GetScalar();
 		ndAssert(mag >= -ndFloat32(0.1f));
@@ -1576,7 +1576,7 @@ ndBigVector ndShapeConvexHull::FaceNormal(const ndEdge* face, const ndBigVector*
 	ndFloat64 den = sqrt(normal.DotProduct(normal).GetScalar()) + ndFloat64(1.0e-24f);
 	normal = normal.Scale(ndFloat64(1.0f) / den);
 
-	#ifdef _DEBUG
+	#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		edge = face;
 		ndBigVector e0(pool[edge->m_incidentVertex] - pool[edge->m_prev->m_incidentVertex]);
 		do

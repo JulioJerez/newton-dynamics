@@ -30,7 +30,7 @@ ndBodyListView::ndBodyListView(const ndBodyListView& src)
 	,m_listIsDirty(1)
 {
 	ndNode* nextNode;
-	ndBodyListView* const stealData = (ndBodyListView*)&src;
+	ndBodyListView* const stealData = const_cast<ndBodyListView*>(&src);
 	for (ndNode* node = stealData->GetFirst(); node; node = nextNode)
 	{
 		nextNode = node->GetNext();

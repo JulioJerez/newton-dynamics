@@ -64,7 +64,6 @@ void ndConstraintDebugCallback::DrawArrow(const ndMatrix& origin, const ndVector
 	}
 }
 
-#define D_WARM_START_LOW_PASS_FILTER ndFloat32 (0.01f)
 void ndForceImpactPair::Clear()
 {
 	m_initialGuessIndex = 0;

@@ -27,8 +27,16 @@
 #include "ndContactOptions.h"
 
 #define D_DIAGONAL_REGULARIZER		ndFloat32 (1.0e-3f)
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
 
 ndVector ndContact::m_initialSeparatingVector(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
 
 void ndContactMaterial::RotateTangentDirections(const ndVector& dir)
 {
@@ -271,7 +279,7 @@ void ndContact::JacobianContactDerivative(ndConstraintDescritor& desc, const ndC
 	desc.m_restitution[normalIndex] = restitutionCoefficient;
 	desc.m_forceBounds[normalIndex].m_low = ndFloat32(0.0f);
 	desc.m_forceBounds[normalIndex].m_normalIndex = D_INDEPENDENT_ROW;
-	desc.m_forceBounds[normalIndex].m_jointForce = (ndForceImpactPair*)&contact.m_normal_Force;
+	desc.m_forceBounds[normalIndex].m_jointForce = const_cast<ndForceImpactPair*>(&contact.m_normal_Force);
 
 	const ndFloat32 restitutionVelocity = (relSpeed > D_REST_RELATIVE_VELOCITY) ? relSpeed * restitutionCoefficient : ndFloat32(0.0f);
 	const ndFloat32 penetrationStiffness = D_MAX_PENETRATION_STIFFNESS * contact.m_material.m_softness;
@@ -348,7 +356,7 @@ void ndContact::JacobianContactDerivative(ndConstraintDescritor& desc, const ndC
 			desc.m_forceBounds[jacobIndex].m_low = -contact.m_material.m_staticFriction0;
 			desc.m_forceBounds[jacobIndex].m_upper = contact.m_material.m_staticFriction0;
 		}
-		desc.m_forceBounds[jacobIndex].m_jointForce = (ndForceImpactPair*)&contact.m_dir0_Force;
+		desc.m_forceBounds[jacobIndex].m_jointForce = const_cast<ndForceImpactPair*>(&contact.m_dir0_Force);
 	}
 
 	if (contact.m_material.m_flags & m_friction1Enable)
@@ -404,7 +412,7 @@ void ndContact::JacobianContactDerivative(ndConstraintDescritor& desc, const ndC
 			desc.m_forceBounds[jacobIndex].m_low = -contact.m_material.m_staticFriction1;
 			desc.m_forceBounds[jacobIndex].m_upper = contact.m_material.m_staticFriction1;
 		}
-		desc.m_forceBounds[jacobIndex].m_jointForce = (ndForceImpactPair*)&contact.m_dir1_Force;
+		desc.m_forceBounds[jacobIndex].m_jointForce = const_cast<ndForceImpactPair*>(&contact.m_dir1_Force);
 	}
 }
 

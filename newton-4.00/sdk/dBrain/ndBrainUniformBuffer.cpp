@@ -56,7 +56,7 @@ void* ndBrainUniformBuffer::GetCpuPtr() const
 	if (m_context->GetAsCpuContext())
 	{
 		const ndFixSizeArray<ndUnsigned32, 256>& dst = **m_data;
-		return (void*)&dst[0];
+		return reinterpret_cast<void*>(const_cast<ndUnsigned32*>(&dst[0]));
 	}
 	return nullptr;
 }

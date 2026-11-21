@@ -35,7 +35,7 @@ bool ndBrainLossCategoricalCrossEntropy::IsCategorical() const
 
 void ndBrainLossCategoricalCrossEntropy::SetTruth(const ndBrainVector& truth)
 {
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndAssert(m_truth.GetCount() == truth.GetCount());
 	ndInt32 index = 0;
 	for (ndInt32 i = 0; i < truth.GetCount(); ++i)

@@ -172,7 +172,7 @@ void ndShapeCapsule::Init(ndFloat32 radio0, ndFloat32 radio1, ndFloat32 height)
 	ndAssert(SanityCheck(polyhedra));
 
 	m_edgeCount = ndUnsigned16(polyhedra.GetEdgeCount());
-	m_simplex = (ndConvexSimplexEdge*)ndMemory::Malloc(size_t(m_edgeCount * sizeof(ndConvexSimplexEdge)));
+	m_simplex = reinterpret_cast<ndConvexSimplexEdge*>(ndMemory::Malloc(size_t(m_edgeCount * sizeof(ndConvexSimplexEdge))));
 
 	ndUnsigned64 i = 0;
 	ndPolyhedra::Iterator iter(polyhedra);

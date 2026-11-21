@@ -132,8 +132,7 @@ void ndBrainVector::Clamp(ndBrainFloat min, ndBrainFloat max)
 
 bool ndBrainVector::SanityCheck(ndBrainFloat bound) const
 {
-//#ifdef _DEBUG
-#if 0
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
 	{
 		ndAssert (ndCheckFloat((*this)[i]));
@@ -144,9 +143,7 @@ bool ndBrainVector::SanityCheck(ndBrainFloat bound) const
 		}
 	}
 #endif
-	bound = 0;
-
-	return true;
+	return bound >= ndBrainFloat(0.0f) ? true : false;
 }
 
 void ndBrainVector::FlushToZero()

@@ -29,11 +29,11 @@
 //#define D_USE_YZ_PLANE_BUCKETS
 
 
-#define D_SPH_HASH_BITS				8
-#define D_SPH_BUFFER_GRANULARITY	4096	
+//#define D_SPH_HASH_BITS				8
+//#define D_SPH_BUFFER_GRANULARITY	4096	
 
-#define D_PARTICLE_BUCKET_SIZE		32
-#define D_GRID_SIZE_SCALER			(1.0f)
+//#define D_PARTICLE_BUCKET_SIZE		32
+//#define D_GRID_SIZE_SCALER			(1.0f)
 
 #if 0
 #if 0

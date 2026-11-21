@@ -31,9 +31,17 @@
 #include "ndMeshBaseComponents.h"
 #include "ndShapeConvexPolygon.h"
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 ndVector ndShapeInstance::m_padding(D_MAX_SHAPE_AABB_PADDING, D_MAX_SHAPE_AABB_PADDING, D_MAX_SHAPE_AABB_PADDING, ndFloat32(0.0f));
 
-//ndShapeInstance::ndShapeInstance(ndShape* const shape)
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
+
 ndShapeInstance::ndShapeInstance(ndSharedPtr<ndShape> shape)
 	:ndContainersFreeListAlloc<ndShapeInstance>()
 	,m_globalMatrix(ndGetIdentityMatrix())
@@ -439,7 +447,7 @@ ndShapeInstance& ndShapeInstance::operator=(const ndShapeInstance& instance)
 
 void ndShapeInstance::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const
 {
-	debugCallback.m_instance = (ndShapeInstance*)this;
+	debugCallback.m_instance = const_cast<ndShapeInstance*>(this);
 	const ndMatrix scaleMatrix(GetScaledTransform(matrix));
 	m_shape->DebugShape(scaleMatrix, debugCallback);
 }
@@ -741,6 +749,7 @@ void ndShapeInstance::CalculateObb(ndVector& origin, ndVector& size) const
 			break;
 		}
 		case m_global:
+		default:
 		{
 			ndVector p0;
 			ndVector p1;

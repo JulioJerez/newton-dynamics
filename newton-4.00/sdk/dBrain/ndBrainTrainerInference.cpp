@@ -207,7 +207,7 @@ ndBrainBufferCommand* ndBrainTrainerInference::FindCommand(ndList<ndSharedPtr<nd
 {
 	for (ndList<ndSharedPtr<ndBrainBufferCommand>>::ndNode* node = commandList.GetFirst(); node; node = node->GetNext())
 	{
-		ndBrainBufferCommand* const command = (ndBrainBufferCommand*)*node->GetInfo();
+		ndBrainBufferCommand* const command = reinterpret_cast<ndBrainBufferCommand*>(*node->GetInfo());
 		const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 		if (desc.m_id == id)
 		{
@@ -264,8 +264,8 @@ void ndBrainTrainerInference::AddCopyInputCommand(ndList<ndSharedPtr<ndBrainBuff
 				const ndCommandSharedInfo& info = m_desc.m_info;
 				ndBrainTrainerInference* const owner = *m_desc.m_owner;
 
-				ndBrainFloat* const dstPtr = (ndBrainFloat*)owner->m_inputOutputBuffer->GetCpuPtr();
-				const ndBrainFloat* const srcPtr = (ndBrainFloat*)owner->m_miniBatchInputBuffer->GetCpuPtr();
+				ndBrainFloat* const dstPtr = reinterpret_cast<ndBrainFloat*>(owner->m_inputOutputBuffer->GetCpuPtr());
+				const ndBrainFloat* const srcPtr = reinterpret_cast<ndBrainFloat*>(owner->m_miniBatchInputBuffer->GetCpuPtr());
 
 				ndAssert(groupId * info.m_inputSize >= 0);
 				ndAssert(groupId * info.m_inputOutputSize >= 0);
@@ -328,8 +328,8 @@ void ndBrainTrainerInference::AddCopyOutputCommand(ndList<ndSharedPtr<ndBrainBuf
 				const ndCommandSharedInfo& info = m_desc.m_info;
 				ndBrainTrainerInference* const owner = *m_desc.m_owner;
 
-				ndBrainFloat* const dstPtr = (ndBrainFloat*)owner->m_miniBatchOutputBuffer->GetCpuPtr();
-				const ndBrainFloat* const srcPtr = (ndBrainFloat*)owner->m_inputOutputBuffer->GetCpuPtr();
+				ndBrainFloat* const dstPtr = reinterpret_cast<ndBrainFloat*>(owner->m_miniBatchOutputBuffer->GetCpuPtr());
+				const ndBrainFloat* const srcPtr = reinterpret_cast<ndBrainFloat*>(owner->m_inputOutputBuffer->GetCpuPtr());
 
 				ndAssert(groupId * info.m_outputSize >= 0);
 				ndAssert(groupId * info.m_inputOutputSize >= 0);
@@ -358,7 +358,7 @@ void ndBrainTrainerInference::CopyWeightsAnBiasParameters(const ndBrainVector& w
 		ndBrainBufferCommand* const command = *node->GetInfo();
 		const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 		const ndCommandSharedInfo& info = desc.m_info;
-		ndBrainLayer* const layer = (ndBrainLayer*)info.m_layer;
+		ndBrainLayer* const layer = const_cast<ndBrainLayer*>(info.m_layer);
 		if (layer)
 		{
 			ndCommandSharedInfo layerParameterSize(layer->GetCommandSharedInfo(this));

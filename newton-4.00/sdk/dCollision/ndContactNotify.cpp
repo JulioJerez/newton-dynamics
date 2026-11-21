@@ -62,9 +62,8 @@ const ndContact* ndContactNotify::GetContactConstructor(const ndShapeInstance&, 
 
 ndMaterial* ndContactNotify::GetMaterial(const ndContact* const, const ndShapeInstance&, const ndShapeInstance&) const
 {
-	return (ndMaterial*)&m_default;
+	return const_cast<ndMaterial*>(&m_default);
 }
-
 
 //bool OnCompoundSubShapeOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance* const subShapeA, const ndShapeInstance* const subShapeB);
 bool ndContactNotify::OnCompoundSubShapeOverlap(const ndContact* const, ndFloat32, const ndShapeInstance* const, const ndShapeInstance* const) const

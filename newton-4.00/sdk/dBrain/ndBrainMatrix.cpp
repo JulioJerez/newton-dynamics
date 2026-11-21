@@ -68,18 +68,18 @@ void ndBrainMatrix::Init(ndInt32 rows, ndInt32 columns)
 	size_t strideInBytes = size_t((ndInt64(columns * sizeof(ndBrainFloat)) + D_BRAIN_MATRIX_ALIGNMENT - 1) & -D_BRAIN_MATRIX_ALIGNMENT);
 	size_t size = size_t(rows * sizeof(ndBrainMemVector) + 256);
 	size += strideInBytes * rows;
-	m_memory = (ndBrainFloat*)ndMemory::Malloc(size_t(size));
-	m_array = (ndBrainMemVector*)m_memory;
+	m_memory = reinterpret_cast<ndBrainFloat*>(ndMemory::Malloc(size_t(size)));
+	m_array = static_cast<ndBrainMemVector*>(m_memory);
 
 	size_t bytes = size_t((rows * sizeof(ndBrainMemVector) + D_BRAIN_MATRIX_ALIGNMENT - 1) & -D_BRAIN_MATRIX_ALIGNMENT);
-	ndInt8* ptr = (ndInt8*)m_memory + bytes;
+	ndInt8* ptr = reinterpret_cast<ndInt8*>(m_memory) + bytes;
 
 	ndBrainMatrix& me = *this;
 	for (ndInt32 i = 0; i < rows; ++i)
 	{
 		ndBrainMemVector& row = me[i];
 		row.SetSize(columns);
-		row.SetPointer((ndBrainFloat*) ptr);
+		row.SetPointer(reinterpret_cast<ndBrainFloat*>(ptr));
 		ptr += strideInBytes;
 		ndAssert((bytes + strideInBytes * i) < size);
 	}

@@ -30,7 +30,17 @@ void ndExpandTraceMessage(const char* const fmt, ...)
 
 	text[0] = 0;
 	va_start(v_args, fmt);
+	#if defined(__clang__)
+		#pragma clang diagnostic push
+		#pragma clang diagnostic ignored "-Wformat-nonliteral"
+	#endif
+
 	vsnprintf(text, sizeof(text), fmt, v_args);
+
+	#if defined(__clang__)
+		#pragma clang diagnostic pop
+	#endif
+
 	va_end(v_args);
 
 #if (defined(WIN32) || defined(_WIN32))

@@ -53,7 +53,17 @@ class ndFreeListDictionary: public ndFixSizeArray<ndFreeListHeader, D_FREELIST_D
 
 	static ndFreeListDictionary& GetHeader()
 	{
+		#if defined(__clang__)
+			#pragma clang diagnostic push
+			#pragma clang diagnostic ignored "-Wexit-time-destructors"
+		#endif
+
 		static ndFreeListDictionary dictionary;
+
+		#if defined(__clang__)
+			#pragma clang diagnostic pop
+		#endif
+
 		return dictionary;
 	}
 

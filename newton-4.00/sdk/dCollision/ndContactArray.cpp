@@ -35,7 +35,7 @@ ndContactArray::ndContactArray(const ndContactArray& src)
 	:ndArray<ndContact*>()
 	,m_lock()
 {
-	ndContactArray& steal = (ndContactArray&)src;
+	ndContactArray& steal = const_cast<ndContactArray&>(src);
 	Swap(steal);
 }
 

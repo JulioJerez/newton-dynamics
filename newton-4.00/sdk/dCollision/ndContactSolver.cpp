@@ -755,6 +755,11 @@ ndInt32 ndContactSolver::CalculateClosestSimplex()
 
 void ndContactSolver::CalculateContactFromFeacture(ndInt32 featureType)
 {
+	#if defined(__clang__)
+		#pragma clang diagnostic push
+		#pragma clang diagnostic ignored "-Wimplicit-fallthrough"
+	#endif
+
 	ndVector d;
 	ndVector s;
 	switch (featureType)
@@ -890,6 +895,10 @@ void ndContactSolver::CalculateContactFromFeacture(ndInt32 featureType)
 		}
 	}
 
+	#if defined(__clang__)
+		#pragma clang diagnostic pop
+	#endif
+
 	m_closestPoint0 = ndVector::m_half * (s + d);
 	m_closestPoint1 = ndVector::m_half * (s - d);
 	ndAssert(m_separatingVector.m_w == ndFloat32(0.0f));
@@ -909,7 +918,8 @@ ndInt32 ndContactSolver::ConvexPolygonToLineIntersection(const ndVector& normal,
 	// face line intersection
 	if (count2 == 2) 
 	{
-		ptr = (ndVector*)&shape2[0];
+		//ptr = (ndVector*)&shape2[0];
+		ptr = &shape2[0];
 		ndInt32 i0 = count1 - 1;
 		for (ndInt32 i1 = 0; i1 < count1; ++i1) 
 		{
@@ -1235,8 +1245,8 @@ ndInt32 ndContactSolver::Prune3dContacts(const ndMatrix& matrix, ndInt32 count, 
 		{
 			cluster = spliteStack.Pop();
 
-			const ndVector origin(cluster.m_sum.Scale(ndFloat32(1.0f) / (ndFloat32)cluster.m_count));
-			const ndVector variance2(cluster.m_sum2.Scale(ndFloat32(1.0f) / (ndFloat32)cluster.m_count) - origin * origin);
+			const ndVector origin(cluster.m_sum.Scale(ndFloat32(1.0f) / ndFloat32(cluster.m_count)));
+			const ndVector variance2(cluster.m_sum2.Scale(ndFloat32(1.0f) / ndFloat32(cluster.m_count)) - origin * origin);
 			ndFloat32 maxVariance2 = ndMax(ndMax(variance2.m_x, variance2.m_y), variance2.m_z);
 
 			if ((cluster.m_count <= clusterSize) || (maxVariance2 < ndFloat32(1.e-4f)))
@@ -1657,7 +1667,7 @@ ndInt32 ndContactSolver::Prune2dContacts(ndFixSizeArray<ndVector, D_MAX_CONTATCS
 		ndInt32 hullIndex = ndInt32(hull->m_point2d.m_w);
 		buffer.PushBack(contactArray[hullIndex]);
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		ndVector e1(hull->m_point2d - hull->m_next->m_point2d);
 		ndVector e0(hull->m_next->m_next->m_point2d - hull->m_next->m_point2d);
 		ndFloat32 n = e0.m_x * e1.m_y - e0.m_y * e1.m_x;
@@ -1722,7 +1732,7 @@ ndInt32 ndContactSolver::PruneContacts(ndInt32 count, ndInt32 maxCount) const
 	{
 		origin += contactArray[i].m_point;
 	}
-	ndVector scale(ndFloat32(1.0f) / (ndFloat32)count);
+	ndVector scale(ndFloat32(1.0f) / ndFloat32(count));
 	origin = origin * scale;
 	origin.m_w = ndFloat32(1.0f);
 
@@ -1982,7 +1992,7 @@ ndFloat32 ndContactSolver::RayCast(const ndVector& localP0, const ndVector& loca
 
 inline ndMinkFace* ndContactSolver::NewFace()
 {
-	ndMinkFace* face = (ndMinkFace*)m_freeFace;
+	ndMinkFace* face = reinterpret_cast<ndMinkFace*>(m_freeFace);
 	if (m_freeFace) 
 	{
 		m_freeFace = m_freeFace->m_next;
@@ -2036,7 +2046,7 @@ inline void ndContactSolver::PushFace(ndMinkFace* const face)
 
 inline void ndContactSolver::DeleteFace(ndMinkFace* const face)
 {
-	dgFaceFreeList* const freeFace = (dgFaceFreeList*)face;
+	dgFaceFreeList* const freeFace = reinterpret_cast<dgFaceFreeList*>(face);
 	freeFace->m_next = m_freeFace;
 	m_freeFace = freeFace;
 }
@@ -2193,7 +2203,7 @@ ndInt32 ndContactSolver::CalculateIntersectingPlane(ndInt32 count)
 			ndSwap(m_hullDiff[1], m_hullDiff[2]);
 		}
 
-		#ifdef _DEBUG
+		#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 		{
 			ndVector f0(m_hullDiff[1] - m_hullDiff[0]);
 			ndVector f1(m_hullDiff[2] - m_hullDiff[0]);
@@ -3104,11 +3114,11 @@ ndInt32 ndContactSolver::CompoundToShapeStaticBvhContactsDiscrete()
 	const ndMatrix& compoundMatrix = compoundInstance->GetGlobalMatrix();
 	ndBoxBoxDistance2 data(compoundMatrix, treeMatrix);
 
-	ndVector bvhp0;
-	ndVector bvhp1;
-	bvhTreeCollision->GetNodeAabb(bvhTreeCollision->GetRootNode(), bvhp0, bvhp1);
-	const ndVector bvhSize((bvhp1 - bvhp0) * ndVector::m_half);
-	const ndVector bvhOrigin((bvhp1 + bvhp0) * ndVector::m_half);
+	ndVector outerBvhp0;
+	ndVector outerBvhp1;
+	bvhTreeCollision->GetNodeAabb(bvhTreeCollision->GetRootNode(), outerBvhp0, outerBvhp1);
+	const ndVector outerBvhSize((outerBvhp1 - outerBvhp0) * ndVector::m_half);
+	const ndVector outerBvhOrigin((outerBvhp1 + outerBvhp0) * ndVector::m_half);
 	const ndVector treeScale(bvhTreeInstance->GetScale());
 
 	ndInt32 contactCount = 0;
@@ -3145,7 +3155,7 @@ ndInt32 ndContactSolver::CompoundToShapeStaticBvhContactsDiscrete()
 	};
 
 	stackPool.PushBack(ndStackBvhStackEntry(compoundShape->m_root, bvhTreeCollision->GetRootNode(), 0, 
-		data.CalculateDistance2(compoundShape->m_root->m_origin, compoundShape->m_root->m_size, bvhOrigin, bvhSize)));
+		data.CalculateDistance2(compoundShape->m_root->m_origin, compoundShape->m_root->m_size, outerBvhOrigin, outerBvhSize)));
 
 	ndFloat32 closestDist2 = (stackPool[0].m_dist2 > ndFloat32(0.0f)) ? stackPool[0].m_dist2 : ndFloat32(1.0e10f);
 	while (stackPool.GetCount())
@@ -3822,7 +3832,7 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsContinue(ndPolygonMeshDe
 	ndContactPoint* const contactOut = m_contactBuffer;
 
 	ndPolygonMeshDesc::ndStaticMeshFaceQuery& query = *data.m_staticMeshQuery;
-	ndInt32* const indexArray = (ndInt32*)&query.m_faceVertexIndex[0];
+	ndInt32* const indexArray = &query.m_faceVertexIndex[0];
 	data.SortFaceArray();
 
 	ndVector closestPoint0(ndVector::m_zero);

@@ -25,7 +25,17 @@
 #include "ndShape.h"
 #include "ndMeshBaseComponents.h"
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 ndVector ndShape::m_flushZero(ndFloat32(1.0e-7f));
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
+
 
 ndShape::ndShape(ndShapeID id)
 	:ndContainersFreeListAlloc<ndShape>()

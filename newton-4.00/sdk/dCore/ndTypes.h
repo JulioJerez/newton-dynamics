@@ -38,8 +38,19 @@
 	#include <malloc.h>
 	#include <stdarg.h>
 	#include <process.h>
+
+	#if defined(__clang__)
+		#pragma clang diagnostic push
+		#pragma clang diagnostic ignored "-Wnonportable-system-include-path"
+	#endif
+
 	#include <windows.h>
 	#include <crtdbg.h>
+
+	#if defined(__clang__)
+		#pragma clang diagnostic pop
+	#endif
+
 #else
   #include <sys/stat.h>
 #endif

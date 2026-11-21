@@ -27,8 +27,18 @@
 #define D_AABB_QUANTIZATION		ndFloat32 (4.0f)
 #define D_AABB_INV_QUANTIZATION	(ndFloat32 (1.0f) / D_AABB_QUANTIZATION)
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 ndVector ndBvhNode::m_aabbQuantization(D_AABB_QUANTIZATION, D_AABB_QUANTIZATION, D_AABB_QUANTIZATION, ndFloat32 (0.0f));
 ndVector ndBvhNode::m_aabbInvQuantization(D_AABB_INV_QUANTIZATION, D_AABB_INV_QUANTIZATION, D_AABB_INV_QUANTIZATION, ndFloat32(0.0f));
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
+
 
 ndBvhLeafNode::ndBvhLeafNode(ndBodyKinematic* const body)
 	:ndBvhNode(nullptr)
@@ -151,7 +161,7 @@ ndBvhNodeArray::ndBvhNodeArray(const ndBvhNodeArray& src)
 	,m_isDirty(1)
 	,m_scansCount(0)
 {
-	Swap((ndBvhNodeArray&)src);
+	Swap(const_cast<ndBvhNodeArray&>(src));
 }
 
 ndBvhNodeArray::~ndBvhNodeArray()
@@ -240,7 +250,7 @@ ndBvhNode::~ndBvhNode()
 
 ndBvhNode* ndBvhNode::GetAsSceneNode() const
 {
-	return (ndBvhNode*)this;
+	return const_cast<ndBvhNode*>(this);
 }
 
 ndBvhLeafNode* ndBvhNode::GetAsSceneBodyNode() const
@@ -297,7 +307,7 @@ ndBvhNode* ndBvhNode::Clone() const
 
 ndBvhLeafNode* ndBvhLeafNode::GetAsSceneBodyNode() const
 {
-	return (ndBvhLeafNode*)this;
+	return const_cast<ndBvhLeafNode*>(this);
 }
 
 ndBodyKinematic* ndBvhLeafNode::GetBody() const
@@ -307,7 +317,7 @@ ndBodyKinematic* ndBvhLeafNode::GetBody() const
 
 ndBvhInternalNode* ndBvhInternalNode::GetAsSceneTreeNode() const
 {
-	return (ndBvhInternalNode*)this;
+	return const_cast<ndBvhInternalNode*>(this);
 }
 
 ndBvhNode* ndBvhInternalNode::GetLeft() const
@@ -420,8 +430,8 @@ ndBvhNode* ndBvhSceneManager::AddBody(ndBodyKinematic* const body, ndBvhNode* ro
 void ndBvhSceneManager::RemoveBody(ndBodyKinematic* const body)
 {
 	m_workingArray.m_isDirty = 1;
-	ndBvhLeafNode* const bodyNode = (ndBvhLeafNode*)m_workingArray[body->m_bodyNodeIndex];
-	ndBvhInternalNode* const sceneNode = (ndBvhInternalNode*)m_workingArray[body->m_sceneNodeIndex];
+	ndBvhLeafNode* const bodyNode = static_cast<ndBvhLeafNode*>(m_workingArray[body->m_bodyNodeIndex]);
+	ndBvhInternalNode* const sceneNode = static_cast<ndBvhInternalNode*>(m_workingArray[body->m_sceneNodeIndex]);
 	ndAssert(bodyNode->GetAsSceneBodyNode());
 	ndAssert(sceneNode->GetAsSceneTreeNode());
 	bodyNode->Kill();
@@ -431,9 +441,8 @@ void ndBvhSceneManager::RemoveBody(ndBodyKinematic* const body)
 ndBvhLeafNode* ndBvhSceneManager::GetLeafNode(ndBodyKinematic* const body) const
 {
 	ndAssert(m_workingArray[body->m_bodyNodeIndex] && m_workingArray[body->m_bodyNodeIndex]->GetAsSceneBodyNode());
-	return (ndBvhLeafNode*)m_workingArray[body->m_bodyNodeIndex];
+	return static_cast<ndBvhLeafNode*>(m_workingArray[body->m_bodyNodeIndex]);
 }
-
 
 void ndBvhSceneManager::CleanUp()
 {
@@ -460,7 +469,8 @@ void ndBvhSceneManager::Update(ndThreadPool& threadPool)
 
 		ndCountingSortInPlace(threadPool, src, tmp, count, scans, 2, [&keyCode](const ndBvhNode* const node)
 		{
-			ndUnsigned32 code = ndUnsigned32(node->m_isDead * 2 + (((ndBvhNode*)node)->GetAsSceneBodyNode() ? 1 : 0));
+			//ndUnsigned32 code = ndUnsigned32(node->m_isDead * 2 + (((ndBvhNode*)node)->GetAsSceneBodyNode() ? 1 : 0));
+			ndUnsigned32 code = ndUnsigned32(node->m_isDead * 2 + (const_cast<ndBvhNode*>(node)->GetAsSceneBodyNode() ? 1 : 0));
 			return keyCode[code];
 		});
 
@@ -480,7 +490,7 @@ void ndBvhSceneManager::Update(ndThreadPool& threadPool)
 				ND_PROFILE_ZONE_NAMED("MarkCellBounds");
 				ndBvhNode** const nodes = &nodeArray[0];
 				const ndInt32 baseCount = ndInt32(nodeArray.GetCount()) / 2;
-				ndBvhLeafNode* const bodyNode = (ndBvhLeafNode*)nodes[baseCount + groupId];
+				ndBvhLeafNode* const bodyNode = reinterpret_cast<ndBvhLeafNode*>(nodes[baseCount + groupId]);
 				ndAssert(nodes[groupId]->GetAsSceneTreeNode());
 				ndAssert(nodes[baseCount + groupId]->GetAsSceneBodyNode());
 
@@ -533,7 +543,7 @@ void ndBvhSceneManager::UpdateScene(ndThreadPool& threadPool)
 	auto UpdateSceneBvh = ndMakeObject::ndFunction([this, &start](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ND_PROFILE_ZONE_NAMED("UpdateSceneBvh");
-		ndBvhInternalNode** const nodes = (ndBvhInternalNode**)&m_workingArray[start];
+		ndBvhInternalNode** const nodes = reinterpret_cast<ndBvhInternalNode**>(&m_workingArray[start]);
 		ndBvhInternalNode* const node = nodes[groupId];
 		ndAssert(node && node->GetAsSceneNode());
 
@@ -567,7 +577,7 @@ bool ndBvhSceneManager::BuildBvhTreeInitNodes(ndThreadPool& threadPool)
 		ndBvhNodeArray& nodeArray = m_workingArray;
 		const ndInt32 baseCount = ndInt32(nodeArray.GetCount()) / 2;
 		ndBvhNode** const srcArray = m_bvhBuildState.m_srcArray;
-		ndBvhLeafNode** const bodySceneNodes = (ndBvhLeafNode**)&nodeArray[baseCount];
+		ndBvhLeafNode** const bodySceneNodes = reinterpret_cast<ndBvhLeafNode**>(&nodeArray[baseCount]);
 
 		ndBvhLeafNode* const node = bodySceneNodes[groupId];
 		ndAssert(node && node->GetAsSceneBodyNode());
@@ -585,7 +595,7 @@ bool ndBvhSceneManager::BuildBvhTreeInitNodes(ndThreadPool& threadPool)
 		ND_PROFILE_ZONE_NAMED("CopySceneNode");
 		ndBvhNodeArray& nodeArray = m_workingArray;
 		
-		ndBvhInternalNode** const sceneNodes = (ndBvhInternalNode**)&nodeArray[0];
+		ndBvhInternalNode** const sceneNodes = reinterpret_cast<ndBvhInternalNode**>(&nodeArray[0]);
 		ndBvhNode** const parentsArray = m_bvhBuildState.m_parentsArray;
 
 		ndBvhInternalNode* const node = sceneNodes[groupId];
@@ -1045,8 +1055,8 @@ void ndBvhSceneManager::BuildBvhTreeSetNodesDepth(ndThreadPool& threadPool)
 	ndBvhNodeArray& nodeArray = m_workingArray;
 
 	ndInt32 sceneNodeCount = ndInt32(nodeArray.GetCount()) / 2 - 1;
-	ndBvhInternalNode** const view = (ndBvhInternalNode**)&nodeArray[0];
-	ndBvhInternalNode** tmpBuffer = (ndBvhInternalNode**)&m_bvhBuildState.m_tempNodeBuffer[0];
+	ndBvhInternalNode** const view = reinterpret_cast<ndBvhInternalNode**>(&nodeArray[0]);
+	ndBvhInternalNode** const tmpBuffer = reinterpret_cast<ndBvhInternalNode**>(&m_bvhBuildState.m_tempNodeBuffer[0]);
 
 	ndUnsigned32 scans[257];
 	ndCountingSortInPlace(threadPool, &view[0], tmpBuffer, sceneNodeCount, scans, 8, [](const ndBvhInternalNode* const node)

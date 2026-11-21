@@ -148,10 +148,10 @@ void ndBrainTrainer::AddCopyOutputGradientCommand()
 			virtual void Execute(ndInt32 miniBatchIndex) override
 			{
 				const ndCommandSharedInfo& info = m_desc.m_info;
-				ndBrainTrainer* const owner = (ndBrainTrainer*)*m_desc.m_owner;
+				ndBrainTrainer* const owner = static_cast<ndBrainTrainer*>(*m_desc.m_owner);
 
-				ndBrainFloat* const dstPtr = (ndBrainFloat*)owner->m_inputOutputGradientsBuffer->GetCpuPtr();
-				const ndBrainFloat* const srcPtr = (ndBrainFloat*)owner->m_miniBatchOutputGradientBuffer->GetCpuPtr();
+				ndBrainFloat* const dstPtr = reinterpret_cast<ndBrainFloat*>(owner->m_inputOutputGradientsBuffer->GetCpuPtr());
+				const ndBrainFloat* const srcPtr = reinterpret_cast<ndBrainFloat*>(owner->m_miniBatchOutputGradientBuffer->GetCpuPtr());
 				
 				ndInt32 destOffset = miniBatchIndex * info.m_inputOutputSize;
 				const ndBrainMemVector src(&srcPtr[miniBatchIndex * info.m_outputSize], info.m_outputSize);
@@ -211,10 +211,10 @@ void ndBrainTrainer::AddCopyInputGradientCommand()
 			virtual void Execute(ndInt32 miniBatchIndex) override
 			{
 				const ndCommandSharedInfo& info = m_desc.m_info;
-				ndBrainTrainer* const owner = (ndBrainTrainer*)*m_desc.m_owner;
+				ndBrainTrainer* const owner = static_cast<ndBrainTrainer*>(*m_desc.m_owner);
 
-				ndBrainFloat* const dstPtr = (ndBrainFloat*)owner->m_miniBatchInputGradientBuffer->GetCpuPtr();
-				const ndBrainFloat* const srcPtr = (ndBrainFloat*)owner->m_inputOutputGradientsBuffer->GetCpuPtr();
+				ndBrainFloat* const dstPtr = reinterpret_cast<ndBrainFloat*>(owner->m_miniBatchInputGradientBuffer->GetCpuPtr());
+				const ndBrainFloat* const srcPtr = reinterpret_cast<ndBrainFloat*>(owner->m_inputOutputGradientsBuffer->GetCpuPtr());
 
 				const ndBrainMemVector src(&srcPtr[miniBatchIndex * info.m_inputOutputSize + info.m_inputOutputStartOffset], info.m_inputSize);
 				ndBrainMemVector dst(&dstPtr[miniBatchIndex * info.m_inputSize], info.m_inputSize);
@@ -243,7 +243,7 @@ void ndBrainTrainer::AddLayersGradientCommands()
 		ndAssert(feedForwardLayerCommand);
 
 		const ndBrainBufferCommandDesc& desc = feedForwardLayerCommand->GetDescriptor();
-		ndCommandSharedInfo info(desc.m_info);
+		//ndCommandSharedInfo info(desc.m_info);
 		 
 		ndBrainFloatBuffer* const inputOutputBuffer = *m_inputOutputBuffer;
 		ndBrainFloatBuffer* const weightsAndBiasBuffer = *m_weightAndBiasBuffer;
@@ -271,9 +271,9 @@ void ndBrainTrainer::AddWeighAndBiasSumCommand()
 			:ndBrainBufferCommandCpu(desc, nullptr)
 			,m_info()
 		{
-			const ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)desc[0];
-			m_info = *(ndCommandSharedInfo*)buffer0->GetCpuPtr();
-			m_buffer = (ndBrainFloatBuffer*)desc[1];
+			const ndBrainUniformBuffer* const buffer0 = reinterpret_cast<ndBrainUniformBuffer*>(desc[0]);
+			m_info = *reinterpret_cast<ndCommandSharedInfo*>(buffer0->GetCpuPtr());
+			m_buffer = reinterpret_cast<ndBrainFloatBuffer*>(desc[1]);
 		}
 
 		virtual void Execute(ndInt32 groupId) override
@@ -281,7 +281,7 @@ void ndBrainTrainer::AddWeighAndBiasSumCommand()
 			ndInt32 start = groupId * m_info.m_matrixDimensionK;
 			ndInt32 count = ndInt32(((start + m_info.m_matrixDimensionK) < m_info.m_inputOutputSize) ? m_info.m_matrixDimensionK : m_info.m_inputOutputSize - start);
 
-			ndBrainMemVector buffer((ndBrainFloat*)m_buffer->GetCpuPtr(), ndInt32(m_buffer->SizeInItems()));
+			ndBrainMemVector buffer(reinterpret_cast<ndBrainFloat*>(m_buffer->GetCpuPtr()), ndInt32(m_buffer->SizeInItems()));
 			ndBrainMemVector dst(&buffer[start], count);
 			const ndBrainMemVector src(&buffer[start + m_info.m_inputOutputSize], count);
 			dst.Add(src);

@@ -699,7 +699,7 @@ ndVector ndBodyPlayerCapsuleImpulseSolver::CalculateImpulse()
 		}
 	}
 
-#if defined(_DEBUG)
+#if defined (_DEBUG) && !(defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__))
 	ndFloat32 scratch[D_PLAYER_MAX_ROWS][D_PLAYER_MAX_ROWS];
 	ndAssert(ndTestPSDmatrix(m_rowCount, D_PLAYER_MAX_ROWS, &massMatrix[0][0], &scratch[0][0]));
 #endif
@@ -735,7 +735,7 @@ ndInt32 ndBodyPlayerCapsuleImpulseSolver::AddContactRow(const ndContactPoint* co
 	ndVector r1(p1 - com);
 	ndVector dir1(dir.Scale(ndFloat32(-1.0f)));
 	
-	m_contactPoint[m_rowCount] = (ndContactPoint*)contact;
+	m_contactPoint[m_rowCount] = const_cast<ndContactPoint*>(contact);
 	m_jacobianPairs[m_rowCount].m_jacobianM0.m_linear = dir;
 	m_jacobianPairs[m_rowCount].m_jacobianM0.m_angular = r.CrossProduct(dir);
 	m_jacobianPairs[m_rowCount].m_jacobianM1.m_linear = dir1;
@@ -783,8 +783,8 @@ void ndBodyPlayerCapsuleImpulseSolver::ApplyReaction(ndFloat32 timestep)
 	{
 		if (m_contactPoint[i]) 
 		{
-			ndBodyKinematic* const body0 = ((ndBodyKinematic*)m_contactPoint[i]->m_body0);
-			ndBodyKinematic* const body1 = ((ndBodyKinematic*)m_contactPoint[i]->m_body1);
+			ndBodyKinematic* const body0 = const_cast<ndBodyKinematic*>(m_contactPoint[i]->m_body0);
+			ndBodyKinematic* const body1 = const_cast<ndBodyKinematic*>(m_contactPoint[i]->m_body1);
 			ndVector force(m_jacobianPairs[i].m_jacobianM1.m_linear.Scale(m_impulseMag[i] * invTimeStep));
 			ndVector torque(m_jacobianPairs[i].m_jacobianM1.m_angular.Scale(m_impulseMag[i] * invTimeStep));
 			body1->SetForce(force + body1->GetForce());

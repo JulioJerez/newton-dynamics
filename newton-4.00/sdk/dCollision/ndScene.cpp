@@ -45,9 +45,19 @@
 #define D_CONTACT_TRANSLATION_ERROR	ndFloat32 (1.0e-3f)
 #define D_CONTACT_ANGULAR_ERROR		(ndFloat32 (0.25f * ndDegreeToRad))
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
 ndVector ndScene::m_velocTol(ndFloat32(1.0e-16f));
 ndVector ndScene::m_angularContactError2(D_CONTACT_ANGULAR_ERROR * D_CONTACT_ANGULAR_ERROR);
 ndVector ndScene::m_linearContactError2(D_CONTACT_TRANSLATION_ERROR * D_CONTACT_TRANSLATION_ERROR);
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
+
 
 ndScene::ndScene()
 	:ndThreadPool("newtonWorker")
@@ -103,7 +113,7 @@ ndScene::ndScene(const ndScene& src)
 	,m_subStepNumber(src.m_subStepNumber)
 	,m_forceBalanceSceneCounter(0)
 {
-	ndScene* const stealData = (ndScene*)&src;
+	ndScene* const stealData = const_cast<ndScene*>(&src);
 
 	// each world have to have its own sentinel
 	m_sentinelBody = new ndBodySentinel(this);
@@ -1077,7 +1087,7 @@ bool ndScene::ConvexCast(
 
 	callback.m_contacts.SetCount(0);
 	callback.m_param = ndFloat32(1.2f);
-	callback.m_cachedScene = (ndScene*)this;
+	callback.m_cachedScene = const_cast<ndScene*>(this);
 	while (stackPool.GetCount())
 	{
 		ndFloat32 dist = stackDistance.Pop();
@@ -1538,7 +1548,7 @@ void ndScene::InitBodyArray()
 			ndBvhNodeArray& array = m_bvhSceneManager.GetNodeArray();
 			if (body->m_bodyNodeIndex < array.GetCount())
 			{
-				ndBvhLeafNode* const bodyNode = (ndBvhLeafNode*)array[body->m_bodyNodeIndex];
+				ndBvhLeafNode* const bodyNode = static_cast<ndBvhLeafNode*>(array[body->m_bodyNodeIndex]);
 				ndAssert(bodyNode->GetAsSceneBodyNode());
 				ndAssert(bodyNode->m_body == body);
 				ndAssert(!bodyNode->GetLeft());
@@ -1588,17 +1598,17 @@ void ndScene::InitBodyArray()
 			auto UpdateSceneBvh = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 			{
 				ND_PROFILE_ZONE_NAMED("UpdateSceneBvh");
-				const ndArray<ndBodyKinematic*>& view = m_sceneBodyArray;
+				const ndArray<ndBodyKinematic*>& sceneView = m_sceneBodyArray;
 				ndBvhNodeArray& array = m_bvhSceneManager.GetNodeArray();
 
-				ndBodyKinematic* const body = view[groupId];
-				ndBvhLeafNode* const bodyNode = (ndBvhLeafNode*)array[body->m_bodyNodeIndex];
+				ndBodyKinematic* const body = sceneView[groupId];
+				ndBvhLeafNode* const bodyNode = static_cast<ndBvhLeafNode*>(array[body->m_bodyNodeIndex]);
 				ndAssert(bodyNode->GetAsSceneBodyNode());
 				ndAssert(bodyNode->GetBody() == body);
 
 				const ndBvhNode* const root = (m_rootNode->GetLeft() && m_rootNode->GetRight()) ? nullptr : m_rootNode;
 				ndAssert(root == nullptr);
-				for (ndBvhInternalNode* parent = (ndBvhInternalNode*)bodyNode->m_parent; parent != root; parent = (ndBvhInternalNode*)parent->m_parent)
+				for (ndBvhInternalNode* parent = static_cast<ndBvhInternalNode*>(bodyNode->m_parent); parent != root; parent = static_cast<ndBvhInternalNode*>(parent->m_parent))
 				{
 					ndAssert(parent->GetAsSceneTreeNode());
 					ndScopeSpinLock lock(parent->m_lock);
@@ -1643,7 +1653,7 @@ void ndScene::CreateNewContacts()
 	const ndInt32 contactCount = ndInt32(m_contactArray.GetCount());
 	m_scratchBuffer.SetCount(ndInt32((contactCount + m_newPairs.GetCount() + 16) * sizeof(ndContact*)));
 
-	ndContact** const tmpJointsArray = (ndContact**)&m_scratchBuffer[0];
+	ndContact** const tmpJointsArray = reinterpret_cast<ndContact**>(&m_scratchBuffer[0]);
 	if (m_newPairs.GetCount())
 	{ 
 		auto CreateNewContacts = ndMakeObject::ndFunction([this, tmpJointsArray](ndInt32 groupId, ndInt32, ndInt32)
@@ -1693,7 +1703,7 @@ void ndScene::CalculateContacts()
 	if (contactCount)
 	{
 		// calculate all new and old contact points in the temp buffer
-		ndContact** const tmpJointsArray = (ndContact**)&m_scratchBuffer[0];
+		ndContact** const tmpJointsArray = reinterpret_cast<ndContact**>(&m_scratchBuffer[0]);
 
 		auto CalculateContactPoints = ndMakeObject::ndFunction([this, tmpJointsArray](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 		{
@@ -1725,7 +1735,7 @@ void ndScene::DeleteDeadContacts()
 	if (m_contactArray.GetCount())
 	{
 		ND_PROFILE_ZONE();
-		ndContact** const tmpJointsArray = (ndContact**)&m_scratchBuffer[0];
+		ndContact** const tmpJointsArray = reinterpret_cast<ndContact**>(&m_scratchBuffer[0]);
 		ndInt32 code[4];
 		code[0] = m_active;
 		code[1] = m_inactive;
@@ -1777,7 +1787,7 @@ void ndScene::DeleteDeadContacts()
 		m_activeConstraintArray.SetCount(ndInt32(prefixScan[m_active + 1]));
 		if (m_activeConstraintArray.GetCount())
 		{
-			ndConstraint** constraintArray = (ndConstraint**)& m_contactArray[0];
+			ndConstraint** constraintArray = reinterpret_cast<ndConstraint**>(&m_contactArray[0]);
 			ndMemCpy(&m_activeConstraintArray[0], constraintArray, m_activeConstraintArray.GetCount());
 		}
 	}
