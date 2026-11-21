@@ -94,7 +94,6 @@ inline T& ndStack<T>::operator[] (ndInt32 entry)
 	ndAssert (entry >= 0);
 	ndAssert ((entry < m_size) || ((m_size == 0) && (entry == 0)));
 
-	//T* const mem = (T*) m_ptr;
 	void* const nonConstRoot = const_cast<void*>(m_ptr);
 	T* const mem = reinterpret_cast<T*>(nonConstRoot);
 	return mem[entry];
