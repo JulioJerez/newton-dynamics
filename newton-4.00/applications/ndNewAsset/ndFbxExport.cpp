@@ -19,6 +19,7 @@ ndFbxExport::ndFbxExport(ndRender* const renderer)
 
 bool ndFbxExport::Export(const ndString& ndPath, const ndString& fbxOuputPath)
 {
+#if (defined(WIN32) || defined(_WIN32))
 	char commandLine[1024];
 
 	char appPath[256];
@@ -34,4 +35,7 @@ bool ndFbxExport::Export(const ndString& ndPath, const ndString& fbxOuputPath)
 		ndTrace(("export failed\n"));
 	}
 	return true;
+#else
+	return false;
+#endif
 }
