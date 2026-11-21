@@ -101,9 +101,9 @@ void ndBrainLayerLinearWithDropOut::FeedForward(const ndBrainLayerFeedForwardCpu
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	ndBrainTrainerInference* const trainer = (ndBrainTrainerInference*)*desc.m_owner;
+	ndBrainTrainer* const trainer = reinterpret_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
 
-	const ndBrainMemVector inputOutputBuffer((ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
+	const ndBrainMemVector inputOutputBuffer(reinterpret_cast<ndBrainFloat*>(trainer->GetHiddenLayerBuffer()->GetCpuPtr()), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
 
 	ndInt32 inputSize = info.m_inputSize;
 	ndInt32 outputSize = info.m_outputSize;
@@ -124,9 +124,10 @@ void ndBrainLayerLinearWithDropOut::BackPropagate(const ndBrainLayerBackPropagat
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	ndBrainTrainer* const trainer = (ndBrainTrainer*)*desc.m_owner;
+	//ndBrainTrainer* const trainer = (ndBrainTrainer*)*desc.m_owner;
+	ndBrainTrainer* const trainer = reinterpret_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
 
-	const ndBrainMemVector inputOutputGradientsBuffer((ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerGradientBuffer()->GetCount()));
+	const ndBrainMemVector inputOutputGradientsBuffer(reinterpret_cast<ndBrainFloat*>(trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr()), ndInt32(trainer->GetHiddenLayerGradientBuffer()->GetCount()));
 
 	ndInt32 inputSize = info.m_inputSize;
 	ndInt32 inputOutputSize = info.m_inputOutputSize;
@@ -161,12 +162,12 @@ ndCommandArray ndBrainLayerLinearWithDropOut::CreateFeedForwardBufferCommand(
 	ndBrainBufferCommand* command = nullptr;
 	if (context->GetAsCpuContext())
 	{
-		command = new ndBrainLayerFeedForwardCpuCommand(descriptor, (ndBrainLayer*)this);
+		command = new ndBrainLayerFeedForwardCpuCommand(descriptor, const_cast<ndBrainLayerLinearWithDropOut*>(this));
 	}
 	else
 	{
 		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerDropOutActivation;
-		command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
+		command = new ndBrainGpuCommand(descriptor, const_cast<ndBrainLayerLinearWithDropOut*>(this));
 	}
 	ndCommandArray commandArray(0);
 	commandArray.PushBack(command);
@@ -192,13 +193,13 @@ ndCommandArray ndBrainLayerLinearWithDropOut::CreateBackPropagateBufferCommand(
 
 	if (context->GetAsCpuContext())
 	{
-		ndBrainBufferCommand* const command = new ndBrainLayerBackPropagateCpuCommand(descriptor, (ndBrainLayer*)this);
+		ndBrainBufferCommand* const command = new ndBrainLayerBackPropagateCpuCommand(descriptor, const_cast<ndBrainLayerLinearWithDropOut*>(this));
 		commands.PushBack(command);
 	}
 	else
 	{
 		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerDropOutBackPropagate;
-		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
+		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor, const_cast<ndBrainLayerLinearWithDropOut*>(this));
 		commands.PushBack(command);
 	}
 	return commands;
