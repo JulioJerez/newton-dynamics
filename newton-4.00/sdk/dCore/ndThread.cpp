@@ -33,11 +33,23 @@
 
 ndThread::ndThread()
 	:ndClassAlloc()
-	,ndSemaphore()
+	, ndSemaphore()
 #ifndef D_USE_THREAD_EMULATION
-	,ndAtomic<bool>(true)
-	,std::condition_variable()
-	,std::thread(&ndThread::ThreadFunctionCallback, this)
+	, ndAtomic<bool>(true)
+	, std::condition_variable()
+	//,std::thread(&ndThread::ThreadFunctionCallback, this)
+	,std::thread([this]()
+	{
+		// Wait until the constructor has finished.
+		while (this->load())
+		{
+			ndInt32 loops = 0;
+			ndThreadYield(loops);
+		}
+
+		// Qualified call: no virtual dispatch or vtable access.
+		this->ndThread::ThreadFunctionCallback();
+	})
 #endif
 {
 	strcpy (m_name.m_name, "newtonWorker");
