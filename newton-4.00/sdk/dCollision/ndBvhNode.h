@@ -53,6 +53,7 @@ class ndBvhNode : public ndContainersFreeListAlloc<ndBvhNode>
 	virtual ndBvhNode* GetRight() const;
 	virtual ndBodyKinematic* GetBody() const;
 
+	void DebugTrace() const;
 	virtual bool SanityCheck(ndUnsigned32 level) const;
 
 	ndVector m_minBox;
@@ -187,6 +188,8 @@ class ndBvhSceneManager
 	void CleanUp();
 	ndBvhNode* AddBody(ndBodyKinematic* const body, ndBvhNode* root);
 	void RemoveBody(ndBodyKinematic* const body);
+
+	ndBvhNode* RootNode() const;
 
 	void UpdateScene(ndThreadPool& threadPool);
 	ndBvhNode* BuildBvhTree(ndThreadPool& threadPool);

@@ -45,9 +45,7 @@ ndBvhLeafNode::ndBvhLeafNode(ndBodyKinematic* const body)
 	,m_body(body)
 {
 #ifdef _DEBUG
-	static ndInt32 nodeId = 0;
-	m_nodeId = nodeId;
-	nodeId++;
+	m_nodeId = ndInt32 (body->GetId());
 #endif
 
 	SetAabb(body->m_minAabb, body->m_maxAabb);
@@ -116,26 +114,46 @@ bool ndBvhInternalNode::SanityCheck(ndUnsigned32 level) const
 	return true;
 }
 
-#ifdef _DEBUG
-bool ndBvhNode::SanityCheck(ndUnsigned32 level) const
+void ndBvhNode::DebugTrace() const
 {
-	char margin[512];
-	level = ndMin(level, ndUnsigned32(sizeof(margin) / 2 - 1));
+#ifdef _DEBUG
 
-	for (ndUnsigned32 i = 0; i < level; ++i)
+	ndFixSizeArray<ndBvhNode*, 256> stack;
+
+	stack.PushBack(const_cast<ndBvhNode*>(this));
+	while (stack.GetCount())
 	{
-		margin[i * 2] = ' ';
-		margin[i * 2 + 1] = ' ';
+		ndBvhNode* const node = stack.Pop();
+
+		ndFixSizeArray<char, 256> margin;
+		for (ndBvhNode* ptr = node; ptr->m_parent; ptr = ptr->m_parent)
+		{
+			margin.PushBack(' ');
+			margin.PushBack(' ');
+		}
+		margin.PushBack(0);
+		ndTrace(("%s%d\n", &margin[0], node->m_nodeId));
+
+		if (node->GetAsSceneTreeNode())
+		{
+			stack.PushBack(node->GetAsSceneTreeNode()->m_right);
+			stack.PushBack(node->GetAsSceneTreeNode()->m_left);
+		}
 	}
-	margin[level * 2] = 0;
-	//if (GetBody())
+#endif
+}
+
+#ifdef _DEBUG
+bool ndBvhNode::SanityCheck(ndUnsigned32) const
+{
+	//char margin[512];
+	//level = ndMin(level, ndUnsigned32(sizeof(margin) / 2 - 1));
+	//for (ndUnsigned32 i = 0; i < level; ++i)
 	//{
-	//	ndTrace(("%s nodeId:%d  depth:%d  id:%d\n", margin, m_nodeId, m_depthLevel, GetBody()->GetId()));
+	//	margin[i * 2] = ' ';
+	//	margin[i * 2 + 1] = ' ';
 	//}
-	//else
-	//{
-	//	ndTrace(("%s nodeId:%d  depth:%d\n", margin, m_nodeId, m_depthLevel));
-	//}
+	//margin[level * 2] = 0;
 	ndAssert(!m_parent || (m_depthLevel < m_parent->m_depthLevel));
 	ndAssert(!m_parent || ndBoxInclusionTest(m_minBox, m_maxBox, m_parent->m_minBox, m_parent->m_maxBox));
 	return true;
@@ -532,6 +550,11 @@ void ndBuildBvhTreeBuildState::Init(ndInt32 maxCount)
 	m_tmpArray = &m_srcArray[2 * (maxCount + 4)];
 	m_parentsArray = &m_srcArray[maxCount];
 	m_leafNodesCount = maxCount;
+}
+
+ndBvhNode* ndBvhSceneManager::RootNode() const
+{
+	return m_bvhBuildState.m_root;
 }
 
 void ndBvhSceneManager::UpdateScene(ndThreadPool& threadPool)
