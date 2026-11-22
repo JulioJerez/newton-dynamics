@@ -801,33 +801,6 @@ void ndScene::SubmitPairs(ndBvhLeafNode* const leafNode, ndBvhNode* const node, 
 	}
 }
 
-ndJointBilateralConstraint* ndScene::FindBilateralJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1) const
-{
-	if (body0->m_jointList.GetCount() <= body1->m_jointList.GetCount())
-	{
-		for (ndBodyKinematic::ndJointList::ndNode* node = body0->m_jointList.GetFirst(); node; node = node->GetNext())
-		{
-			ndJointBilateralConstraint* const joint = node->GetInfo();
-			if ((joint->GetBody0() == body1) || (joint->GetBody1() == body1))
-			{
-				return joint;
-			}
-		}
-	}
-	else
-	{
-		for (ndBodyKinematic::ndJointList::ndNode* node = body1->m_jointList.GetFirst(); node; node = node->GetNext())
-		{
-			ndJointBilateralConstraint* const joint = node->GetInfo();
-			if ((joint->GetBody0() == body0) || (joint->GetBody1() == body0))
-			{
-				return joint;
-			}
-		}
-	}
-	return nullptr;
-}
-
 void ndScene::FindCollidingPairsForward(ndBodyKinematic* const body, ndInt32 threadId)
 {
 	ndBvhLeafNode* const bodyNode = m_bvhSceneManager.GetLeafNode(body);
@@ -858,6 +831,33 @@ void ndScene::FindCollidingPairsBackward(ndBodyKinematic* const body, ndInt32 th
 			SubmitPairs(bodyNode, sibling, false, threadId);
 		}
 	}
+}
+
+ndJointBilateralConstraint* ndScene::FindBilateralJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1) const
+{
+	if (body0->m_jointList.GetCount() <= body1->m_jointList.GetCount())
+	{
+		for (ndBodyKinematic::ndJointList::ndNode* node = body0->m_jointList.GetFirst(); node; node = node->GetNext())
+		{
+			ndJointBilateralConstraint* const joint = node->GetInfo();
+			if ((joint->GetBody0() == body1) || (joint->GetBody1() == body1))
+			{
+				return joint;
+			}
+		}
+	}
+	else
+	{
+		for (ndBodyKinematic::ndJointList::ndNode* node = body1->m_jointList.GetFirst(); node; node = node->GetNext())
+		{
+			ndJointBilateralConstraint* const joint = node->GetInfo();
+			if ((joint->GetBody0() == body0) || (joint->GetBody1() == body0))
+			{
+				return joint;
+			}
+		}
+	}
+	return nullptr;
 }
 
 void ndScene::UpdateTransform()
