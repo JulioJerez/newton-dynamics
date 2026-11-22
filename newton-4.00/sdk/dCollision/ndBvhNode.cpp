@@ -469,7 +469,6 @@ void ndBvhSceneManager::Update(ndThreadPool& threadPool)
 
 		ndCountingSortInPlace(threadPool, src, tmp, count, scans, 2, [&keyCode](const ndBvhNode* const node)
 		{
-			//ndUnsigned32 code = ndUnsigned32(node->m_isDead * 2 + (((ndBvhNode*)node)->GetAsSceneBodyNode() ? 1 : 0));
 			ndUnsigned32 code = ndUnsigned32(node->m_isDead * 2 + (const_cast<ndBvhNode*>(node)->GetAsSceneBodyNode() ? 1 : 0));
 			return keyCode[code];
 		});
@@ -490,7 +489,7 @@ void ndBvhSceneManager::Update(ndThreadPool& threadPool)
 				ND_PROFILE_ZONE_NAMED("MarkCellBounds");
 				ndBvhNode** const nodes = &nodeArray[0];
 				const ndInt32 baseCount = ndInt32(nodeArray.GetCount()) / 2;
-				ndBvhLeafNode* const bodyNode = reinterpret_cast<ndBvhLeafNode*>(nodes[baseCount + groupId]);
+				ndBvhLeafNode* const bodyNode = static_cast<ndBvhLeafNode*>(nodes[baseCount + groupId]);
 				ndAssert(nodes[groupId]->GetAsSceneTreeNode());
 				ndAssert(nodes[baseCount + groupId]->GetAsSceneBodyNode());
 
@@ -1215,7 +1214,7 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 				});
 
 				shift += 8;
-			} while (ndInt64(maxGrids[0][0]) > ndInt64(1) << shift);
+			} while (maxGrids[0][0] > (1 << shift));
 		}
 
 		ndBottomUpCell sentinelCell;
