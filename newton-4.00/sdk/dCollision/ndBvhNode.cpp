@@ -1237,7 +1237,7 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 				});
 
 				shift += 8;
-			} while (maxGrids[0][0] > (1 << shift));
+			} while (maxGrids[0][i] >= (1 << shift));
 		}
 
 		ndBottomUpCell sentinelCell;
