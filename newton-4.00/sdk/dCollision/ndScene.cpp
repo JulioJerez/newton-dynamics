@@ -40,7 +40,7 @@
 #include "ndJointBilateralConstraint.h"
 #include "ndShapeStaticProceduralMesh.h"
 
-//#define D_USE_STACK_LESS_SCAN
+#define D_USE_STACKLESS_BROADFACE_SCAN
 
 #define D_CONTACT_DELAY_FRAMES		4
 #define D_NARROW_PHASE_DIST			ndFloat32 (0.2f)
@@ -771,10 +771,37 @@ void ndScene::FindCollidingPairsForward(ndBodyKinematic* const body, ndInt32 thr
 		ndBvhNode* const sibling = outerParent->m_right;
 		if (sibling != ptr)
 		{
-#if defined (D_USE_STACK_LESS_SCAN)
+#if defined (D_USE_STACKLESS_BROADFACE_SCAN)
 
 			ndBvhNode* curr = sibling;
 			bool continueScan = true;
+
+			auto NextNode = [&continueScan, &curr, outerParent]()
+			{
+				ndBvhInternalNode* parent = curr->m_parent->GetAsSceneTreeNode();
+				ndAssert(parent);
+				if (parent->m_right != curr)
+				{
+					curr = parent->m_right;
+				}
+				else
+				{
+					while ((parent->m_right == curr) && (parent != outerParent))
+					{
+						curr = parent;
+						parent = parent->m_parent->GetAsSceneTreeNode();
+					}
+					if (parent != outerParent)
+					{
+						curr = parent->m_right;
+					}
+					else
+					{
+						continueScan = false;
+					}
+				}
+			};
+
 			while (continueScan)
 			{
 				if (ndOverlapTest(curr->m_minBox, curr->m_maxBox, boxP0, boxP1))
@@ -797,37 +824,20 @@ void ndScene::FindCollidingPairsForward(ndBodyKinematic* const body, ndInt32 thr
 							}
 						}
 					}
-				}
 
-				const ndBvhInternalNode* const bvhNode = curr->GetAsSceneTreeNode();
-				if (bvhNode)
-				{
-					curr = bvhNode->m_left;
-				}
-				else
-				{
-					ndBvhInternalNode* parent = curr->m_parent->GetAsSceneTreeNode();
-					ndAssert(parent);
-					if (parent->m_right != curr)
+					const ndBvhInternalNode* const bvhNode = curr->GetAsSceneTreeNode();
+					if (bvhNode)
 					{
-						curr = parent->m_right;
+						curr = bvhNode->m_left;
 					}
 					else
 					{
-						while ((parent->m_right == curr) && (parent != outerParent))
-						{
-							curr = parent;
-							parent = parent->m_parent->GetAsSceneTreeNode();
-						}
-						if (parent != outerParent)
-						{
-							curr = parent->m_right;
-						}
-						else
-						{
-							continueScan = false;
-						}
+						NextNode();
 					}
+				}
+				else
+				{
+					NextNode();
 				}
 			}
 
@@ -890,10 +900,37 @@ void ndScene::FindCollidingPairsBackward(ndBodyKinematic* const body, ndInt32 th
 		ndBvhNode* const sibling = outerParent->m_left;
 		if (sibling != ptr)
 		{
-#if defined (D_USE_STACK_LESS_SCAN)
+#if defined (D_USE_STACKLESS_BROADFACE_SCAN)
 
 			ndBvhNode* curr = sibling;
 			bool continueScan = true;
+
+			auto NextNode = [&continueScan, &curr, outerParent]()
+			{
+				ndBvhInternalNode* parent = curr->m_parent->GetAsSceneTreeNode();
+				ndAssert(parent);
+				if (parent->m_left != curr)
+				{
+					curr = parent->m_left;
+				}
+				else
+				{
+					while ((parent->m_left == curr) && (parent != outerParent))
+					{
+						curr = parent;
+						parent = parent->m_parent->GetAsSceneTreeNode();
+					}
+					if (parent != outerParent)
+					{
+						curr = parent->m_left;
+					}
+					else
+					{
+						continueScan = false;
+					}
+				}
+			};
+
 			while (continueScan)
 			{
 				if (ndOverlapTest(curr->m_minBox, curr->m_maxBox, boxP0, boxP1))
@@ -916,37 +953,20 @@ void ndScene::FindCollidingPairsBackward(ndBodyKinematic* const body, ndInt32 th
 							}
 						}
 					}
-				}
 
-				const ndBvhInternalNode* const bvhNode = curr->GetAsSceneTreeNode();
-				if (bvhNode)
-				{
-					curr = bvhNode->m_right;
-				}
-				else
-				{
-					ndBvhInternalNode* parent = curr->m_parent->GetAsSceneTreeNode();
-					ndAssert(parent);
-					if (parent->m_left != curr)
+					const ndBvhInternalNode* const bvhNode = curr->GetAsSceneTreeNode();
+					if (bvhNode)
 					{
-						curr = parent->m_left;
+						curr = bvhNode->m_right;
 					}
 					else
 					{
-						while ((parent->m_left == curr) && (parent != outerParent))
-						{
-							curr = parent;
-							parent = parent->m_parent->GetAsSceneTreeNode();
-						}
-						if (parent != outerParent)
-						{
-							curr = parent->m_left;
-						}
-						else
-						{
-							continueScan = false;
-						}
+						NextNode();
 					}
+				}
+				else
+				{
+					NextNode();
 				}
 			}
 
@@ -1641,25 +1661,28 @@ void ndScene::FindCollidingPairs()
 	ParallelExecute(FindPairsForward, numOfgroups, 1);
 	ParallelExecute(FindPairsBackward, numOfgroups, 1);
 
-	ndInt32 sum0 = 0;
+	ndInt32 sum = 0;
 	const ndInt32 threadCount = GetThreadCount();
+	ndFixSizeArray<ndInt32, 256> spans;
 	for (ndInt32 i = 0; i < threadCount; ++i)
 	{
-		sum0 += ndInt32(m_partialNewPairs[i].GetCount());
+		spans.PushBack(sum);
+		sum += ndInt32(m_partialNewPairs[i].GetCount());
 	}
-	m_newPairs.SetCount(sum0);
-
-	ndInt32 sum1 = 0;
-	for (ndInt32 i = 0; i < threadCount; ++i)
+	spans.PushBack(sum);
+	m_newPairs.SetCount(sum);
+	auto CopyPairs = ndMakeObject::ndFunction([this, &spans](ndInt32 groupId, ndInt32 , ndInt32)
 	{
-		const ndArray<ndContactPairs>& newPairs = m_partialNewPairs[i];
-		const ndInt32 count = ndInt32(newPairs.GetCount());
-		if (count)
+		ND_PROFILE_ZONE_NAMED("FindPairsBackward");
+		const ndArray<ndContactPairs>&newPairs = m_partialNewPairs[groupId];
+		if (newPairs.GetCount())
 		{
-			ndMemCpy(&m_newPairs[sum1], &newPairs[0], count);
-			sum1 += count;
+			const ndInt32 start = spans[groupId];
+			ndAssert(newPairs.GetCount() == (spans[groupId + 1] - start));
+			ndMemCpy(&m_newPairs[start], &newPairs[0], newPairs.GetCount());
 		}
-	}
+	});
+	ParallelExecute(CopyPairs, threadCount, 1);
 }
 
 void ndScene::UpdateBodyList()
