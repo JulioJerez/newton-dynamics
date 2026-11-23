@@ -1973,8 +1973,8 @@ ndFloat32 ndContactSolver::RayCast(const ndVector& localP0, const ndVector& loca
 					v = ReduceTetrahedrum(index);
 					break;
 				}
-				default:
-					ndAssert(0);
+				default:;
+					//ndAssert(0);
 			}
 		}
 	} while (index >= 0);
