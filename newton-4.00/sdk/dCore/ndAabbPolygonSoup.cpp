@@ -22,14 +22,16 @@
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"
 #include "ndHeap.h"
-#include "ndStack.h"
 #include "ndList.h"
+#include "ndSort.h"
+#include "ndStack.h"
 #include "ndMatrix.h"
 #include "ndPolyhedra.h"
 #include "ndAabbPolygonSoup.h"
 #include "ndPolygonSoupBuilder.h"
 
-#define DG_STACK_DEPTH 512
+#define ND_TOP_DOWN_BUILD
+#define ND_STACK_DEPTH		512
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndAabbPolygonSoup::ndNodeBuilder: public ndAabbPolygonSoup::ndNode
@@ -57,6 +59,7 @@ class ndAabbPolygonSoup::ndNodeBuilder: public ndAabbPolygonSoup::ndNode
 		,m_faceIndex(faceIndex)
 		,m_indexCount(indexCount)
 		,m_faceIndices(indexArray)
+		,m_bhvLinked(0)
 	{
 		ndVector minP ( ndFloat32 (1.0e15f)); 
 		ndVector maxP (-ndFloat32 (1.0e15f)); 
@@ -83,6 +86,7 @@ class ndAabbPolygonSoup::ndNodeBuilder: public ndAabbPolygonSoup::ndNode
 		,m_faceIndex(0)
 		,m_indexCount(0)
 		,m_faceIndices(nullptr)
+		,m_bhvLinked(0)
 	{
 		m_left->m_parent = this;
 		m_right->m_parent = this;
@@ -103,10 +107,12 @@ class ndAabbPolygonSoup::ndNodeBuilder: public ndAabbPolygonSoup::ndNode
 	ndNodeBuilder* m_left;
 	ndNodeBuilder* m_right;
 	ndNodeBuilder* m_parent;
+
 	ndInt32 m_enumeration;
 	ndInt32 m_faceIndex;
 	ndInt32 m_indexCount;
 	const ndInt32* m_faceIndices;
+	ndUnsigned8 m_bhvLinked;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 class ndAabbPolygonSoup::ndSplitInfo
@@ -558,221 +564,6 @@ ndIntersectStatus ndAabbPolygonSoup::CalculateAllFaceEdgeNormals(void* const con
 	return m_continueSearh;
 }
 
-ndAabbPolygonSoup::ndNodeBuilder* ndAabbPolygonSoup::BuildTopDown (ndNodeBuilder* const leafArray, ndInt32 firstBox, ndInt32 lastBox, ndNodeBuilder** const allocator) const
-{
-	ndAssert (firstBox >= 0);
-	ndAssert (lastBox >= 0);
-
-	if (lastBox == firstBox) 
-	{
-		return &leafArray[firstBox];
-	} 
-	else 
-	{
-		ndSplitInfo info (&leafArray[firstBox], lastBox - firstBox + 1);
-
-		ndNodeBuilder* const parent = new (*allocator) ndNodeBuilder (info.m_p0, info.m_p1);
-		*allocator = *allocator + 1;
-
-		ndAssert (parent);
-		parent->m_right = BuildTopDown (leafArray, firstBox + info.m_axis, lastBox, allocator);
-		parent->m_right->m_parent = parent;
-
-		parent->m_left = BuildTopDown (leafArray, firstBox, firstBox + info.m_axis - 1, allocator);
-		parent->m_left->m_parent = parent;
-		return parent;
-	}
-}
-
-void ndAabbPolygonSoup::Create (const ndPolygonSoupBuilder& builder)
-{
-	if (builder.m_faceVertexCount.GetCount() == 0) 
-	{
-		return;
-	}
-	ndAssert (builder.m_faceVertexCount.GetCount() >= 1);
-	m_nodesCount = ((builder.m_faceVertexCount.GetCount() - 1) < 1) ? 1 : ndInt32(builder.m_faceVertexCount.GetCount()) - 1;
-	m_aabb = reinterpret_cast<ndNode*>(ndMemory::Malloc (sizeof (ndNode) * m_nodesCount));
-	m_indexCount = ndInt32(builder.m_vertexIndex.GetCount() * 2 + builder.m_faceVertexCount.GetCount());
-
-	if (builder.m_faceVertexCount.GetCount() == 1) 
-	{
-		m_indexCount *= 2;
-	}
-
-	m_indices = reinterpret_cast<ndInt32*>(ndMemory::Malloc (sizeof (ndInt32) * m_indexCount));
-	ndStack<ndVector> tmpVertexArrayCount(ndInt32(builder.m_vertexPoints.GetCount() + builder.m_normalPoints.GetCount() + builder.m_faceVertexCount.GetCount() * 2 + 4));
-
-	ndVector* const tmpVertexArray = &tmpVertexArrayCount[0];
-	for (ndInt32 i = 0; i < builder.m_vertexPoints.GetCount(); ++i) 
-	{
-		tmpVertexArray[i] = builder.m_vertexPoints[i];
-	}
-
-	for (ndInt32 i = 0; i < builder.m_normalPoints.GetCount(); ++i) 
-	{
-		tmpVertexArray[i + builder.m_vertexPoints.GetCount()] = builder.m_normalPoints[i];
-	}
-
-	const ndInt32* const indices = &builder.m_vertexIndex[0];
-	ndStack<ndNodeBuilder> constructor (ndInt32(builder.m_faceVertexCount.GetCount() * 2 + 16));
-
-	ndInt32 polygonIndex = 0;
-	ndInt32 allocatorIndex = 0;
-	if (builder.m_faceVertexCount.GetCount() == 1) 
-	{
-		ndInt32 indexCount = builder.m_faceVertexCount[0] - 1;
-		new (&constructor[allocatorIndex]) ndNodeBuilder (&tmpVertexArray[0], 0, indexCount, &indices[0]);
-		allocatorIndex ++;
-	}
-	for (ndInt32 i = 0; i < builder.m_faceVertexCount.GetCount(); ++i) 
-	{
-		ndInt32 indexCount = builder.m_faceVertexCount[i] - 1;
-		new (&constructor[allocatorIndex]) ndNodeBuilder (&tmpVertexArray[0], i, indexCount, &indices[polygonIndex]);
-		allocatorIndex ++;
-		polygonIndex += (indexCount + 1);
-	}
-
-	ndNodeBuilder* constructorAllocator = &constructor[allocatorIndex];
-	ndNodeBuilder* const root = BuildTopDown (&constructor[0], 0, allocatorIndex - 1, &constructorAllocator);
-
-	ndAssert (root);
-	ndList<ndNodeBuilder*> list;
-	list.Append(root);
-	ndInt32 nodeIndex = 0;
-	while (list.GetCount())
-	{
-		ndNodeBuilder* const node = list.GetFirst()->GetInfo();
-		list.Remove(list.GetFirst());
-
-		if (node->m_left) 
-		{
-			node->m_enumeration = nodeIndex;
-			nodeIndex ++;
-			ndAssert (node->m_right);
-			list.Append(node->m_left);
-			list.Append(node->m_right);
-		}
-	}
-	ndAssert(!list.GetCount());
-
-	ndInt32 aabbBase = ndInt32(builder.m_vertexPoints.GetCount() + builder.m_normalPoints.GetCount());
-
-	ndVector* const aabbPoints = &tmpVertexArray[aabbBase];
-
-	ndInt32 vertexIndex = 0;
-	ndInt32 aabbNodeIndex = 0;
-	list.Append(root);
-	ndInt32 indexMap = 0;
-	while (list.GetCount())
-	{
-		ndNodeBuilder* const node = list.GetFirst()->GetInfo();
-		list.Remove(list.GetFirst());
-
-		if (node->m_enumeration >= 0)
-		{
-			ndAssert (node->m_left);
-			ndAssert (node->m_right);
-			ndNode& aabbNode = m_aabb[aabbNodeIndex];
-			aabbNodeIndex ++;
-			ndAssert (aabbNodeIndex <= m_nodesCount);
-
-			if (node->m_parent)
-			{
-				if (node->m_parent->m_left == node)
-				{
-					m_aabb[node->m_parent->m_enumeration].m_leftInfo = ndNode::ndLeafNodePtr (ndUnsigned32 (&m_aabb[node->m_enumeration] - m_aabb));
-				}
-				else 
-				{
-					ndAssert (node->m_parent->m_right == node);
-					m_aabb[node->m_parent->m_enumeration].m_rightInfo = ndNode::ndLeafNodePtr (ndUnsigned32 (&m_aabb[node->m_enumeration] - m_aabb));
-				}
-			}
-
-			aabbPoints[vertexIndex + 0] = node->m_p0;
-			aabbPoints[vertexIndex + 1] = node->m_p1;
-
-			aabbNode.m_indexBox0 = aabbBase + vertexIndex;
-			aabbNode.m_indexBox1 = aabbBase + vertexIndex + 1;
-
-			vertexIndex += 2;
-		}
-		else
-		{
-			ndAssert (!node->m_left);
-			ndAssert (!node->m_right);
-
-			if (node->m_parent)
-			{
-				if (node->m_parent->m_left == node)
-				{
-					m_aabb[node->m_parent->m_enumeration].m_leftInfo = ndNode::ndLeafNodePtr (ndUnsigned32(node->m_indexCount), ndUnsigned32(indexMap));
-				}
-				else 
-				{
-					ndAssert (node->m_parent->m_right == node);
-					m_aabb[node->m_parent->m_enumeration].m_rightInfo = ndNode::ndLeafNodePtr (ndUnsigned32(node->m_indexCount), ndUnsigned32(indexMap));
-				}
-			}
-
-			// index format i0, i1, i2, ... , id, normal, e0Normal, e1Normal, e2Normal, ..., faceSize
-			for (ndInt32 j = 0; j < node->m_indexCount; ++j) 
-			{
-				m_indices[indexMap + j] = node->m_faceIndices[j];
-				m_indices[indexMap + j + node->m_indexCount + 2] = D_CONCAVE_EDGE_MASK | 0xffffffff;
-			}
-
-			// face attribute
-			m_indices[indexMap + node->m_indexCount] = node->m_faceIndices[node->m_indexCount];
-			// face normal
-			m_indices[indexMap + node->m_indexCount + 1] = ndInt32(builder.m_vertexPoints.GetCount()) + builder.m_normalIndex[node->m_faceIndex];
-			// face size
-			ndFloat32 faceMaxDiag = CalculateFaceMaxDiagonal(&tmpVertexArray[0], node->m_indexCount, node->m_faceIndices);
-			ndInt32 quantizedDiagSize = ndInt32(ndFloor(faceMaxDiag / D_FACE_CLIP_DIAGONAL_SCALE + ndFloat32(1.0f)));
-			m_indices[indexMap + node->m_indexCount * 2 + 2] = quantizedDiagSize;
-
-			indexMap += node->m_indexCount * 2 + 3;
-		}
-
-		if (node->m_left) 
-		{
-			ndAssert (node->m_right);
-			list.Append(node->m_left);
-			list.Append(node->m_right);
-		}
-	}
-
-	ndStack<ndInt32> indexArray (vertexIndex);
-	ndInt32 aabbPointCount = ndVertexListToIndexList (&aabbPoints[0].m_x, sizeof (ndVector), 3, vertexIndex, &indexArray[0], ndFloat64 (1.0e-6f));
-
-	m_vertexCount = aabbBase + aabbPointCount;
-	m_localVertex = reinterpret_cast<ndVector*>(ndMemory::Malloc (sizeof (ndVector) * m_vertexCount));
-	
-	for (ndInt32 i = 0; i < m_vertexCount; ++i) 
-	{
-		m_localVertex[i].m_x = tmpVertexArray[i].m_x;
-		m_localVertex[i].m_y = tmpVertexArray[i].m_y;
-		m_localVertex[i].m_z = tmpVertexArray[i].m_z;
-		m_localVertex[i].m_w = ndFloat32 (0.0f);
-	}
-	
-	for (ndInt32 i = 0; i < m_nodesCount; ++i) 
-	{
-		ndNode& box = m_aabb[i];
-
-		ndInt32 j = box.m_indexBox0 - aabbBase;
-		box.m_indexBox0 = indexArray[j] + aabbBase;
-		j = box.m_indexBox1 - aabbBase;
-		box.m_indexBox1 = indexArray[j] + aabbBase;
-	}
-
-	if (builder.m_faceVertexCount.GetCount() == 1) 
-	{
-		m_aabb[0].m_rightInfo = ndNode::ndLeafNodePtr (0, 0);
-	}
-}
-
 void ndAabbPolygonSoup::Serialize (const char* const path) const
 {
 	FILE* const file = fopen(path, "wb");
@@ -826,8 +617,8 @@ ndVector ndAabbPolygonSoup::ForAllSectorsSupportVertex (const ndVector& dir) con
 	ndVector supportVertex (ndVector::m_zero);
 	if (m_aabb) 
 	{
-		ndFixSizeArray<ndNode*, DG_STACK_DEPTH> stackPool;
-		ndFixSizeArray<ndFloat32, DG_STACK_DEPTH> aabbProjection;
+		ndFixSizeArray<ndNode*, ND_STACK_DEPTH> stackPool;
+		ndFixSizeArray<ndFloat32, ND_STACK_DEPTH> aabbProjection;
 
 		stackPool.PushBack(m_aabb);
 		aabbProjection.PushBack(ndFloat32 (1.0e10f));
@@ -963,8 +754,8 @@ ndVector ndAabbPolygonSoup::ForAllSectorsSupportVertex (const ndVector& dir) con
 void ndAabbPolygonSoup::ForAllSectorsRayHit (const ndFastRay& raySrc, ndFloat32 maxParam, ndRayIntersectCallback callback, void* const context) const
 {
 	ndFastRay ray (raySrc);
-	ndFixSizeArray<ndFloat32, DG_STACK_DEPTH> distance;
-	ndFixSizeArray<const ndNode*, DG_STACK_DEPTH> stackPool;
+	ndFixSizeArray<ndFloat32, ND_STACK_DEPTH> distance;
+	ndFixSizeArray<const ndNode*, ND_STACK_DEPTH> stackPool;
 
 	const ndVector* const vertexArray = m_localVertex;
 	
@@ -1069,8 +860,8 @@ void ndAabbPolygonSoup::ForAllSectors (const ndFastAabb& obbAabbInfo, const ndVe
 
 	if (m_aabb) 
 	{
-		ndFixSizeArray<ndFloat32, DG_STACK_DEPTH> distance;
-		ndFixSizeArray<const ndNode*, DG_STACK_DEPTH> stackPool;
+		ndFixSizeArray<ndFloat32, ND_STACK_DEPTH> distance;
+		ndFixSizeArray<const ndNode*, ND_STACK_DEPTH> stackPool;
 		const ndVector* const vertexArray = m_localVertex;
 
 		ndAssert (boxDistanceTravel.m_w == ndFloat32 (0.0f));
@@ -1395,7 +1186,7 @@ void ndAabbPolygonSoup::ForThisSector(const ndAabbPolygonSoup::ndNode* const nod
 			//					stackPool[j] = stackPool[j - 1];
 			//					distance[j] = distance[j - 1];
 			//				}
-			//				ndAssert(stack < DG_STACK_DEPTH);
+			//				ndAssert(stack < ND_STACK_DEPTH);
 			//				stackPool[j] = node;
 			//				distance[j] = dist1;
 			//				stack++;
@@ -1434,7 +1225,7 @@ void ndAabbPolygonSoup::ForThisSector(const ndAabbPolygonSoup::ndNode* const nod
 			//					stackPool[j] = stackPool[j - 1];
 			//					distance[j] = distance[j - 1];
 			//				}
-			//				ndAssert(stack < DG_STACK_DEPTH);
+			//				ndAssert(stack < ND_STACK_DEPTH);
 			//				stackPool[j] = node;
 			//				distance[j] = dist1;
 			//				stack++;
@@ -1471,4 +1262,789 @@ void ndAabbPolygonSoup::Serialize(ndArray<ndVector>& points, ndArray<ndInt32>& i
 	{
 		nodes.PushBack(m_aabb[i]);
 	}
+}
+
+void ndAabbPolygonSoup::Create(const ndPolygonSoupBuilder& builder)
+{
+	if (builder.m_faceVertexCount.GetCount() == 0)
+	{
+		return;
+	}
+	ndAssert(builder.m_faceVertexCount.GetCount() >= 1);
+	m_nodesCount = ((builder.m_faceVertexCount.GetCount() - 1) < 1) ? 1 : ndInt32(builder.m_faceVertexCount.GetCount()) - 1;
+	m_aabb = reinterpret_cast<ndNode*>(ndMemory::Malloc(sizeof(ndNode) * m_nodesCount));
+	m_indexCount = ndInt32(builder.m_vertexIndex.GetCount() * 2 + builder.m_faceVertexCount.GetCount());
+
+	if (builder.m_faceVertexCount.GetCount() == 1)
+	{
+		m_indexCount *= 2;
+	}
+
+	m_indices = reinterpret_cast<ndInt32*>(ndMemory::Malloc(sizeof(ndInt32) * m_indexCount));
+	ndStack<ndVector> tmpVertexArrayCount(ndInt32(builder.m_vertexPoints.GetCount() + builder.m_normalPoints.GetCount() + builder.m_faceVertexCount.GetCount() * 2 + 4));
+
+	ndVector* const tmpVertexArray = &tmpVertexArrayCount[0];
+	for (ndInt32 i = 0; i < builder.m_vertexPoints.GetCount(); ++i)
+	{
+		tmpVertexArray[i] = builder.m_vertexPoints[i];
+	}
+
+	for (ndInt32 i = 0; i < builder.m_normalPoints.GetCount(); ++i)
+	{
+		tmpVertexArray[i + builder.m_vertexPoints.GetCount()] = builder.m_normalPoints[i];
+	}
+
+	const ndInt32* const indices = &builder.m_vertexIndex[0];
+	ndStack<ndNodeBuilder> constructor(ndInt32(builder.m_faceVertexCount.GetCount() * 2 + 16));
+
+	ndInt32 polygonIndex = 0;
+	ndInt32 allocatorIndex = 0;
+	if (builder.m_faceVertexCount.GetCount() == 1)
+	{
+		ndAssert(0);
+		ndInt32 indexCount = builder.m_faceVertexCount[0] - 1;
+		new (&constructor[allocatorIndex]) ndNodeBuilder(&tmpVertexArray[0], 0, indexCount, &indices[0]);
+		allocatorIndex++;
+	}
+
+	for (ndInt32 i = 0; i < ndInt32 (builder.m_faceVertexCount.GetCount()); ++i)
+	{
+		ndInt32 indexCount = builder.m_faceVertexCount[i] - 1;
+		new (&constructor[allocatorIndex]) ndNodeBuilder(&tmpVertexArray[0], i, indexCount, &indices[polygonIndex]);
+		allocatorIndex++;
+		polygonIndex += (indexCount + 1);
+	}
+#if defined(ND_TOP_DOWN_BUILD)
+	ndNodeBuilder* constructorAllocator = &constructor[allocatorIndex];
+	ndNodeBuilder* const root = BuildTopDown(&constructor[0], 0, allocatorIndex - 1, &constructorAllocator);
+#else
+	ndNodeBuilder* const root = BuildBottomUp(&constructor[0], ndInt32(builder.m_faceVertexCount.GetCount()));
+#endif
+
+
+	ndAssert(root);
+	ndList<ndNodeBuilder*> list;
+	list.Append(root);
+	ndInt32 nodeIndex = 0;
+	while (list.GetCount())
+	{
+		ndNodeBuilder* const node = list.GetFirst()->GetInfo();
+		list.Remove(list.GetFirst());
+
+		if (node->m_left)
+		{
+			node->m_enumeration = nodeIndex;
+			nodeIndex++;
+			ndAssert(node->m_right);
+			list.Append(node->m_left);
+			list.Append(node->m_right);
+		}
+	}
+	ndAssert(!list.GetCount());
+
+	ndInt32 aabbBase = ndInt32(builder.m_vertexPoints.GetCount() + builder.m_normalPoints.GetCount());
+
+	ndVector* const aabbPoints = &tmpVertexArray[aabbBase];
+
+	ndInt32 vertexIndex = 0;
+	ndInt32 aabbNodeIndex = 0;
+	list.Append(root);
+	ndInt32 indexMap = 0;
+	while (list.GetCount())
+	{
+		ndNodeBuilder* const node = list.GetFirst()->GetInfo();
+		list.Remove(list.GetFirst());
+
+		if (node->m_enumeration >= 0)
+		{
+			ndAssert(node->m_left);
+			ndAssert(node->m_right);
+			ndNode& aabbNode = m_aabb[aabbNodeIndex];
+			aabbNodeIndex++;
+			ndAssert(aabbNodeIndex <= m_nodesCount);
+
+			if (node->m_parent)
+			{
+				if (node->m_parent->m_left == node)
+				{
+					m_aabb[node->m_parent->m_enumeration].m_leftInfo = ndNode::ndLeafNodePtr(ndUnsigned32(&m_aabb[node->m_enumeration] - m_aabb));
+				}
+				else
+				{
+					ndAssert(node->m_parent->m_right == node);
+					m_aabb[node->m_parent->m_enumeration].m_rightInfo = ndNode::ndLeafNodePtr(ndUnsigned32(&m_aabb[node->m_enumeration] - m_aabb));
+				}
+			}
+
+			aabbPoints[vertexIndex + 0] = node->m_p0;
+			aabbPoints[vertexIndex + 1] = node->m_p1;
+
+			aabbNode.m_indexBox0 = aabbBase + vertexIndex;
+			aabbNode.m_indexBox1 = aabbBase + vertexIndex + 1;
+
+			vertexIndex += 2;
+		}
+		else
+		{
+			ndAssert(!node->m_left);
+			ndAssert(!node->m_right);
+
+			if (node->m_parent)
+			{
+				if (node->m_parent->m_left == node)
+				{
+					m_aabb[node->m_parent->m_enumeration].m_leftInfo = ndNode::ndLeafNodePtr(ndUnsigned32(node->m_indexCount), ndUnsigned32(indexMap));
+				}
+				else
+				{
+					ndAssert(node->m_parent->m_right == node);
+					m_aabb[node->m_parent->m_enumeration].m_rightInfo = ndNode::ndLeafNodePtr(ndUnsigned32(node->m_indexCount), ndUnsigned32(indexMap));
+				}
+			}
+
+			// index format i0, i1, i2, ... , id, normal, e0Normal, e1Normal, e2Normal, ..., faceSize
+			for (ndInt32 j = 0; j < node->m_indexCount; ++j)
+			{
+				m_indices[indexMap + j] = node->m_faceIndices[j];
+				m_indices[indexMap + j + node->m_indexCount + 2] = D_CONCAVE_EDGE_MASK | 0xffffffff;
+			}
+
+			// face attribute
+			m_indices[indexMap + node->m_indexCount] = node->m_faceIndices[node->m_indexCount];
+			// face normal
+			m_indices[indexMap + node->m_indexCount + 1] = ndInt32(builder.m_vertexPoints.GetCount()) + builder.m_normalIndex[node->m_faceIndex];
+			// face size
+			ndFloat32 faceMaxDiag = CalculateFaceMaxDiagonal(&tmpVertexArray[0], node->m_indexCount, node->m_faceIndices);
+			ndInt32 quantizedDiagSize = ndInt32(ndFloor(faceMaxDiag / D_FACE_CLIP_DIAGONAL_SCALE + ndFloat32(1.0f)));
+			m_indices[indexMap + node->m_indexCount * 2 + 2] = quantizedDiagSize;
+
+			indexMap += node->m_indexCount * 2 + 3;
+		}
+
+		if (node->m_left)
+		{
+			ndAssert(node->m_right);
+			list.Append(node->m_left);
+			list.Append(node->m_right);
+		}
+	}
+
+	ndStack<ndInt32> indexArray(vertexIndex);
+	ndInt32 aabbPointCount = ndVertexListToIndexList(&aabbPoints[0].m_x, sizeof(ndVector), 3, vertexIndex, &indexArray[0], ndFloat64(1.0e-6f));
+
+	m_vertexCount = aabbBase + aabbPointCount;
+	m_localVertex = reinterpret_cast<ndVector*>(ndMemory::Malloc(sizeof(ndVector) * m_vertexCount));
+
+	for (ndInt32 i = 0; i < m_vertexCount; ++i)
+	{
+		m_localVertex[i].m_x = tmpVertexArray[i].m_x;
+		m_localVertex[i].m_y = tmpVertexArray[i].m_y;
+		m_localVertex[i].m_z = tmpVertexArray[i].m_z;
+		m_localVertex[i].m_w = ndFloat32(0.0f);
+	}
+
+	for (ndInt32 i = 0; i < m_nodesCount; ++i)
+	{
+		ndNode& box = m_aabb[i];
+
+		ndInt32 j = box.m_indexBox0 - aabbBase;
+		box.m_indexBox0 = indexArray[j] + aabbBase;
+		j = box.m_indexBox1 - aabbBase;
+		box.m_indexBox1 = indexArray[j] + aabbBase;
+	}
+
+	if (builder.m_faceVertexCount.GetCount() == 1)
+	{
+		m_aabb[0].m_rightInfo = ndNode::ndLeafNodePtr(0, 0);
+	}
+}
+
+ndAabbPolygonSoup::ndNodeBuilder* ndAabbPolygonSoup::BuildTopDown(ndNodeBuilder* const leafArray, ndInt32 firstBox, ndInt32 lastBox, ndNodeBuilder** const allocator) const
+{
+	ndAssert(firstBox >= 0);
+	ndAssert(lastBox >= 0);
+
+	if (lastBox == firstBox)
+	{
+		return &leafArray[firstBox];
+	}
+	else
+	{
+		ndSplitInfo info(&leafArray[firstBox], lastBox - firstBox + 1);
+
+		ndNodeBuilder* const parent = new (*allocator) ndNodeBuilder(info.m_p0, info.m_p1);
+		*allocator = *allocator + 1;
+
+		ndAssert(parent);
+		parent->m_right = BuildTopDown(leafArray, firstBox + info.m_axis, lastBox, allocator);
+		parent->m_right->m_parent = parent;
+
+		parent->m_left = BuildTopDown(leafArray, firstBox, firstBox + info.m_axis - 1, allocator);
+		parent->m_left->m_parent = parent;
+		return parent;
+	}
+}
+
+ndAabbPolygonSoup::ndNodeBuilder* ndAabbPolygonSoup::BuildBottomUp(ndNodeBuilder* const array, ndInt32 count) const
+{
+count = 4;
+
+	// calculate origin
+	ndVector origin(ndFloat32(1.0e15f));
+	for (ndInt32 i = 0; i < count; ++i)
+	{
+		const ndNodeBuilder* const node = &array[i];
+		origin = origin.GetMin(node->m_p0);
+	}
+
+	class ndCellScanPrefix
+	{
+		public:
+		ndCellScanPrefix() {}
+		ndCellScanPrefix(ndInt32 location, ndUnsigned32 cellTest)
+			:m_location(location)
+			,m_cellTest(cellTest)
+		{
+		}
+		ndInt32 m_location : 30;
+		ndUnsigned32 m_cellTest : 1;
+	};
+
+	class ndBottomUpCell
+	{
+		public:
+		ndBottomUpCell()
+		{
+		}
+
+		ndBottomUpCell(ndInt32 x, ndInt32 y, ndInt32 z, ndNodeBuilder* const node)
+			:m_x(x)
+			,m_y(y)
+			,m_z(z)
+			,m_node(node)
+		{
+		}
+
+		union
+		{
+			ndInt32 m_index[3];
+			struct
+			{
+				ndInt32 m_x;
+				ndInt32 m_y;
+				ndInt32 m_z;
+			};
+		};
+		ndNodeBuilder* m_node;
+	};
+
+	ndArray<ndNodeBuilder*> buffer;
+	ndArray<ndNodeBuilder*> scratchBuffer;
+	ndArray<ndBottomUpCell> cellBuffer0;
+	ndArray<ndBottomUpCell> cellBuffer1;
+	ndArray<ndCellScanPrefix> cellsCount;
+	ndArray<ndCellScanPrefix> cellsCountScratch;
+
+	buffer.SetCount(count * 2);
+	scratchBuffer.SetCount(count);
+	cellsCount.SetCount(count);
+	cellBuffer0.SetCount(count);
+	cellBuffer1.SetCount(count);
+	cellsCountScratch.SetCount(count);
+
+	buffer.SetCount(0);
+	for (ndInt32 i = 0; i < count * 2; ++i)
+	{
+		buffer.PushBack(&array[i]);
+	}
+
+	ndNodeBuilder** parentArray = &buffer[count];
+
+	// calculate smallest size
+	auto CalculateSize = [](ndInt32 nodeCount, ndNodeBuilder** const buffer)
+	{
+		ndFloat32 minSize = ndFloat32(1.0e15f);
+		for (ndInt32 i = 0; i < nodeCount; ++i)
+		{
+			const ndNodeBuilder* const node = buffer[i];
+			const ndVector size(node->m_p1 - node->m_p0);
+			ndFloat32 maxDim = ndMax(ndMax(size.m_x, size.m_y), size.m_z);
+			minSize = ndMin(maxDim, minSize);
+		}
+		return minSize * ndFloat32(2.0f);
+	};
+
+	auto BuildSmallBvhTree = [&](const ndInt32 spansCount)
+	{
+		//ndNodeBuilder* const parentArray = 
+		auto MakeTwoNodesTree = [](ndNodeBuilder* const root, ndNodeBuilder* const left, ndNodeBuilder* const right)
+		{
+			left->m_bhvLinked = 1;
+			right->m_bhvLinked = 1;
+			root->m_bhvLinked = 1;
+			root->m_left = left;
+			root->m_right = right;
+
+			left->m_parent = root;
+			right->m_parent = root;
+			root->m_parent = nullptr;
+
+			root->m_p0 = left->m_p0.GetMin(right->m_p0);
+			root->m_p1 = left->m_p1.GetMax(right->m_p1);
+		};
+
+		//auto MakeThreeNodesTree = [](ndBvhInternalNode* const root, ndBvhInternalNode* const subRoot, ndBvhNode* const node0, ndBvhNode* const node1, ndBvhNode* const node2)
+		auto MakeThreeNodesTree = [](ndNodeBuilder* const root, ndNodeBuilder* const subRoot, ndNodeBuilder* const node0, ndNodeBuilder* const node1, ndNodeBuilder* const node2)
+		{
+			class ndNodeOrder
+			{
+				public:
+				ndVector m_p0;
+				ndVector m_p1;
+				ndNodeBuilder* m_node0;
+				ndNodeBuilder* m_node1;
+				ndNodeBuilder* m_node2;
+				ndFloat32 m_area;
+			};
+
+			ndNodeOrder order[3];
+
+			order[0].m_node0 = node0;
+			order[0].m_node1 = node1;
+			order[0].m_node2 = node2;
+
+			order[1].m_node0 = node1;
+			order[1].m_node1 = node2;
+			order[1].m_node2 = node0;
+
+			order[2].m_node0 = node2;
+			order[2].m_node1 = node0;
+			order[2].m_node2 = node1;
+
+			for (ndInt32 i = 0; i < 3; ++i)
+			{
+				order[i].m_p0 = order[i].m_node0->m_p0.GetMin(order[i].m_node1->m_p0);
+				order[i].m_p1 = order[i].m_node0->m_p1.GetMax(order[i].m_node1->m_p1);
+				const ndVector size(order[i].m_p1 - order[i].m_p0);
+				order[i].m_area = size.DotProduct(size.ShiftTripleRight()).GetScalar();
+			}
+
+			if (order[2].m_area < order[1].m_area)
+			{
+				ndSwap(order[1], order[2]);
+			}
+			if (order[1].m_area < order[0].m_area)
+			{
+				ndSwap(order[1], order[0]);
+			}
+
+			root->m_bhvLinked = 1;
+			node0->m_bhvLinked = 1;
+			node1->m_bhvLinked = 1;
+			node2->m_bhvLinked = 1;
+			subRoot->m_bhvLinked = 1;
+
+			subRoot->m_parent = root;
+			subRoot->m_left = order[0].m_node0;
+			subRoot->m_right = order[0].m_node1;
+			subRoot->m_p0 = order[0].m_p0;
+			subRoot->m_p1 = order[0].m_p1;
+			subRoot->m_left->m_parent = subRoot;
+			subRoot->m_right->m_parent = subRoot;
+
+			root->m_parent = nullptr;
+			root->m_right = subRoot;
+			root->m_left = order[0].m_node2;
+			root->m_left->m_parent = root;
+
+			root->m_p0 = root->m_left->m_p0.GetMin(root->m_right->m_p0);
+			root->m_p1 = root->m_left->m_p1.GetMax(root->m_right->m_p1);
+		};
+
+		for (ndInt32 i = 0; i < spansCount; ++i)
+		{
+			const ndInt32 nodesCount = cellsCountScratch[i + 1].m_location - cellsCountScratch[i].m_location;
+			if (nodesCount == 1)
+			{
+				const ndInt32 childIndex = cellsCount[i].m_location;
+				const ndInt32 parentIndex = cellsCountScratch[i].m_location;
+				ndNodeBuilder* const node0 = cellBuffer0[childIndex + 0].m_node;
+				ndNodeBuilder* const node1 = cellBuffer0[childIndex + 1].m_node;
+				ndAssert(0);
+				//ndNodeBuilder* const root = &parentArray[parentIndex];
+				//ndAssert(root);
+				//MakeTwoNodesTree(root, node0, node1);
+				//root->m_bhvLinked = 0;
+			}
+			else if (nodesCount == 2)
+			{
+				const ndInt32 childIndex = cellsCount[i].m_location;
+				const ndInt32 parentIndex = cellsCountScratch[i].m_location;
+				
+				ndNodeBuilder* const node0 = cellBuffer0[childIndex + 0].m_node;
+				ndNodeBuilder* const node1 = cellBuffer0[childIndex + 1].m_node;
+				ndNodeBuilder* const node2 = cellBuffer0[childIndex + 2].m_node;
+				
+				ndNodeBuilder* const root = parentArray[parentIndex + 1];
+				ndNodeBuilder* const subParent = parentArray[parentIndex + 0];
+				
+				ndAssert(root);
+				MakeThreeNodesTree(root, subParent, node0, node1, node2);
+				root->m_bhvLinked = 0;
+			}
+			else
+			{
+				class ndBlockSegment
+				{
+					public:
+					ndBlockSegment() {}
+					ndBlockSegment(ndInt32 start, ndInt32 count, ndInt32 rootNodeIndex)
+						:m_start(start)
+						,m_count(count)
+						,m_rootNodeIndex(rootNodeIndex)
+					{
+					}
+
+					ndInt32 m_start;
+					ndInt32 m_count;
+					ndInt32 m_rootNodeIndex;
+				};
+
+				ndFixSizeArray<ndBlockSegment, 64> stackPool;
+
+				//ndInt32 rootNodeIndex = newParentsDest[k].m_location;
+				ndInt32 rootNodeIndex = cellsCountScratch[i].m_location;
+				stackPool.PushBack(ndBlockSegment(cellsCount[i].m_location, cellsCount[i + 1].m_location - cellsCount[i].m_location, rootNodeIndex));
+
+				//ndBvhNode* const rootNode = parentsArray[rootNodeIndex];
+				ndNodeBuilder* const rootNode = parentArray[rootNodeIndex];
+				//rootNodeIndex++;
+
+				while (stackPool.GetCount())
+				{
+					const ndBlockSegment block(stackPool.Pop());
+					ndAssert(block.m_count > 2);
+
+					ndVector minP(ndFloat32(1.0e15f));
+					ndVector maxP(ndFloat32(-1.0e15f));
+					ndVector median(ndVector::m_zero);
+					ndVector varian(ndVector::m_zero);
+
+					for (ndInt32 m = 0; m < block.m_count; ++m)
+					{
+						ndNodeBuilder* const node = cellBuffer0[block.m_start + m].m_node;
+						minP = minP.GetMin(node->m_p0);
+						maxP = maxP.GetMax(node->m_p1);
+						ndVector p(ndVector::m_half * (node->m_p0 + node->m_p1));
+						median += p;
+						varian += p * p;
+					}
+
+					ndNodeBuilder* const root = parentArray[block.m_rootNodeIndex];
+					root->m_p0 = minP;
+					root->m_p1 = maxP;
+					root->m_bhvLinked = 1;
+
+					ndInt32 index = 0;
+					ndFloat32 maxVarian = ndFloat32(-1.0e15f);
+					varian = varian.Scale(ndFloat32(block.m_count)) - median * median;
+					for (ndInt32 m = 0; m < 3; ++m)
+					{
+						if (varian[m] > maxVarian)
+						{
+							index = m;
+							maxVarian = varian[m];
+						}
+					}
+
+					ndInt32 index0 = block.m_start + block.m_count / 2;
+					if (maxVarian > ndFloat32(1.0e-3f))
+					{
+						class ndCompareContext
+						{
+							public:
+							ndCompareContext(ndFloat32 midPoint, ndInt32 index)
+								:m_midPoint(midPoint)
+								,m_index(index)
+							{
+							}
+							ndFloat32 m_midPoint;
+							ndInt32 m_index;
+						};
+
+						ndUnsigned32 scan[8];
+						ndCompareContext info(median[index] / ndFloat32(block.m_count), index);
+						ndCountingSortInPlace(&cellBuffer0[block.m_start], &cellBuffer1[0], block.m_count, scan, 2, [&info](const ndBottomUpCell& cell)
+						{
+							const ndNodeBuilder* const node = cell.m_node;
+							const ndVector p(ndVector::m_half * (node->m_p0 + node->m_p1));
+							ndInt32 key = p[info.m_index] >= info.m_midPoint;
+							return key;
+						});
+
+
+						index0 = block.m_start + ndInt32(scan[1]);
+						if (index0 == block.m_start)
+						{
+							index0 = block.m_start + block.m_count / 2;
+						}
+						if (index0 == (block.m_start + block.m_count))
+						{
+							index0 = block.m_start + block.m_count / 2;
+						}
+					}
+
+					ndAssert(index0 > block.m_start);
+					ndAssert(index0 < (block.m_start + block.m_count));
+
+					ndInt32 count0 = index0 - block.m_start;
+
+					ndAssert(count0);
+					if (count0 == 1)
+					{
+						ndNodeBuilder* const node = cellBuffer0[block.m_start].m_node;
+						node->m_bhvLinked = 1;
+						node->m_parent = root;
+						root->m_left = node;
+					}
+					else if (count0 == 2)
+					{
+						ndNodeBuilder* const node0 = cellBuffer0[block.m_start + 0].m_node;
+						ndNodeBuilder* const node1 = cellBuffer0[block.m_start + 1].m_node;
+						ndNodeBuilder* const parent = parentArray[rootNodeIndex];
+						rootNodeIndex++;
+
+						ndAssert(root);
+						MakeTwoNodesTree(parent, node0, node1);
+						parent->m_parent = root;
+						root->m_left = parent;
+					}
+					else if (count0 == 3)
+					{
+						ndNodeBuilder* const node0 = cellBuffer0[block.m_start + 0].m_node;
+						ndNodeBuilder* const node1 = cellBuffer0[block.m_start + 1].m_node;
+						ndNodeBuilder* const node2 = cellBuffer0[block.m_start + 2].m_node;
+
+						ndNodeBuilder* const grandParent = parentArray[rootNodeIndex];
+						rootNodeIndex++;
+
+						ndNodeBuilder* const parent = parentArray[rootNodeIndex];
+						rootNodeIndex++;
+
+						ndAssert(root);
+						MakeThreeNodesTree(grandParent, parent, node0, node1, node2);
+						grandParent->m_parent = root;
+						root->m_left = grandParent;
+					}
+					else
+					{
+						ndNodeBuilder* const parent = parentArray[rootNodeIndex];
+						parent->m_bhvLinked = 1;
+						parent->m_parent = root;
+						parent->m_left = nullptr;
+						parent->m_right = nullptr;
+						root->m_left = parent;
+
+						stackPool.PushBack(ndBlockSegment(block.m_start, count0, rootNodeIndex));
+						rootNodeIndex++;
+					}
+
+					ndInt32 count1 = block.m_start + block.m_count - index0;
+					ndAssert(count1);
+					if (count1 == 1)
+					{
+						ndNodeBuilder* const node = cellBuffer0[index0].m_node;
+						node->m_bhvLinked = 1;
+						node->m_parent = root;
+						root->m_right = node;
+					}
+					else if (count1 == 2)
+					{
+						ndNodeBuilder* const node0 = cellBuffer0[index0 + 0].m_node;
+						ndNodeBuilder* const node1 = cellBuffer0[index0 + 1].m_node;
+						ndNodeBuilder* const parent = parentArray[rootNodeIndex];
+						rootNodeIndex++;
+
+						ndAssert(root);
+						MakeTwoNodesTree(parent, node0, node1);
+						parent->m_parent = root;
+						root->m_right = parent;
+					}
+					else if (count1 == 3)
+					{
+						ndNodeBuilder* const node0 = cellBuffer0[index0 + 0].m_node;
+						ndNodeBuilder* const node1 = cellBuffer0[index0 + 1].m_node;
+						ndNodeBuilder* const node2 = cellBuffer0[index0 + 2].m_node;
+
+						ndNodeBuilder* const grandParent = parentArray[rootNodeIndex];
+						rootNodeIndex++;
+
+						ndNodeBuilder* const parent = parentArray[rootNodeIndex];
+						rootNodeIndex++;
+
+						ndAssert(root);
+						MakeThreeNodesTree(grandParent, parent, node0, node1, node2);
+						grandParent->m_parent = root;
+						root->m_right = grandParent;
+					}
+					else
+					{
+						ndNodeBuilder* const parent = parentArray[rootNodeIndex];
+						parent->m_bhvLinked = 1;
+						parent->m_parent = root;
+						parent->m_left = nullptr;
+						parent->m_right = nullptr;
+						root->m_right = parent;
+
+						stackPool.PushBack(ndBlockSegment(index0, count1, rootNodeIndex));
+						rootNodeIndex++;
+					}
+				}
+				rootNode->m_bhvLinked = 0;
+
+			}
+		}
+	};
+
+	ndInt32 nodeStart = 0;
+	ndInt32 nodeCount = count;
+	ndFloat32 minSize = CalculateSize(nodeCount, &buffer[0]);
+
+	while (nodeCount > 1)
+	{
+		enum
+		{
+			m_linkedCell,
+			m_insideCell,
+			m_outsideCell,
+		};
+
+		// classify nodes categorically
+		const ndVector invSize(ndVector::m_triplexMask& ndVector(ndFloat32(1.0f) / minSize));
+
+		ndUnsigned32 prefixScan[8];
+		{
+			ndInt32 m_code[4];
+			m_code[0] = m_outsideCell;
+			m_code[1] = m_insideCell;
+			m_code[2] = m_linkedCell;
+			m_code[3] = m_linkedCell;
+			ndCountingSortInPlace(&buffer[nodeStart], &scratchBuffer[0], nodeCount, prefixScan, 2, [&](const ndNodeBuilder* const node)
+			{
+				const ndVector minPosit((invSize * (node->m_p0 - origin)).GetInt());
+				const ndVector maxPosit((invSize * (node->m_p1 - origin)).GetInt());
+				const ndInt32 x0 = ndInt32(minPosit.m_ix);
+				const ndInt32 y0 = ndInt32(minPosit.m_iy);
+				const ndInt32 z0 = ndInt32(minPosit.m_iz);
+				const ndInt32 x1 = ndInt32(maxPosit.m_ix);
+				const ndInt32 y1 = ndInt32(maxPosit.m_iy);
+				const ndInt32 z1 = ndInt32(maxPosit.m_iz);
+		
+				ndAssert(x0 >= 0);
+				ndAssert(y0 >= 0);
+				ndAssert(z0 >= 0);
+				ndAssert(x1 >= 0);
+				ndAssert(y1 >= 0);
+				ndAssert(z1 >= 0);
+		
+				const ndUnsigned32 test_x = ndUnsigned32(((x1 - x0) >> 1) == 0);
+				const ndUnsigned32 test_y = ndUnsigned32(((y1 - y0) >> 1) == 0);
+				const ndUnsigned32 test_z = ndUnsigned32(((z1 - z0) >> 1) == 0);
+				const ndUnsigned32 test = test_x & test_y & test_z;
+				const ndUnsigned32 codeIndex = node->m_bhvLinked * 2 + test;
+				return m_code[codeIndex];
+			});
+		}
+
+		const ndInt32 insideCellsCount = ndInt32(prefixScan[m_insideCell + 1] - prefixScan[m_insideCell]);
+		if (insideCellsCount)
+		{
+			// make integer grids
+			ndInt32 maxGrid[3];
+			maxGrid[0] = 0;
+			maxGrid[1] = 0;
+			maxGrid[2] = 0;
+
+			cellBuffer0.SetCount(0);
+			const ndInt32 leafNodeStart = ndInt32(prefixScan[m_insideCell]);
+			for (ndInt32 i = 0; i < insideCellsCount; ++i)
+			{
+				ndNodeBuilder* const node = &array[leafNodeStart + i];
+				
+				const ndVector dist(node->m_p0 - origin);
+				const ndVector posit(invSize * dist);
+				const ndVector intPosit(posit.GetInt());
+				cellBuffer0.PushBack(ndBottomUpCell(ndInt32(intPosit.m_ix), ndInt32(intPosit.m_iy), ndInt32(intPosit.m_iz), node));
+				maxGrid[0] = ndMax(ndInt32(intPosit.m_ix), maxGrid[0]);
+				maxGrid[1] = ndMax(ndInt32(intPosit.m_iy), maxGrid[1]);
+				maxGrid[2] = ndMax(ndInt32(intPosit.m_iz), maxGrid[2]);
+			}
+			ndAssert(maxGrid[0] < 0x7fffffff);
+			ndAssert(maxGrid[1] < 0x7fffffff);
+			ndAssert(maxGrid[2] < 0x7fffffff);
+
+			for (ndInt32 i = 0; i < 3; ++i)
+			{
+				ndInt64 shift = 0;
+				do
+				{
+					ndCountingSortInPlace(&cellBuffer0[0], &cellBuffer1[0], ndInt32(cellBuffer0.GetCount()), nullptr, 8, [&](const ndBottomUpCell& cell)
+					{
+						ndInt32 val = cell.m_index[i] >> shift;
+						return val & 0xff;
+					});
+			
+					shift += 8;
+				} while (maxGrid[i] >= (1 << shift));
+			}
+			
+			ndBottomUpCell sentinelCell(0x7fffffff, 0x7fffffff, 0x7fffffff, nullptr);
+			cellBuffer0.PushBack(sentinelCell);
+
+			cellsCount.SetCount(0);
+			cellsCount.PushBack(ndCellScanPrefix(0, 0));
+			for (ndInt32 i = 0; i < insideCellsCount; ++i)
+			{
+				const ndBottomUpCell& cell0 = cellBuffer0[i];
+				const ndBottomUpCell& cell1 = cellBuffer0[i + 1];
+				const ndUnsigned8 test = ndUnsigned8((cell0.m_x == cell1.m_x) & (cell0.m_y == cell1.m_y) & (cell0.m_z == cell1.m_z) & (cell1.m_node != nullptr));
+				cellsCount.PushBack(ndCellScanPrefix(i + 1, test));
+			}
+			ndUnsigned32 cellPrefixScan[4];
+			ndCountingSortInPlace(&cellsCount[0], &cellsCountScratch[0], ndInt32(cellsCount.GetCount()), cellPrefixScan, 1, [](const ndCellScanPrefix& cell)
+			{
+				return ndInt32(cell.m_cellTest);
+			});
+
+			ndInt32 sum = 0;
+			const ndInt32 batchCount = ndInt32(cellPrefixScan[1] - 1);
+			for (ndInt32 i = 0; i < batchCount; ++i)
+			{
+				const ndInt32 nodesCount = cellsCount[i + 1].m_location - cellsCount[i].m_location - 1;
+				cellsCountScratch[i].m_location = ndInt32(sum);
+				sum += nodesCount;
+			}
+			cellsCountScratch[batchCount].m_location = sum;
+			if (sum)
+			{
+				// build sub trees
+				BuildSmallBvhTree(batchCount);
+
+				nodeStart = ndInt32(prefixScan[m_insideCell]);
+				parentArray += sum;
+				nodeCount += (sum - nodeStart);
+				minSize = CalculateSize(nodeCount, &buffer[nodeStart]);
+			}
+			else
+			{
+				minSize *= ndFloat32(2.0f);
+			}
+		}
+		else
+		{
+			nodeCount = 0;
+		}
+	}
+	parentArray--;
+	return *parentArray;
 }

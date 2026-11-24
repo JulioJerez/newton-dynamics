@@ -24,6 +24,8 @@
 
 #include "ndCollisionStdafx.h"
 
+//#define ND_DEBUG_DEPTH
+
 class ndBodyKinematic;
 class ndBvhLeafNode;
 class ndBvhInternalNode;
@@ -54,13 +56,14 @@ class ndBvhNode : public ndContainersFreeListAlloc<ndBvhNode>
 	virtual ndBodyKinematic* GetBody() const;
 
 	void DebugTrace() const;
-	virtual bool SanityCheck(ndUnsigned32 level) const;
 
 	ndVector m_minBox;
 	ndVector m_maxBox;
 	ndBvhNode* m_parent;
 	ndSpinLock m_lock;
+#ifdef ND_DEBUG_DEPTH
 	ndInt32 m_depthLevel;
+#endif
 	ndUnsigned8 m_isDead;
 	ndUnsigned8 m_bhvLinked;
 	ndClassPadding m_padding;
@@ -84,8 +87,6 @@ class ndBvhInternalNode: public ndBvhNode
 	virtual ndBvhNode* GetLeft() const override;
 	virtual ndBvhNode* GetRight() const override;
 	virtual ndBvhInternalNode* GetAsSceneTreeNode() const override;
-
-	bool SanityCheck(ndUnsigned32 level) const override;
 
 	ndBvhNode* m_left;
 	ndBvhNode* m_right;
@@ -157,8 +158,9 @@ class ndBuildBvhTreeBuildState
 	ndBvhNode** m_srcArray;
 	ndBvhNode** m_tmpArray;
 	ndBvhNode** m_parentsArray;
-
+#ifdef ND_DEBUG_DEPTH
 	ndInt32 m_depthLevel;
+#endif
 	ndInt32 m_leafNodesCount;
 	ndState m_state;
 };
@@ -200,12 +202,15 @@ class ndBvhSceneManager
 	private:
 	void Update(ndThreadPool& threadPool);
 	bool BuildBvhTreeInitNodes(ndThreadPool& threadPool);
-	void BuildBvhTreeSetNodesDepth(ndThreadPool& threadPool);
 	void BuildBvhGenerateLayerGrids(ndThreadPool& threadPool);
 	void BuildBvhTreeCalculateLeafBoxes(ndThreadPool& threadPool);
 	
 	ndBvhNode* BuildIncrementalBvhTree(ndThreadPool& threadPool);
 	ndInt32 BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode** const parentsArray, ndInt32 batchCount);
+
+#ifdef ND_DEBUG_DEPTH
+	void BuildBvhTreeSetNodesDepth(ndThreadPool& threadPool);
+#endif
 
 	ndBvhNodeArray m_workingArray;
 	ndBuildBvhTreeBuildState m_bvhBuildState;

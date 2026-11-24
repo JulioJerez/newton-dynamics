@@ -244,6 +244,7 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 	D_CORE_API virtual void ForThisSector(const ndAabbPolygonSoup::ndNode* const node, const ndFastAabb& obbAabb, const ndVector& boxDistanceTravel, ndFloat32 maxT, ndAaabbIntersectCallback callback, void* const context) const;
 
 	private:
+	ndNodeBuilder* BuildBottomUp(ndNodeBuilder* const array, ndInt32 count) const;
 	ndNodeBuilder* BuildTopDown (ndNodeBuilder* const leafArray, ndInt32 firstBox, ndInt32 lastBox, ndNodeBuilder** const allocator) const;
 	ndFloat32 CalculateFaceMaxDiagonal (const ndVector* const vertex, ndInt32 indexCount, const ndInt32* const indexArray) const;
 	static ndIntersectStatus CalculateAllFaceEdgeNormals(void* const context, const ndVector* const polygon, const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance);
