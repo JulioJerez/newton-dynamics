@@ -101,7 +101,7 @@ void ndBrainLayerLinearWithDropOut::FeedForward(const ndBrainLayerFeedForwardCpu
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	ndBrainTrainer* const trainer = reinterpret_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
+	ndBrainTrainer* const trainer = static_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
 
 	const ndBrainMemVector inputOutputBuffer(reinterpret_cast<ndBrainFloat*>(trainer->GetHiddenLayerBuffer()->GetCpuPtr()), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
 
@@ -125,7 +125,7 @@ void ndBrainLayerLinearWithDropOut::BackPropagate(const ndBrainLayerBackPropagat
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
 	//ndBrainTrainer* const trainer = (ndBrainTrainer*)*desc.m_owner;
-	ndBrainTrainer* const trainer = reinterpret_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
+	ndBrainTrainer* const trainer = static_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
 
 	const ndBrainMemVector inputOutputGradientsBuffer(reinterpret_cast<ndBrainFloat*>(trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr()), ndInt32(trainer->GetHiddenLayerGradientBuffer()->GetCount()));
 

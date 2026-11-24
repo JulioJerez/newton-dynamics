@@ -206,28 +206,28 @@ void ndBrainLayerLinear::Scale(ndBrainFloat scale)
 
 void ndBrainLayerLinear::Set(const ndBrainLayer& src)
 {
-	const ndBrainLayerLinear& linearSrc = reinterpret_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(src));
+	const ndBrainLayerLinear& linearSrc = static_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(src));
 	m_bias.Set(linearSrc.m_bias);
 	m_weights.Set(linearSrc.m_weights);
 }
 
 void ndBrainLayerLinear::Add(const ndBrainLayer& src)
 {
-	const ndBrainLayerLinear& linearSrc = reinterpret_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(src));
+	const ndBrainLayerLinear& linearSrc = static_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(src));
 	m_bias.Add(linearSrc.m_bias);
 	m_weights.Add(linearSrc.m_weights);
 }
 
 void ndBrainLayerLinear::Mul(const ndBrainLayer& src)
 {
-	const ndBrainLayerLinear& linearSrc = reinterpret_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(src));
+	const ndBrainLayerLinear& linearSrc = static_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(src));
 	m_bias.Mul(linearSrc.m_bias);
 	m_weights.Mul(linearSrc.m_weights);
 }
 
 void ndBrainLayerLinear::ScaleAdd(const ndBrainLayer& src, ndBrainFloat scale)
 {
-	const ndBrainLayerLinear& linearSrc = reinterpret_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(src));
+	const ndBrainLayerLinear& linearSrc = static_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(src));
 	m_bias.ScaleAdd(linearSrc.m_bias, scale);
 	m_weights.ScaleAdd(linearSrc.m_weights, scale);
 }
@@ -258,15 +258,15 @@ void ndBrainLayerLinear::AddReqularizerL1(const ndBrainLayer& weights, ndBrainFl
 
 void ndBrainLayerLinear::Blend(const ndBrainLayer& src, ndBrainFloat blend)
 {
-	const ndBrainLayerLinear& linearSrc = reinterpret_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(src));
+	const ndBrainLayerLinear& linearSrc = static_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(src));
 	m_bias.Blend(linearSrc.m_bias, blend);
 	m_weights.Blend(linearSrc.m_weights, blend);
 }
 
 void ndBrainLayerLinear::AdamUpdate(const ndBrainLayer& u, const ndBrainLayer& v, ndBrainFloat epsilon)
 {
-	const ndBrainLayerLinear& linear_U = reinterpret_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(u));
-	const ndBrainLayerLinear& linear_V = reinterpret_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(v));
+	const ndBrainLayerLinear& linear_U =static_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(u));
+	const ndBrainLayerLinear& linear_V =static_cast<ndBrainLayerLinear&>(const_cast<ndBrainLayer&>(v));
 
 	const ndBrainVector& bias_U = linear_U.m_bias;
 	const ndBrainVector& bias_V = linear_V.m_bias;
@@ -695,7 +695,7 @@ void ndBrainLayerLinear::BackPropagateInputGradients(const ndBrainLayerBackPropa
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	ndBrainTrainer* const trainer = reinterpret_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
+	ndBrainTrainer* const trainer = static_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
 
 	const ndBrainMemVector weightAndBias (reinterpret_cast<ndBrainFloat*>(trainer->GetWeightAndBiasBuffer()->GetCpuPtr()), ndInt64(trainer->GetWeightAndBiasBuffer()->GetCount()));
 	const ndBrainMemVector inputOutputGradientsBuffer (reinterpret_cast<ndBrainFloat*>(trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr()), ndInt64(trainer->GetHiddenLayerGradientBuffer()->GetCount()));
@@ -745,7 +745,7 @@ void ndBrainLayerLinear::BackPropagateTileInputGradients(const ndBrainLayerBackP
 
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	ndBrainTrainer* const trainer = reinterpret_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
+	ndBrainTrainer* const trainer = static_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
 
 	const ndInt32 inputSize = info.m_inputSize;
 	const ndInt32 inputOutputSize = info.m_inputOutputSize;
@@ -872,7 +872,7 @@ void ndBrainLayerLinear::BackPropagateBiasGradients(const ndBrainLayerBackPropag
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	ndBrainTrainer* const trainer = reinterpret_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
+	ndBrainTrainer* const trainer = static_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
 
 	const ndBrainMemVector weightAndBiasGradients (reinterpret_cast<ndBrainFloat*>(trainer->GetWeightAndBiasGradientBuffer()->GetCpuPtr()), ndInt32(trainer->GetWeightAndBiasGradientBuffer()->GetCount()));
 	const ndBrainMemVector inputOutputGradientsBuffer (reinterpret_cast<ndBrainFloat*>(trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr()), ndInt32(trainer->GetHiddenLayerGradientBuffer()->GetCount()));
@@ -901,7 +901,7 @@ void ndBrainLayerLinear::BackPropagateWeightsGradients(const ndBrainLayerBackPro
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	ndBrainTrainer* const trainer = reinterpret_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
+	ndBrainTrainer* const trainer = static_cast<ndBrainTrainer*>(const_cast<ndBrainTrainerInference*>(*desc.m_owner));
 
 	const ndBrainMemVector inputOutputBuffer(reinterpret_cast<ndBrainFloat*>(trainer->GetHiddenLayerBuffer()->GetCpuPtr()), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
 	const ndBrainMemVector weightAndBiasGradients(reinterpret_cast<ndBrainFloat*>(trainer->GetWeightAndBiasGradientBuffer()->GetCpuPtr()), ndInt32(trainer->GetWeightAndBiasGradientBuffer()->GetCount()));

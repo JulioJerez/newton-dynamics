@@ -271,9 +271,9 @@ void ndBrainTrainer::AddWeighAndBiasSumCommand()
 			:ndBrainBufferCommandCpu(desc, nullptr)
 			,m_info()
 		{
-			const ndBrainUniformBuffer* const buffer0 = reinterpret_cast<ndBrainUniformBuffer*>(desc[0]);
+			const ndBrainUniformBuffer* const buffer0 = static_cast<ndBrainUniformBuffer*>(const_cast<ndBrainBuffer*>(desc[0]));
 			m_info = *reinterpret_cast<ndCommandSharedInfo*>(buffer0->GetCpuPtr());
-			m_buffer = reinterpret_cast<ndBrainFloatBuffer*>(desc[1]);
+			m_buffer = static_cast<ndBrainFloatBuffer*>(const_cast<ndBrainBuffer*>(desc[1]));
 		}
 
 		virtual void Execute(ndInt32 groupId) override
