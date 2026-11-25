@@ -197,10 +197,11 @@ void ndCountingSortInPlace(T* const array, T* const scratchBuffer, ndInt32 size,
 
 	if (prefixScanOut)
 	{
-		for (ndInt32 i = 0; i < (scanSize + 1); ++i)
+		for (ndInt32 i = 0; i < scanSize; ++i)
 		{
 			prefixScanOut[i] = scans[i];
 		}
+		prefixScanOut[scanSize] = sum;
 	}
 
 	for (ndInt32 i = 0; i < size; ++i)
@@ -355,10 +356,11 @@ void ndCountingSort(const T* const srcArray, T* const dstArray, ndInt32 size, nd
 
 	if (prefixScanOut)
 	{
-		for (ndInt32 i = 0; i < (scanSize + 1); ++i)
+		for (ndInt32 i = 0; i < scanSize; ++i)
 		{
 			prefixScanOut[i] = scans[i];
 		}
+		prefixScanOut[scanSize] = sum;
 	}
 
 	for (ndInt32 i = 0; i < size; ++i)
