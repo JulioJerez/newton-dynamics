@@ -143,7 +143,7 @@ void ndContact::SetBodies(ndBodyKinematic* const body0, ndBodyKinematic* const b
 	m_body1 = body1;
 	if (m_body0->GetInvMass() == ndFloat32(0.0f))
 	{
-		ndSwap(m_body1, m_body0);
+		ndSwap(m_body0, m_body1);
 	}
 	ndAssert(m_body0->GetInvMass() > ndFloat32(0.0f));
 }
