@@ -30,8 +30,8 @@
 #include "ndAabbPolygonSoup.h"
 #include "ndPolygonSoupBuilder.h"
 
-#define ND_TOP_DOWN_BUILD
 #define ND_STACK_DEPTH		512
+//#define ND_TOP_DOWN_POLYSOUP_BUILD
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndAabbPolygonSoup::ndNodeBuilder: public ndAabbPolygonSoup::ndNode
@@ -1253,7 +1253,7 @@ void ndAabbPolygonSoup::Create(const ndPolygonSoupBuilder& builder)
 		allocatorIndex++;
 		polygonIndex += (indexCount + 1);
 	}
-#if defined(ND_TOP_DOWN_BUILD)
+#if defined(ND_TOP_DOWN_POLYSOUP_BUILD)
 	ndNodeBuilder* constructorAllocator = &constructor[allocatorIndex];
 	ndNodeBuilder* const root = BuildTopDown(&constructor[0], 0, allocatorIndex - 1, &constructorAllocator);
 #else
