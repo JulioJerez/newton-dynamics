@@ -1674,6 +1674,19 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 
 			m_bvhBuildState.m_parentsArray += sum;
 			m_bvhBuildState.m_leafNodesCount += sum;
+
+			ndFloat32 restartSize = ndFloat32(1.0e15f);
+			for (ndInt32 i = 0; i < m_bvhBuildState.m_leafNodesCount; ++i)
+			{
+				const ndBvhNode* const node = m_bvhBuildState.m_srcArray[i];
+				if (!node->m_bhvLinked)
+				{
+					const ndVector size(node->m_maxBox - node->m_minBox);
+					ndFloat32 maxDim = ndMax(ndMax(size.m_x, size.m_y), size.m_z);
+					restartSize = ndMin(maxDim, restartSize);
+				}
+			}
+			m_bvhBuildState.m_size = ndVector(ndMin(m_bvhBuildState.m_size[0], restartSize));
 		}
 	}
 }
