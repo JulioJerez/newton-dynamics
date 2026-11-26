@@ -203,7 +203,6 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 		ndLeafNodePtr m_rightInfo;
 	};
 
-	class ndSplitInfo;
 	class ndNodeBuilder;
 
 	/// get the root node bounding box of the mesh.
