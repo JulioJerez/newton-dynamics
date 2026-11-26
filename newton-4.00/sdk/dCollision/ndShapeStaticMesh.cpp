@@ -215,6 +215,11 @@ ndShape* ndShapeStaticMesh::Clone(ndShapeInstance* const) const
 	return const_cast<ndShapeStaticMesh*>(this);
 }
 
+bool ndShapeStaticMesh::IsStatic() const
+{
+	return true;
+}
+
 ndFloat32 ndShapeStaticMesh::GetVolume() const
 {
 	return ndFloat32(0.0f);

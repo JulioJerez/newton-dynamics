@@ -100,6 +100,7 @@ class ndShapeStaticMesh: public ndShape
 	D_COLLISION_API virtual void GetCollidingFaces(ndPolygonMeshDesc* const data) const;
 
 	protected:
+	D_COLLISION_API virtual bool IsStatic() const override;
 	D_COLLISION_API virtual ndFloat32 GetVolume() const override;
 	D_COLLISION_API virtual ndFloat32 GetBoxMinRadius() const override;
 	D_COLLISION_API virtual ndFloat32 GetBoxMaxRadius() const override;
