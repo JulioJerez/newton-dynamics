@@ -316,6 +316,11 @@ ndFloat32 ndShapeInstance::GetVolume() const
 	return m_shape->GetVolume() * m_scale.m_x * m_scale.m_y * m_scale.m_z;
 }
 
+bool ndShapeInstance::IsStatic() const
+{
+	return m_shape->IsStatic();
+}
+
 ndShapeMaterial ndShapeInstance::GetMaterial() const
 {
 	return m_shapeMaterial;
@@ -807,6 +812,5 @@ void ndShapeInstance::Serialize(ndMeshShapeInstance* const meshInstance) const
 	meshInstance->m_localMatrix = m_localMatrix;
 	meshInstance->m_alignmentMatrix = m_alignmentMatrix;
 
-	ndAssert(0);
-	//meshInstance->m_shape = m_shape->GetMeshShape();
+	meshInstance->m_shape = m_shape->GetMeshShape();
 }

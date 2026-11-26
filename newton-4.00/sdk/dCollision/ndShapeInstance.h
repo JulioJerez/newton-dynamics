@@ -159,6 +159,7 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 	D_COLLISION_API void SetGlobalScale(const ndMatrix& scaleMatrix);
 	D_COLLISION_API ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const;
 
+	D_COLLISION_API bool IsStatic() const;
 	D_COLLISION_API ndFloat32 GetVolume() const;
 	D_COLLISION_API ndFloat32 GetBoxMinRadius() const;
 	D_COLLISION_API ndFloat32 GetBoxMaxRadius() const;

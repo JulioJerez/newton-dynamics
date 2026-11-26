@@ -28,6 +28,7 @@
 #include "ndShapeCompound.h"
 #include "ndMeshBaseComponents.h"
 
+#define ND_TOP_DOWN_COMPOUND_BUILD
 #define D_MAX_MIN_VOLUME	ndFloat32 (1.0e-3f)
 
 ndShapeCompound::ndNodeBase::~ndNodeBase()
@@ -263,6 +264,7 @@ ndShapeCompound::ndShapeCompound()
 	,m_root(nullptr)
 	,m_idIndex(0)
 	,m_owner(nullptr)
+	,m_isStatic(false)
 {
 }
 
@@ -275,6 +277,7 @@ ndShapeCompound::ndShapeCompound(const ndShapeCompound& source)
 	,m_root(nullptr)
 	,m_idIndex(0)
 	,m_owner(nullptr)
+	,m_isStatic(source.m_isStatic)
 {
 	ndAssert(0);
 }
@@ -288,6 +291,7 @@ ndShapeCompound::ndShapeCompound(const ndShapeCompound& source, const ndShapeIns
 	,m_root(nullptr)
 	,m_idIndex(0)
 	,m_owner(const_cast<ndShapeInstance*>(parent))
+	,m_isStatic(source.m_isStatic)
 {
 	ndTreeArray::Iterator iter(source.m_array);
 	for (iter.Begin(); iter; iter++) 
@@ -407,6 +411,11 @@ void ndShapeCompound::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& deb
 		ndShapeInstance* const collision = iter.GetNode()->GetInfo()->GetShape();
 		collision->DebugShape(matrix, debugCallback);
 	}
+}
+
+bool ndShapeCompound::IsStatic() const
+{
+	return m_isStatic;
 }
 
 ndFloat32 ndShapeCompound::GetVolume() const
@@ -692,11 +701,6 @@ ndFloat32 ndShapeCompound::RayCast(ndRayCastNotify& callback, const ndVector& lo
 	return maxT;
 }
 
-void ndShapeCompound::BeginAddRemove()
-{
-	//ndAssert(m_ownerInstance);
-}
-
 ndFloat32 ndShapeCompound::CalculateSurfaceArea(ndNodeBase* const node0, ndNodeBase* const node1, ndVector& minBox, ndVector& maxBox) const
 {
 	minBox = node0->m_p0.GetMin(node1->m_p0);
@@ -974,100 +978,6 @@ ndShapeCompound::ndNodeBase* ndShapeCompound::BuildTopDownBig(ndNodeBase** const
 	parent->m_right = BuildTopDownBig(leafArray, firstBox + midPoint + 1, lastBox, rootNodesMemory, rootIndex);
 	parent->m_right->m_parent = parent;
 	return parent;
-}
-
-void ndShapeCompound::EndAddRemove()
-{
-	if (m_root) 
-	{
-		ndTreeArray::Iterator iter(m_array);
-		for (iter.Begin(); iter; iter++) 
-		{
-			ndNodeBase* const node = iter.GetNode()->GetInfo();
-			node->CalculateAABB();
-		}
-
-		ndInt32 nodeCount = 0;
-		ndNodeBase** nodeArray = ndAlloca(ndNodeBase*, m_array.GetCount() + 10);
-		ndFixSizeArray<ndNodeBase*, D_COMPOUND_STACK_DEPTH> stackBuffer;
-
-		stackBuffer.PushBack(m_root);
-		while (stackBuffer.GetCount())
-		{
-			ndNodeBase* const node = stackBuffer.Pop();
-		
-			if (node->m_type == m_node) 
-			{
-				nodeArray[nodeCount] = node;
-				nodeCount++;
-				ndAssert(nodeCount <= m_array.GetCount());
-
-				stackBuffer.PushBack(node->m_right);
-				stackBuffer.PushBack(node->m_left);
-			}
-		}
-		
-		if (nodeCount)
-		{
-			ndFloat64 cost = CalculateEntropy(nodeCount, nodeArray);
-			if ((cost > m_treeEntropy * ndFloat64(2.0f)) || (cost < m_treeEntropy * ndFloat64(0.5f))) 
-			{
-				ndInt32 leafNodesCount = 0;
-				ndNodeBase** leafArray = ndAlloca(ndNodeBase*, nodeCount + 12);
-				for (ndInt32 i = 0; i < nodeCount; ++i)
-				{ 
-					ndNodeBase* const node = nodeArray[i];
-					if (node->m_left->m_type == m_leaf) 
-					{
-						leafArray[leafNodesCount] = node->m_left;
-						leafNodesCount++;
-						ndAssert(leafNodesCount <= (nodeCount + 1));
-					}
-					if (node->m_right->m_type == m_leaf) 
-					{
-						leafArray[leafNodesCount] = node->m_right;
-						leafNodesCount++;
-						ndAssert(leafNodesCount <= (nodeCount + 1));
-					}
-				}
-
-				ndSort(leafArray, leafNodesCount, [](const ndNodeBase* const elementA, const ndNodeBase* const elementB)
-				{
-					ndFloat32 areaA = elementA->m_area;
-					ndFloat32 areaB = elementB->m_area;
-					if (areaA < areaB)
-					{
-						return 1;
-					}
-					if (areaA > areaB)
-					{
-						return -1;
-					}
-					return 0;
-				});
-
-				ndInt32 rootIndex = 0;
-				m_root = BuildTopDownBig(&leafArray[0], 0, leafNodesCount - 1, nodeArray, rootIndex);
-				m_treeEntropy = CalculateEntropy(nodeCount, nodeArray);
-			}
-			while (m_root->m_parent) 
-			{
-				m_root = m_root->m_parent;
-			}
-		}
-		else 
-		{
-			m_treeEntropy = ndFloat64(2.0f);
-		}
-		
-		ndAssert(m_root->m_size.m_w == ndFloat32(0.0f));
-		m_boxMinRadius = ndMin(ndMin(m_root->m_size.m_x, m_root->m_size.m_y), m_root->m_size.m_z);
-		m_boxMaxRadius = ndSqrt(m_root->m_size.DotProduct(m_root->m_size).GetScalar());
-		
-		m_boxSize = m_root->m_size;
-		m_boxOrigin = m_root->m_origin;
-		MassProperties();
-	}
 }
 
 ndShapeInstance* ndShapeCompound::GetShapeInstance(ndTreeArray::ndNode* const node)
@@ -1393,3 +1303,144 @@ ndSharedPtr<ndMeshCollisionShape> ndShapeCompound::GetMeshShape() const
 	}
 	return ndSharedPtr<ndMeshCollisionShape>(shape);
 }
+
+void ndShapeCompound::BeginAddRemove()
+{
+	//ndAssert(m_ownerInstance);
+}
+
+#if defined (ND_TOP_DOWN_COMPOUND_BUILD)
+void ndShapeCompound::EndAddRemove()
+{
+	m_isStatic = false;
+	if (m_root)
+	{
+		ndTreeArray::Iterator iter(m_array);
+		for (iter.Begin(); iter; iter++)
+		{
+			ndNodeBase* const node = iter.GetNode()->GetInfo();
+			node->CalculateAABB();
+			m_isStatic = m_isStatic || node->m_shapeInstance->IsStatic();
+		}
+
+		ndInt32 nodeCount = 0;
+		ndNodeBase** nodeArray = ndAlloca(ndNodeBase*, m_array.GetCount() + 10);
+		ndFixSizeArray<ndNodeBase*, D_COMPOUND_STACK_DEPTH> stackBuffer;
+
+		stackBuffer.PushBack(m_root);
+		while (stackBuffer.GetCount())
+		{
+			ndNodeBase* const node = stackBuffer.Pop();
+
+			if (node->m_type == m_node)
+			{
+				nodeArray[nodeCount] = node;
+				nodeCount++;
+				ndAssert(nodeCount <= m_array.GetCount());
+
+				stackBuffer.PushBack(node->m_right);
+				stackBuffer.PushBack(node->m_left);
+			}
+		}
+
+		if (nodeCount)
+		{
+			ndFloat64 cost = CalculateEntropy(nodeCount, nodeArray);
+			if ((cost > m_treeEntropy * ndFloat64(2.0f)) || (cost < m_treeEntropy * ndFloat64(0.5f)))
+			{
+				ndInt32 leafNodesCount = 0;
+				ndNodeBase** leafArray = ndAlloca(ndNodeBase*, nodeCount + 12);
+				for (ndInt32 i = 0; i < nodeCount; ++i)
+				{
+					ndNodeBase* const node = nodeArray[i];
+					if (node->m_left->m_type == m_leaf)
+					{
+						leafArray[leafNodesCount] = node->m_left;
+						leafNodesCount++;
+						ndAssert(leafNodesCount <= (nodeCount + 1));
+					}
+					if (node->m_right->m_type == m_leaf)
+					{
+						leafArray[leafNodesCount] = node->m_right;
+						leafNodesCount++;
+						ndAssert(leafNodesCount <= (nodeCount + 1));
+					}
+				}
+
+				ndSort(leafArray, leafNodesCount, [](const ndNodeBase* const elementA, const ndNodeBase* const elementB)
+				{
+					ndFloat32 areaA = elementA->m_area;
+					ndFloat32 areaB = elementB->m_area;
+					if (areaA < areaB)
+					{
+						return 1;
+					}
+					if (areaA > areaB)
+					{
+						return -1;
+					}
+					return 0;
+				});
+
+				ndInt32 rootIndex = 0;
+				m_root = BuildTopDownBig(&leafArray[0], 0, leafNodesCount - 1, nodeArray, rootIndex);
+				m_treeEntropy = CalculateEntropy(nodeCount, nodeArray);
+			}
+			while (m_root->m_parent)
+			{
+				m_root = m_root->m_parent;
+			}
+		}
+		else
+		{
+			m_treeEntropy = ndFloat64(2.0f);
+		}
+
+		ndAssert(m_root->m_size.m_w == ndFloat32(0.0f));
+		m_boxMinRadius = ndMin(ndMin(m_root->m_size.m_x, m_root->m_size.m_y), m_root->m_size.m_z);
+		m_boxMaxRadius = ndSqrt(m_root->m_size.DotProduct(m_root->m_size).GetScalar());
+
+		m_boxSize = m_root->m_size;
+		m_boxOrigin = m_root->m_origin;
+		MassProperties();
+	}
+}
+
+#else
+
+void ndShapeCompound::EndAddRemove()
+{
+	if (!m_root)
+	{
+		return;
+	}
+
+	ndTreeArray::Iterator iter(m_array);
+	for (iter.Begin(); iter; iter++)
+	{
+		ndNodeBase* const node = iter.GetNode()->GetInfo();
+		node->CalculateAABB();
+	}
+
+	ndInt32 nodeCount = 0;
+	ndNodeBase** nodeArray = ndAlloca(ndNodeBase*, m_array.GetCount() + 10);
+	ndFixSizeArray<ndNodeBase*, D_COMPOUND_STACK_DEPTH> stackBuffer;
+
+	stackBuffer.PushBack(m_root);
+	while (stackBuffer.GetCount())
+	{
+		ndNodeBase* const node = stackBuffer.Pop();
+
+		if (node->m_type == m_node)
+		{
+			nodeArray[nodeCount] = node;
+			nodeCount++;
+			ndAssert(nodeCount <= m_array.GetCount());
+
+			stackBuffer.PushBack(node->m_right);
+			stackBuffer.PushBack(node->m_left);
+		}
+	}
+}
+
+#endif

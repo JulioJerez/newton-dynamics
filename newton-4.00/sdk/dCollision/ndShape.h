@@ -240,6 +240,7 @@ class ndShape: public ndContainersFreeListAlloc<ndShape>
 	D_COLLISION_API ndVector GetObbOrigin() const;
 	D_COLLISION_API ndFloat32 GetUmbraClipSize() const;
 
+	D_COLLISION_API virtual bool IsStatic() const;
 	D_COLLISION_API virtual void MassProperties();
 	D_COLLISION_API virtual ndShapeInfo GetShapeInfo() const;
 	D_COLLISION_API virtual ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const;

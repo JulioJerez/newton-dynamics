@@ -127,6 +127,11 @@ ndUnsigned64 ndShape::GetHash(ndUnsigned64 hash) const
 	return hash;
 }
 
+bool ndShape::IsStatic() const
+{
+	return false;
+}
+
 void ndShape::MassProperties()
 {
 	// using general central theorem, to extract the Inertia relative to the center of mass 

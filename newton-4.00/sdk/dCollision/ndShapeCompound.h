@@ -74,6 +74,7 @@ class ndShapeCompound: public ndShape
 	virtual void DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const override;
 	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const owner) const override;
 
+	virtual bool IsStatic() const override;
 	virtual ndFloat32 GetVolume() const override;
 	virtual ndFloat32 GetBoxMinRadius() const override;
 	virtual ndFloat32 GetBoxMaxRadius() const override;
@@ -106,6 +107,7 @@ class ndShapeCompound: public ndShape
 	ndNodeBase* m_root;
 	ndInt32 m_idIndex;
 	ndWeakPtr<ndShapeInstance> m_owner;
+	bool m_isStatic;
 
 	friend class ndBodyKinematic;
 	friend class ndShapeInstance;
