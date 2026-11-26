@@ -573,6 +573,11 @@ void ndBodyKinematic::SetCollisionShape(const ndShapeInstance& shapeInstance)
 	{
 		compound->SetSubShapeOwner(this);
 	}
+
+	if (m_shapeInstance.IsStatic())
+	{
+		SetMassMatrix(ndVector::m_zero);
+	}
 }
 
 ndContact* ndBodyKinematic::FindContact(const ndBody* const otherBody) const
