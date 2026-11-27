@@ -787,7 +787,9 @@ void ndScene::FindCollidingPairsForward(ndBodyKinematic* const body, ndInt32 thr
 
 						ndBodyKinematic* const body1 = bvhNode->GetBody();
 						ndAssert(body1);
-						const ndUnsigned8 test = ndUnsigned8(!bvhNode->m_isDead & (test0 | ndUnsigned8(!body1->m_equilibrium)));
+						const ndUnsigned8 test = ndUnsigned8(1 & ~bvhNode->m_isDead & (test0 | ~body1->m_equilibrium));
+						ndAssert(test == ndUnsigned8(!bvhNode->m_isDead & (test0 | ndUnsigned8(!body1->m_equilibrium))));
+
 						if (test)
 						{
 							if (!notify || notify->OnSceneAabbOverlap(body1))
@@ -851,7 +853,10 @@ void ndScene::FindCollidingPairsForward(ndBodyKinematic* const body, ndInt32 thr
 						ndBodyKinematic* const body1 = terminalNode->GetBody();
 						ndAssert(body1);
 
-						const ndUnsigned8 test = ndUnsigned8(!terminalNode->m_isDead && (test0 | ndUnsigned8(!body1->m_equilibrium)));
+						//const ndUnsigned8 test = ndUnsigned8(!terminalNode->m_isDead && (test0 | ndUnsigned8(!body1->m_equilibrium)));
+						const ndUnsigned8 test = ndUnsigned8(1 & ~terminalNode->m_isDead & (test0 | ~body1->m_equilibrium));
+						ndAssert(test == ndUnsigned8(!terminalNode->m_isDead && (test0 | ndUnsigned8(!body1->m_equilibrium))));
+
 						if (test)
 						{
 							if (!notify || notify->OnSceneAabbOverlap(body1))
@@ -916,7 +921,8 @@ void ndScene::FindCollidingPairsBackward(ndBodyKinematic* const body, ndInt32 th
 
 						ndBodyKinematic* const body1 = bvhNode->GetBody();
 						ndAssert(body1);
-						const ndUnsigned8 test = ndUnsigned8(!bvhNode->m_isDead && body1->m_sceneEquilibrium & (test0 | ndUnsigned8(!body1->m_equilibrium)));
+						const ndUnsigned8 test = ndUnsigned8(1 & ~bvhNode->m_isDead & body1->m_sceneEquilibrium & (test0 | ~body1->m_equilibrium));
+						ndAssert(test == ndUnsigned8(!bvhNode->m_isDead && body1->m_sceneEquilibrium & (test0 | ndUnsigned8(!body1->m_equilibrium))));
 						if (test)
 						{
 							if (!notify || notify->OnSceneAabbOverlap(body1))
@@ -979,7 +985,9 @@ void ndScene::FindCollidingPairsBackward(ndBodyKinematic* const body, ndInt32 th
 						ndBodyKinematic* const body1 = terminalNode->GetBody();
 						ndAssert(body1);
 
-						const ndUnsigned8 test = ndUnsigned8(!terminalNode->m_isDead && body1->m_sceneEquilibrium & (test0 | ndUnsigned8(!body1->m_equilibrium)));
+						//const ndUnsigned8 test = ndUnsigned8(!terminalNode->m_isDead && body1->m_sceneEquilibrium & (test0 | ndUnsigned8(!body1->m_equilibrium)));
+						const ndUnsigned8 test = ndUnsigned8(1 & ~terminalNode->m_isDead & body1->m_sceneEquilibrium & (test0 | ~body1->m_equilibrium));
+						ndAssert(test == ndUnsigned8(!terminalNode->m_isDead && body1->m_sceneEquilibrium & (test0 | ndUnsigned8(!body1->m_equilibrium))));
 						if (test)
 						{
 							if (!notify || notify->OnSceneAabbOverlap(body1))
