@@ -30,8 +30,9 @@
 #include "ndAabbPolygonSoup.h"
 #include "ndPolygonSoupBuilder.h"
 
-#define ND_STACK_DEPTH		512
-//#define ND_TOP_DOWN_POLYSOUP_BUILD
+#define D_TOP_DOWN_POLYSOUP_BUILD
+
+#define D_POLYSOUP_STACK_DEPTH		512
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndAabbPolygonSoup::ndNodeBuilder: public ndAabbPolygonSoup::ndNode
@@ -557,8 +558,8 @@ ndVector ndAabbPolygonSoup::ForAllSectorsSupportVertex (const ndVector& dir) con
 	ndVector supportVertex (ndVector::m_zero);
 	if (m_aabb) 
 	{
-		ndFixSizeArray<ndNode*, ND_STACK_DEPTH> stackPool;
-		ndFixSizeArray<ndFloat32, ND_STACK_DEPTH> aabbProjection;
+		ndFixSizeArray<ndNode*, D_POLYSOUP_STACK_DEPTH> stackPool;
+		ndFixSizeArray<ndFloat32, D_POLYSOUP_STACK_DEPTH> aabbProjection;
 
 		stackPool.PushBack(m_aabb);
 		aabbProjection.PushBack(ndFloat32 (1.0e10f));
@@ -694,8 +695,8 @@ ndVector ndAabbPolygonSoup::ForAllSectorsSupportVertex (const ndVector& dir) con
 void ndAabbPolygonSoup::ForAllSectorsRayHit (const ndFastRay& raySrc, ndFloat32 maxParam, ndRayIntersectCallback callback, void* const context) const
 {
 	ndFastRay ray (raySrc);
-	ndFixSizeArray<ndFloat32, ND_STACK_DEPTH> distance;
-	ndFixSizeArray<const ndNode*, ND_STACK_DEPTH> stackPool;
+	ndFixSizeArray<ndFloat32, D_POLYSOUP_STACK_DEPTH> distance;
+	ndFixSizeArray<const ndNode*, D_POLYSOUP_STACK_DEPTH> stackPool;
 
 	const ndVector* const vertexArray = m_localVertex;
 	
@@ -800,8 +801,8 @@ void ndAabbPolygonSoup::ForAllSectors (const ndFastAabb& obbAabbInfo, const ndVe
 
 	if (m_aabb) 
 	{
-		ndFixSizeArray<ndFloat32, ND_STACK_DEPTH> distance;
-		ndFixSizeArray<const ndNode*, ND_STACK_DEPTH> stackPool;
+		ndFixSizeArray<ndFloat32, D_POLYSOUP_STACK_DEPTH> distance;
+		ndFixSizeArray<const ndNode*, D_POLYSOUP_STACK_DEPTH> stackPool;
 		const ndVector* const vertexArray = m_localVertex;
 
 		ndAssert (boxDistanceTravel.m_w == ndFloat32 (0.0f));
@@ -1126,7 +1127,7 @@ void ndAabbPolygonSoup::ForThisSector(const ndAabbPolygonSoup::ndNode* const nod
 			//					stackPool[j] = stackPool[j - 1];
 			//					distance[j] = distance[j - 1];
 			//				}
-			//				ndAssert(stack < ND_STACK_DEPTH);
+			//				ndAssert(stack < D_POLYSOUP_STACK_DEPTH);
 			//				stackPool[j] = node;
 			//				distance[j] = dist1;
 			//				stack++;
@@ -1165,7 +1166,7 @@ void ndAabbPolygonSoup::ForThisSector(const ndAabbPolygonSoup::ndNode* const nod
 			//					stackPool[j] = stackPool[j - 1];
 			//					distance[j] = distance[j - 1];
 			//				}
-			//				ndAssert(stack < ND_STACK_DEPTH);
+			//				ndAssert(stack < D_POLYSOUP_STACK_DEPTH);
 			//				stackPool[j] = node;
 			//				distance[j] = dist1;
 			//				stack++;
@@ -1253,7 +1254,7 @@ void ndAabbPolygonSoup::Create(const ndPolygonSoupBuilder& builder)
 		allocatorIndex++;
 		polygonIndex += (indexCount + 1);
 	}
-#if defined(ND_TOP_DOWN_POLYSOUP_BUILD)
+#if defined(D_TOP_DOWN_POLYSOUP_BUILD)
 	ndNodeBuilder* constructorAllocator = &constructor[allocatorIndex];
 	ndNodeBuilder* const root = BuildTopDown(&constructor[0], 0, allocatorIndex - 1, &constructorAllocator);
 #else

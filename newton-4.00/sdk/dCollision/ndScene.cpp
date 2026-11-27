@@ -40,7 +40,7 @@
 #include "ndJointBilateralConstraint.h"
 #include "ndShapeStaticProceduralMesh.h"
 
-#define D_USE_STACKLESS_BROADFACE_SCAN
+#define D_USE_STACK_BROADFACE_SCENE_SCAN
 
 #define D_CONTACT_DELAY_FRAMES		4
 #define D_NARROW_PHASE_DIST			ndFloat32 (0.2f)
@@ -771,7 +771,43 @@ void ndScene::FindCollidingPairsForward(ndBodyKinematic* const body, ndInt32 thr
 		ndBvhNode* const sibling = outerParent->m_right;
 		if (sibling != ptr)
 		{
-#if defined (D_USE_STACKLESS_BROADFACE_SCAN)
+#if defined (D_USE_STACK_BROADFACE_SCENE_SCAN)
+
+			ndFixSizeArray<ndBvhNode*, D_SCENE_MAX_STACK_DEPTH> pool;
+			pool.PushBack(sibling);
+			while (pool.GetCount() && (pool.GetCount() < (D_SCENE_MAX_STACK_DEPTH - 16)))
+			{
+				ndBvhNode* const bvhNode = pool.Pop();
+				if (ndOverlapTest(bvhNode->m_minBox, bvhNode->m_maxBox, boxP0, boxP1))
+				{
+					if (bvhNode->GetAsSceneBodyNode())
+					{
+						ndAssert(!bvhNode->GetRight());
+						ndAssert(!bvhNode->GetLeft());
+
+						ndBodyKinematic* const body1 = bvhNode->GetBody();
+						ndAssert(body1);
+						const ndUnsigned8 test = ndUnsigned8(!bvhNode->m_isDead & (test0 | ndUnsigned8(!body1->m_equilibrium)));
+						if (test)
+						{
+							if (!notify || notify->OnSceneAabbOverlap(body1))
+							{
+								AddPair(body0, body1, threadId);
+							}
+						}
+					}
+					else
+					{
+						ndBvhInternalNode* const tmpNode = bvhNode->GetAsSceneTreeNode();
+						ndAssert(tmpNode->m_left);
+						ndAssert(tmpNode->m_right);
+						pool.PushBack(tmpNode->m_left);
+						pool.PushBack(tmpNode->m_right);
+					}
+				}
+			}
+
+#else
 
 			ndBvhNode* curr = sibling;
 			bool continueScan = true;
@@ -840,42 +876,6 @@ void ndScene::FindCollidingPairsForward(ndBodyKinematic* const body, ndInt32 thr
 					NextNode();
 				}
 			}
-
-#else
-
-			ndFixSizeArray<ndBvhNode*, D_SCENE_MAX_STACK_DEPTH> pool;
-			pool.PushBack(sibling);
-			while (pool.GetCount() && (pool.GetCount() < (D_SCENE_MAX_STACK_DEPTH - 16)))
-			{
-				ndBvhNode* const bvhNode = pool.Pop();
-				if (ndOverlapTest(bvhNode->m_minBox, bvhNode->m_maxBox, boxP0, boxP1))
-				{
-					if (bvhNode->GetAsSceneBodyNode())
-					{
-						ndAssert(!bvhNode->GetRight());
-						ndAssert(!bvhNode->GetLeft());
-
-						ndBodyKinematic* const body1 = bvhNode->GetBody();
-						ndAssert(body1);
-						const ndUnsigned8 test = ndUnsigned8(!bvhNode->m_isDead & (test0 | ndUnsigned8(!body1->m_equilibrium)));
-						if (test)
-						{
-							if (!notify || notify->OnSceneAabbOverlap(body1))
-							{
-								AddPair(body0, body1, threadId);
-							}
-						}
-					}
-					else
-					{
-						ndBvhInternalNode* const tmpNode = bvhNode->GetAsSceneTreeNode();
-						ndAssert(tmpNode->m_left);
-						ndAssert(tmpNode->m_right);
-						pool.PushBack(tmpNode->m_left);
-						pool.PushBack(tmpNode->m_right);
-					}
-				}
-			}
 #endif
 		}
 	}
@@ -900,8 +900,43 @@ void ndScene::FindCollidingPairsBackward(ndBodyKinematic* const body, ndInt32 th
 		ndBvhNode* const sibling = outerParent->m_left;
 		if (sibling != ptr)
 		{
-#if defined (D_USE_STACKLESS_BROADFACE_SCAN)
+#if defined (D_USE_STACK_BROADFACE_SCENE_SCAN)
 
+			ndFixSizeArray<ndBvhNode*, D_SCENE_MAX_STACK_DEPTH> pool;
+			pool.PushBack(sibling);
+			while (pool.GetCount() && (pool.GetCount() < (D_SCENE_MAX_STACK_DEPTH - 16)))
+			{
+				ndBvhNode* const bvhNode = pool.Pop();
+				if (ndOverlapTest(bvhNode->m_minBox, bvhNode->m_maxBox, boxP0, boxP1))
+				{
+					if (bvhNode->GetAsSceneBodyNode())
+					{
+						ndAssert(!bvhNode->GetRight());
+						ndAssert(!bvhNode->GetLeft());
+
+						ndBodyKinematic* const body1 = bvhNode->GetBody();
+						ndAssert(body1);
+						const ndUnsigned8 test = ndUnsigned8(!bvhNode->m_isDead && body1->m_sceneEquilibrium & (test0 | ndUnsigned8(!body1->m_equilibrium)));
+						if (test)
+						{
+							if (!notify || notify->OnSceneAabbOverlap(body1))
+							{
+								AddPair(body0, body1, threadId);
+							}
+						}
+					}
+					else
+					{
+						ndBvhInternalNode* const tmpNode = bvhNode->GetAsSceneTreeNode();
+						ndAssert(tmpNode->m_left);
+						ndAssert(tmpNode->m_right);
+						pool.PushBack(tmpNode->m_left);
+						pool.PushBack(tmpNode->m_right);
+					}
+				}
+			}
+
+#else
 			ndBvhNode* curr = sibling;
 			bool continueScan = true;
 
@@ -969,42 +1004,6 @@ void ndScene::FindCollidingPairsBackward(ndBodyKinematic* const body, ndInt32 th
 					NextNode();
 				}
 			}
-
-#else
-			ndFixSizeArray<ndBvhNode*, D_SCENE_MAX_STACK_DEPTH> pool;
-			pool.PushBack(sibling);
-			while (pool.GetCount() && (pool.GetCount() < (D_SCENE_MAX_STACK_DEPTH - 16)))
-			{
-				ndBvhNode* const bvhNode = pool.Pop();
-				if (ndOverlapTest(bvhNode->m_minBox, bvhNode->m_maxBox, boxP0, boxP1))
-				{
-					if (bvhNode->GetAsSceneBodyNode())
-					{
-						ndAssert(!bvhNode->GetRight());
-						ndAssert(!bvhNode->GetLeft());
-
-						ndBodyKinematic* const body1 = bvhNode->GetBody();
-						ndAssert(body1);
-						const ndUnsigned8 test = ndUnsigned8(!bvhNode->m_isDead && body1->m_sceneEquilibrium & (test0 | ndUnsigned8(!body1->m_equilibrium)));
-						if (test)
-						{
-							if (!notify || notify->OnSceneAabbOverlap(body1))
-							{
-								AddPair(body0, body1, threadId);
-							}
-						}
-					}
-					else
-					{
-						ndBvhInternalNode* const tmpNode = bvhNode->GetAsSceneTreeNode();
-						ndAssert(tmpNode->m_left);
-						ndAssert(tmpNode->m_right);
-						pool.PushBack(tmpNode->m_left);
-						pool.PushBack(tmpNode->m_right);
-					}
-				}
-			}
-
 #endif
 		}
 	}
