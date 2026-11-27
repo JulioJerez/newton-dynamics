@@ -1050,11 +1050,9 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 
 #else
 
-	auto SmallBhvNodes = ndMakeObject::ndFunction([this, parentsArray](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
+	auto SmallBhvNodes = ndMakeObject::ndFunction([this, parentsArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ND_PROFILE_ZONE_NAMED("SmallBhvNodes");
-		ndAssert(threadIndex < D_MAX_THREADS_COUNT);
-
 		const ndCellScanPrefix* const srcCellNodes = &m_bvhBuildState.m_cellCounts0[0];
 		const ndCellScanPrefix* const newParentsDest = &m_bvhBuildState.m_cellCounts1[0];
 		const ndBottomUpCell* const nodesCells = &m_bvhBuildState.m_cellBuffer0[0];

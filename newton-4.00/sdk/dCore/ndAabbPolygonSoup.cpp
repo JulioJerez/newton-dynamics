@@ -1548,9 +1548,7 @@ ndAabbPolygonSoup::ndNodeBuilder* ndAabbPolygonSoup::BuildBottomUp(ndNodeBuilder
 	class ndBottomUpCell
 	{
 		public:
-		ndBottomUpCell()
-		{
-		}
+		//ndBottomUpCell(){}
 
 		ndBottomUpCell(ndInt32 x, ndInt32 y, ndInt32 z, ndNodeBuilder* const node)
 			:m_x(x)
@@ -1576,7 +1574,7 @@ ndAabbPolygonSoup::ndNodeBuilder* ndAabbPolygonSoup::BuildBottomUp(ndNodeBuilder
 	class ndCellScanPrefix
 	{
 		public:
-		ndCellScanPrefix() {}
+		//ndCellScanPrefix() {}
 		ndCellScanPrefix(ndInt32 location, ndUnsigned32 cellTest)
 			:m_location(location)
 			,m_cellTest(cellTest)

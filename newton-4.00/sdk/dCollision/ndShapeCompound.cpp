@@ -1437,9 +1437,7 @@ void ndShapeCompound::EndAddRemove()
 	class ndBottomUpCell
 	{
 		public:
-		ndBottomUpCell()
-		{
-		}
+		//ndBottomUpCell(){}
 	
 		ndBottomUpCell(ndInt32 x, ndInt32 y, ndInt32 z, ndNodeBase* const node)
 			:m_x(x)
@@ -1465,7 +1463,7 @@ void ndShapeCompound::EndAddRemove()
 	class ndCellScanPrefix
 	{
 		public:
-		ndCellScanPrefix() {}
+		//ndCellScanPrefix() {}
 		ndCellScanPrefix(ndInt32 location, ndUnsigned32 cellTest)
 			:m_location(location)
 			,m_cellTest(cellTest)
