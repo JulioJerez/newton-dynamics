@@ -204,7 +204,6 @@ void ndBrainSave::Save(const ndBrain* const brain)
 			#pragma clang diagnostic pop
 		#endif
 
-
 		va_end(v_args);
 		WriteData(buffer);
 	};

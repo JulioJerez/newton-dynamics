@@ -136,7 +136,8 @@ void ndBrainLayerImagePolling_2x2::MakePrediction(const ndBrainVector& input, nd
 	ndInt32 offsetOut = 0;
 	ndInt32 inputOffset = 0;
 
-	ndInt32* const maxIndex = (ndInt32*)(&output[0] + outputSize);
+	//ndInt32* const maxIndex = (ndInt32*)(&output[0] + outputSize);
+	ndInt32* const maxIndex = reinterpret_cast<ndInt32*>(const_cast<ndReal*>(&output[0] + outputSize));
 	for (ndInt32 k = 0; k < m_channels; ++k)
 	{
 		ndInt32 inputStride = 0;
@@ -228,7 +229,7 @@ void ndBrainLayerImagePolling_2x2::InputDerivative(const ndBrainVector&, const n
 	ndAssert(output.GetCount() == outputDerivative.GetCount());
 
 	const ndInt32 outputSize = GetOutputSize();
-	const ndInt32* const maxIndex = (ndInt32*)(&output[0] + outputSize);
+	const ndInt32* const maxIndex = reinterpret_cast<ndInt32*>(const_cast<ndReal*>(&output[0] + outputSize));
 	inputDerivative.Set(ndBrainFloat(0.0f));
 	for (ndInt32 i = outputSize - 1; i >= 0; --i)
 	{

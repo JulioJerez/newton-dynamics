@@ -67,7 +67,17 @@ void ndBrainLayerActivationLinear::Save(const ndBrainSave* const loadSave) const
 		va_list v_args;
 		buffer[0] = 0;
 		va_start(v_args, fmt);
+		#if defined(__clang__)
+			#pragma clang diagnostic push
+			#pragma clang diagnostic ignored "-Wformat-nonliteral"
+		#endif
+
 		vsnprintf(buffer, sizeof(buffer), fmt, v_args);
+
+		#if defined(__clang__)
+			#pragma clang diagnostic pop
+		#endif
+
 		va_end(v_args);
 		loadSave->WriteData(buffer);
 	};
