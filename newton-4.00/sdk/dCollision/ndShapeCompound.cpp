@@ -1427,42 +1427,6 @@ void ndShapeCompound::EndAddRemove()
 		return;
 	}
 
-	//m_isStatic = false;
-	//ndTreeArray::Iterator iter(m_array);
-	//for (iter.Begin(); iter; iter++)
-	//{
-	//	ndNodeBase* const node = iter.GetNode()->GetInfo();
-	//	node->CalculateAABB();
-	//	m_isStatic = m_isStatic || node->m_shapeInstance->IsStatic();
-	//}
-
-	//ndInt32 nodeCount = 0;
-	//ndNodeBase** nodeArray = ndAlloca(ndNodeBase*, m_array.GetCount() + 10);
-	//ndFixSizeArray<ndNodeBase*, D_COMPOUND_STACK_DEPTH> stackBuffer;
-	//
-	//stackBuffer.PushBack(m_root);
-	//while (stackBuffer.GetCount())
-	//{
-	//	ndNodeBase* const node = stackBuffer.Pop();
-	//
-	//	if (node->m_type == m_node)
-	//	{
-	//		nodeArray[nodeCount] = node;
-	//		nodeCount++;
-	//		ndAssert(nodeCount <= m_array.GetCount());
-	//
-	//		stackBuffer.PushBack(node->m_right);
-	//		stackBuffer.PushBack(node->m_left);
-	//	}
-	//}
-	//
-	//if (nodeCount)
-	//{
-	//	ndAssert(0);
-	//	return;
-	//}
-
-
 	enum
 	{
 		m_linkedCell,
@@ -1504,7 +1468,7 @@ void ndShapeCompound::EndAddRemove()
 		ndCellScanPrefix() {}
 		ndCellScanPrefix(ndInt32 location, ndUnsigned32 cellTest)
 			:m_location(location)
-			, m_cellTest(cellTest)
+			,m_cellTest(cellTest)
 		{
 		}
 		ndInt32 m_location : 30;
@@ -1524,20 +1488,11 @@ void ndShapeCompound::EndAddRemove()
 		return minSize;
 	};
 	
-	//if (count == 1)
-	//{
-	//	ndNodeBase* const left = &array[0];
-	//	ndNodeBase* const right = &array[1];
-	//	ndNodeBase* const root = &array[2];
-	//	left->m_parent = root;
-	//	right->m_parent = root;
-	//
-	//	root->m_left = left;
-	//	root->m_right = right;
-	//	root->Init(left, right);
-	//	return root;
-	//}
-	
+	if (m_array.GetCount() == 1)
+	{
+		m_root = m_array.GetRoot()->GetInfo();
+		return;
+	}
 
 	ndInt32 bufferSizeInElements = 2 * m_array.GetCount() + 16;
 	ndInt32 bufferSizeInBytes = 2 * (sizeof (ndNodeBase*) + sizeof (ndBottomUpCell) + sizeof(ndCellScanPrefix));
